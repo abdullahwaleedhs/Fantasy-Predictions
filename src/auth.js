@@ -41,7 +41,7 @@ export async function logoutUser() {
 export async function fetchProfile(userId) {
   const { data, error } = await supabase
     .from("profiles")
-    .select("name, username, avatar, boosts_remaining")
+    .select("name, username, avatar, boosts_remaining, is_admin")
     .eq("id", userId)
     .single();
   if (error) throw error;

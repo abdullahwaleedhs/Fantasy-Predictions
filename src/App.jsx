@@ -4579,8 +4579,12 @@ function NavDrawer({ open, onClose, activePage, onNavigate, viewMode, setViewMod
           })}
         </nav>
 
-        {/* Admin/User mode switch - affects what the whole app shows */}
+        {/* Admin/User mode switch - affects what the whole app shows.
+            Only the organizer (currentUser.is_admin) can see or use this;
+            everyone else is locked to المشارك (participant) mode. */}
         <div style={{ marginTop: "auto", paddingTop: "16px", borderTop: `1px solid ${theme.border}` }}>
+          {currentUser?.is_admin && (
+          <>
           <span style={{ fontFamily: "Tajawal, sans-serif", fontSize: "11px", fontWeight: 600, color: theme.muted, display: "block", marginBottom: "8px" }}>
             وضع الاستخدام
           </span>
@@ -4632,6 +4636,8 @@ function NavDrawer({ open, onClose, activePage, onNavigate, viewMode, setViewMod
               المشارك
             </button>
           </div>
+          </>
+          )}
 
           {/* Login / logout */}
           <button
@@ -4831,10 +4837,14 @@ export default function App() {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activePage, setActivePage] = useState("home");
-  const [viewMode, setViewMode] = useState("admin"); // "admin" | "user" - for previewing both roles here
+  const [viewMode, setViewMode] = useState("user"); // "admin" | "user" - only admins may switch to "admin"
   const [predictionsTabView, setPredictionsTabView] = useState("current"); // "current" | "archived" - for the توقع! page's match list
   const [currentUser, setCurrentUser] = useState(null); // null when logged out, { id, name, username, email, avatar } when logged in
   const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    if (viewMode === "admin" && !currentUser?.is_admin) setViewMode("user");
+  }, [currentUser, viewMode]);
 
   // Restore the session (if any) when the app first loads, so a refresh
   // doesn't log the user out.
