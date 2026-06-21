@@ -13,8 +13,9 @@ export async function registerUser({ name, username, email, password }) {
   if (error) throw error;
 
   const userId = data.user?.id;
-  if (!userId) {
-    // Email confirmation is required before a session exists.
+  if (!data.session || !userId) {
+    // Email confirmation is required before a session exists, so we can't
+    // create the profile row yet (RLS requires auth.uid() = id).
     return { needsEmailConfirmation: true };
   }
 
