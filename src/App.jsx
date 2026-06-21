@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Plus, Trash2, ChevronDown, Search, Palette, Lock, Unlock, Calendar, Clock, Menu, X, Home, Target, Trophy, BarChart3, Zap, Shield, Upload, CircleDot, Users, Copy, Check, Crown, ArrowDown, Award, TrendingUp, User, LogIn, LogOut, Mail, Camera } from "lucide-react";
+import { isUsernameTaken, registerUser, loginUser, logoutUser, updateProfile, getSessionUser } from "./auth";
 
 const DEFAULT_TOURNAMENTS = [
   "دوري روشن السعودي",
@@ -2731,35 +2732,41 @@ const GLOBAL_TRIAL_PLAYERS = Array.from({ length: 98 }, (_, i) => {
   };
 });
 
-// Login/register page. No real backend - email/password aren't actually
-// verified, but the username uniqueness check is enforced against the
-// in-memory takenUsernames list, since that's a real product rule we can
-// demonstrate without a server.
-function AuthPage({ takenUsernames, onRegister, onLoginExisting, onBack, theme }) {
+// Login/register page, backed by Supabase Auth + the profiles table.
+function AuthPage({ onRegister, onLoginExisting, onBack, theme }) {
   const [mode, setMode] = useState("register"); // "register" | "login"
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [usernameError, setUsernameError] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    setAuthError("");
     if (mode === "login") {
       if (!email.trim() || !password.trim()) return;
-      onLoginExisting({ email: email.trim() });
+      setSubmitting(true);
+      const result = await onLoginExisting({ email: email.trim(), password });
+      setSubmitting(false);
+      if (result?.error) setAuthError(result.error);
       return;
     }
 
     if (!name.trim() || !username.trim() || !email.trim() || !password.trim()) return;
 
-    const normalized = username.trim().toLowerCase();
-    if (takenUsernames.includes(normalized)) {
-      setUsernameError("اليوزرنيم هذا مستخدم من قبل، جرّب واحد ثاني");
-      return;
-    }
-
     setUsernameError("");
-    onRegister({ name: name.trim(), username: normalized, email: email.trim() });
+    setSubmitting(true);
+    const result = await onRegister({ name: name.trim(), username: username.trim().toLowerCase(), email: email.trim(), password });
+    setSubmitting(false);
+    if (result?.usernameError) {
+      setUsernameError(result.usernameError);
+    } else if (result?.error) {
+      setAuthError(result.error);
+    } else if (result?.needsEmailConfirmation) {
+      setAuthError("تم إنشاء الحساب — تحقق من بريدك الإلكتروني لتأكيد التسجيل قبل تسجيل الدخول");
+    }
   };
 
   const inputStyle = {
@@ -2797,7 +2804,7 @@ function AuthPage({ takenUsernames, onRegister, onLoginExisting, onBack, theme }
           {mode === "register" ? "إنشاء حساب جديد" : "تسجيل الدخول"}
         </h2>
         <p style={{ fontSize: "12px", color: theme.muted, marginBottom: "24px", textAlign: "center" }}>
-          نموذج معاينة - بدون تحقق حقيقي من البريد أو كلمة السر
+          {mode === "register" ? "أدخل بياناتك لإنشاء حسابك" : "سجّل دخولك بالبريد وكلمة السر"}
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -2867,8 +2874,13 @@ function AuthPage({ takenUsernames, onRegister, onLoginExisting, onBack, theme }
             </div>
           </div>
 
+          {authError && (
+            <p style={{ fontSize: "12px", color: theme.danger, textAlign: "center" }}>{authError}</p>
+          )}
+
           <button
             onClick={handleSubmit}
+            disabled={submitting}
             style={{
               width: "100%",
               marginTop: "8px",
@@ -2880,10 +2892,11 @@ function AuthPage({ takenUsernames, onRegister, onLoginExisting, onBack, theme }
               fontFamily: "Tajawal, sans-serif",
               fontWeight: 700,
               fontSize: "14px",
-              cursor: "pointer",
+              cursor: submitting ? "not-allowed" : "pointer",
+              opacity: submitting ? 0.6 : 1,
             }}
           >
-            {mode === "register" ? "إنشاء الحساب" : "دخول"}
+            {submitting ? "..." : mode === "register" ? "إنشاء الحساب" : "دخول"}
           </button>
 
           <button
@@ -2908,12 +2921,13 @@ function AuthPage({ takenUsernames, onRegister, onLoginExisting, onBack, theme }
 }
 
 // Profile page: edit avatar, name, and username after registering.
-function ProfilePage({ currentUser, onUpdateProfile, takenUsernames, onNavigateToAuth, theme }) {
+function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, theme }) {
   const [name, setName] = useState(currentUser?.name || "");
   const [username, setUsername] = useState(currentUser?.username || "");
   const [avatar, setAvatar] = useState(currentUser?.avatar || null);
   const [usernameError, setUsernameError] = useState("");
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   if (!currentUser) {
     return (
@@ -2948,15 +2962,16 @@ function ProfilePage({ currentUser, onUpdateProfile, takenUsernames, onNavigateT
     fileToBase64(file, (dataUrl) => setAvatar(dataUrl));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const normalized = username.trim().toLowerCase();
-    const otherUsersHaveIt = takenUsernames.filter((u) => u !== currentUser.username).includes(normalized);
-    if (otherUsersHaveIt) {
-      setUsernameError("اليوزرنيم هذا مستخدم من قبل، جرّب واحد ثاني");
+    setUsernameError("");
+    setSaving(true);
+    const result = await onUpdateProfile({ name: name.trim(), username: normalized, avatar });
+    setSaving(false);
+    if (result?.usernameError) {
+      setUsernameError(result.usernameError);
       return;
     }
-    setUsernameError("");
-    onUpdateProfile({ name: name.trim(), username: normalized, avatar });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -3065,6 +3080,7 @@ function ProfilePage({ currentUser, onUpdateProfile, takenUsernames, onNavigateT
 
           <button
             onClick={handleSave}
+            disabled={saving}
             style={{
               width: "100%",
               marginTop: "8px",
@@ -3076,10 +3092,11 @@ function ProfilePage({ currentUser, onUpdateProfile, takenUsernames, onNavigateT
               fontFamily: "Tajawal, sans-serif",
               fontWeight: 700,
               fontSize: "14px",
-              cursor: "pointer",
+              cursor: saving ? "not-allowed" : "pointer",
+              opacity: saving ? 0.6 : 1,
             }}
           >
-            {saved ? "تم الحفظ ✓" : "حفظ التعديلات"}
+            {saving ? "..." : saved ? "تم الحفظ ✓" : "حفظ التعديلات"}
           </button>
         </div>
 
@@ -4744,24 +4761,59 @@ export default function App() {
   const [activePage, setActivePage] = useState("home");
   const [viewMode, setViewMode] = useState("admin"); // "admin" | "user" - for previewing both roles here
   const [predictionsTabView, setPredictionsTabView] = useState("current"); // "current" | "archived" - for the توقع! page's match list
-  const [currentUser, setCurrentUser] = useState(null); // null when logged out, { name, username, email, avatar } when logged in
-  const [takenUsernames, setTakenUsernames] = useState(["abdullah123", "sultan_q8"]); // pre-seeded so the uniqueness check has something to demonstrate against
+  const [currentUser, setCurrentUser] = useState(null); // null when logged out, { id, name, username, email, avatar } when logged in
+  const [authLoading, setAuthLoading] = useState(true);
 
-  const handleRegister = ({ name, username, email }) => {
-    setTakenUsernames((prev) => [...prev, username]);
-    setCurrentUser({ name, username, email, avatar: null });
-    setActivePage("home");
+  // Restore the session (if any) when the app first loads, so a refresh
+  // doesn't log the user out.
+  useEffect(() => {
+    getSessionUser()
+      .then((user) => setCurrentUser(user))
+      .finally(() => setAuthLoading(false));
+  }, []);
+
+  const handleRegister = async ({ name, username, email, password }) => {
+    try {
+      if (await isUsernameTaken(username)) {
+        return { usernameError: "اليوزرنيم هذا مستخدم من قبل، جرّب واحد ثاني" };
+      }
+      const result = await registerUser({ name, username, email, password });
+      if (result.needsEmailConfirmation) return { needsEmailConfirmation: true };
+      setCurrentUser(result.user);
+      setActivePage("home");
+      return {};
+    } catch (err) {
+      return { error: err.message || "حدث خطأ، حاول مرة أخرى" };
+    }
   };
 
-  const handleLoginExisting = ({ email }) => {
-    // No real backend - log in as a generic existing user for the preview.
-    setCurrentUser({ name: "مستخدم", username: "user_" + Math.floor(Math.random() * 9999), email, avatar: null });
-    setActivePage("home");
+  const handleLoginExisting = async ({ email, password }) => {
+    try {
+      const user = await loginUser({ email, password });
+      setCurrentUser(user);
+      setActivePage("home");
+      return {};
+    } catch (err) {
+      return { error: "بيانات الدخول غير صحيحة" };
+    }
   };
 
-  const handleUpdateProfile = ({ name, username, avatar }) => {
-    setTakenUsernames((prev) => [...prev.filter((u) => u !== currentUser.username), username]);
-    setCurrentUser((u) => ({ ...u, name, username, avatar }));
+  const handleLogout = async () => {
+    await logoutUser();
+    setCurrentUser(null);
+  };
+
+  const handleUpdateProfile = async ({ name, username, avatar }) => {
+    try {
+      if (username !== currentUser.username && (await isUsernameTaken(username, currentUser.id))) {
+        return { usernameError: "اليوزرنيم هذا مستخدم من قبل، جرّب واحد ثاني" };
+      }
+      await updateProfile(currentUser.id, { name, username, avatar });
+      setCurrentUser((u) => ({ ...u, name, username, avatar }));
+      return {};
+    } catch (err) {
+      return { error: err.message || "حدث خطأ، حاول مرة أخرى" };
+    }
   };
 
   const [boostsRemaining, setBoostsRemaining] = useState(3);
@@ -4891,7 +4943,7 @@ export default function App() {
         viewMode={viewMode}
         setViewMode={setViewMode}
         currentUser={currentUser}
-        onLogout={() => setCurrentUser(null)}
+        onLogout={handleLogout}
         theme={theme}
       />
 
@@ -5149,7 +5201,6 @@ export default function App() {
         <ProfilePage
           currentUser={currentUser}
           onUpdateProfile={handleUpdateProfile}
-          takenUsernames={takenUsernames}
           onNavigateToAuth={() => setActivePage("auth")}
           theme={theme}
         />
@@ -5157,7 +5208,6 @@ export default function App() {
 
       {activePage === "auth" && (
         <AuthPage
-          takenUsernames={takenUsernames}
           onRegister={handleRegister}
           onLoginExisting={handleLoginExisting}
           onBack={() => setActivePage("profile")}
