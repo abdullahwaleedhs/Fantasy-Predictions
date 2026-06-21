@@ -41,11 +41,16 @@ export async function logoutUser() {
 export async function fetchProfile(userId) {
   const { data, error } = await supabase
     .from("profiles")
-    .select("name, username, avatar")
+    .select("name, username, avatar, boosts_remaining")
     .eq("id", userId)
     .single();
   if (error) throw error;
   return data;
+}
+
+export async function setBoostsRemaining(userId, boostsRemaining) {
+  const { error } = await supabase.from("profiles").update({ boosts_remaining: boostsRemaining }).eq("id", userId);
+  if (error) throw error;
 }
 
 export async function updateProfile(userId, { name, username, avatar }) {

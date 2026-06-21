@@ -1,6 +1,25 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Plus, Trash2, ChevronDown, Search, Palette, Lock, Unlock, Calendar, Clock, Menu, X, Home, Target, Trophy, BarChart3, Zap, Shield, Upload, CircleDot, Users, Copy, Check, Crown, ArrowDown, Award, TrendingUp, User, LogIn, LogOut, Mail, Camera } from "lucide-react";
-import { isUsernameTaken, registerUser, loginUser, logoutUser, updateProfile, getSessionUser } from "./auth";
+import { isUsernameTaken, registerUser, loginUser, logoutUser, updateProfile, getSessionUser, setBoostsRemaining as setBoostsRemainingDB } from "./auth";
+import {
+  fetchTournaments,
+  addTournamentDB,
+  setTournamentLogoDB,
+  fetchClubs,
+  addClubDB,
+  updateClubDB,
+  removeClubDB,
+  fetchMatches,
+  addMatchDB,
+  updateMatchDB,
+  removeMatchDB,
+  fetchPredictionsForUser,
+  upsertPredictionDB,
+  fetchLeaguesWithMembers,
+  createLeagueDB,
+  joinLeagueDB,
+  renamePlayerInLeagueDB,
+} from "./data";
 
 const DEFAULT_TOURNAMENTS = [
   "دوري روشن السعودي",
@@ -4740,23 +4759,76 @@ function TopBar({ onMenuClick, theme }) {
 
 export default function App() {
   const [theme, setTheme] = useState(THEMES.find((t) => t.id === "slate-mono"));
-  const [tournaments, setTournaments] = useState(DEFAULT_TOURNAMENTS);
-  const [clubsByTournament, setClubsByTournament] = useState({
-    "دوري روشن السعودي": [
-      { id: "c1", name: "الهلال", logo: null },
-      { id: "c2", name: "النصر", logo: null },
-      { id: "c3", name: "الاتحاد", logo: null },
-      { id: "c4", name: "الأهلي", logo: null },
-    ],
-  });
-  const [tournamentLogos, setTournamentLogos] = useState({});
-  const [matches, setMatches] = useState([
-    { id: 1, tournament: "دوري روشن السعودي", home: "الهلال", away: "النصر", homeLogo: null, awayLogo: null, predHome: "3", predAway: "1", actualHome: "3", actualAway: "1", date: "", time: "", doublePoints: false, userBoost: false },
-    { id: 2, tournament: "الدوري الإنجليزي الممتاز", home: "الاتحاد", away: "الأهلي", homeLogo: null, awayLogo: null, predHome: "2", predAway: "0", actualHome: "1", actualAway: "1", date: "", time: "", doublePoints: false, userBoost: false },
-    { id: 3, tournament: "دوري روشن السعودي", home: "النصر", away: "الأهلي", homeLogo: null, awayLogo: null, predHome: "2", predAway: "1", actualHome: "1", actualAway: "0", date: "", time: "", doublePoints: false, userBoost: false },
-    { id: 4, tournament: "دوري روشن السعودي", home: "الهلال", away: "الاتحاد", homeLogo: null, awayLogo: null, predHome: "2", predAway: "2", actualHome: "1", actualAway: "1", date: "", time: "", doublePoints: false, userBoost: false },
-    { id: 5, tournament: "الدوري الإنجليزي الممتاز", home: "الأهلي", away: "الهلال", homeLogo: null, awayLogo: null, predHome: "", predAway: "", actualHome: "2", actualAway: "0", date: "", time: "", doublePoints: false, userBoost: false },
-  ]);
+
+  // Tournaments, clubs and matches are loaded from Supabase. We keep the raw
+  // DB rows in state and derive the name-keyed shapes the rest of the UI
+  // already expects (tournaments as a list of names, clubsByTournament keyed
+  // by tournament name, etc.) so the components below didn't need to change.
+  const [tournamentRows, setTournamentRows] = useState([]); // [{id, name, logo}]
+  const [clubRows, setClubRows] = useState([]); // [{id, tournament_id, name, logo}]
+  const [matchRows, setMatchRows] = useState([]); // raw matches (no per-user prediction fields)
+  const [predictionsByMatch, setPredictionsByMatch] = useState({}); // matchId -> {predHome, predAway, userBoost}, for currentUser only
+  const [dataLoading, setDataLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([fetchTournaments(), fetchClubs(), fetchMatches()])
+      .then(([t, c, m]) => {
+        setTournamentRows(t);
+        setClubRows(c);
+        setMatchRows(m);
+      })
+      .finally(() => setDataLoading(false));
+  }, []);
+
+  const tournaments = useMemo(() => tournamentRows.map((t) => t.name), [tournamentRows]);
+  const tournamentLogos = useMemo(
+    () => Object.fromEntries(tournamentRows.map((t) => [t.name, t.logo])),
+    [tournamentRows]
+  );
+  const tournamentIdByName = useMemo(
+    () => Object.fromEntries(tournamentRows.map((t) => [t.name, t.id])),
+    [tournamentRows]
+  );
+  const tournamentNameById = useMemo(
+    () => Object.fromEntries(tournamentRows.map((t) => [t.id, t.name])),
+    [tournamentRows]
+  );
+
+  const clubsByTournament = useMemo(() => {
+    const grouped = {};
+    for (const club of clubRows) {
+      const tName = tournamentNameById[club.tournament_id];
+      if (!tName) continue;
+      if (!grouped[tName]) grouped[tName] = [];
+      grouped[tName].push({ id: club.id, name: club.name, logo: club.logo });
+    }
+    return grouped;
+  }, [clubRows, tournamentNameById]);
+
+  const matches = useMemo(
+    () =>
+      matchRows.map((row) => {
+        const pred = predictionsByMatch[row.id];
+        return {
+          id: row.id,
+          tournament: tournamentNameById[row.tournamentId] || "",
+          home: row.home,
+          away: row.away,
+          homeLogo: row.homeLogo,
+          awayLogo: row.awayLogo,
+          actualHome: row.actualHome,
+          actualAway: row.actualAway,
+          date: row.date,
+          time: row.time,
+          doublePoints: row.doublePoints,
+          predHome: pred?.predHome != null ? String(pred.predHome) : "",
+          predAway: pred?.predAway != null ? String(pred.predAway) : "",
+          userBoost: pred?.userBoost || false,
+        };
+      }),
+    [matchRows, tournamentNameById, predictionsByMatch]
+  );
+
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activePage, setActivePage] = useState("home");
   const [viewMode, setViewMode] = useState("admin"); // "admin" | "user" - for previewing both roles here
@@ -4771,6 +4843,21 @@ export default function App() {
       .then((user) => setCurrentUser(user))
       .finally(() => setAuthLoading(false));
   }, []);
+
+  // Load this user's own predictions whenever they log in; clear them on logout.
+  useEffect(() => {
+    if (!currentUser) {
+      setPredictionsByMatch({});
+      return;
+    }
+    fetchPredictionsForUser(currentUser.id).then((rows) => {
+      const byMatch = {};
+      for (const row of rows) {
+        byMatch[row.match_id] = { predHome: row.pred_home, predAway: row.pred_away, userBoost: row.user_boost };
+      }
+      setPredictionsByMatch(byMatch);
+    });
+  }, [currentUser?.id]);
 
   const handleRegister = async ({ name, username, email, password }) => {
     try {
@@ -4816,100 +4903,151 @@ export default function App() {
     }
   };
 
-  const [boostsRemaining, setBoostsRemaining] = useState(3);
-  const [leagues, setLeagues] = useState([
-    {
-      id: "league-1",
-      code: "FRND01",
-      name: "دوري الأصدقاء",
-      players: [
-        { id: "p3", name: "عبدالله", isYou: false },
-      ],
-    },
-  ]);
+  const boostsRemaining = currentUser?.boosts_remaining ?? 3;
+
+  // Leagues are loaded from Supabase (leagues + league_members), and
+  // re-shaped into the {id, code, name, players:[{id, name, isYou}]} form
+  // the league UI already expects.
+  const [leagueRows, setLeagueRows] = useState([]); // [{id, code, name, created_by, league_members:[{id,user_id,display_name}]}]
+
+  useEffect(() => {
+    fetchLeaguesWithMembers().then(setLeagueRows);
+  }, []);
+
+  const leagues = useMemo(
+    () =>
+      leagueRows.map((l) => ({
+        id: l.id,
+        code: l.code,
+        name: l.name,
+        players: (l.league_members || []).map((m) => ({
+          id: m.id,
+          name: m.display_name,
+          isYou: currentUser ? m.user_id === currentUser.id : false,
+        })),
+      })),
+    [leagueRows, currentUser]
+  );
 
   const createLeague = (name) => {
-    const id = `league-${Date.now()}`;
-    setLeagues((prev) => [...prev, { id, code: generateLeagueCode(), name, players: [] }]);
+    if (!currentUser) return null;
+    const id = `pending-${Date.now()}`;
+    createLeagueDB(name, currentUser.id).then((row) => {
+      setLeagueRows((prev) => [...prev, { ...row, league_members: [] }]);
+    });
     return id;
   };
 
-  const joinLeague = (leagueId, playerName, username) => {
-    setLeagues((prev) =>
-      prev.map((l) =>
-        l.id === leagueId
-          ? { ...l, players: [...l.players, { id: `you-${Date.now()}`, name: playerName, username: username || null, isYou: true }] }
-          : l
-      )
-    );
+  const joinLeague = (leagueId, playerName) => {
+    if (!currentUser) return;
+    joinLeagueDB(leagueId, currentUser.id, playerName).then((member) => {
+      setLeagueRows((prev) =>
+        prev.map((l) => (l.id === leagueId ? { ...l, league_members: [...(l.league_members || []), member] } : l))
+      );
+    });
   };
 
   const renamePlayerInLeague = (leagueId, newName) => {
-    setLeagues((prev) =>
-      prev.map((l) =>
-        l.id === leagueId
-          ? { ...l, players: l.players.map((p) => (p.isYou ? { ...p, name: newName } : p)) }
-          : l
-      )
-    );
+    if (!currentUser) return;
+    renamePlayerInLeagueDB(leagueId, currentUser.id, newName).then(() => {
+      setLeagueRows((prev) =>
+        prev.map((l) =>
+          l.id === leagueId
+            ? {
+                ...l,
+                league_members: (l.league_members || []).map((m) =>
+                  m.user_id === currentUser.id ? { ...m, display_name: newName } : m
+                ),
+              }
+            : l
+        )
+      );
+    });
   };
 
   const addTournament = (name) => {
-    setTournaments((t) => (t.includes(name) ? t : [...t, name]));
+    if (tournaments.includes(name)) return;
+    addTournamentDB(name).then((row) => setTournamentRows((prev) => [...prev, row]));
   };
 
   const setTournamentLogo = (tournamentName, logo) => {
-    setTournamentLogos((prev) => ({ ...prev, [tournamentName]: logo }));
+    const id = tournamentIdByName[tournamentName];
+    if (!id) return;
+    setTournamentLogoDB(id, logo);
+    setTournamentRows((prev) => prev.map((t) => (t.id === id ? { ...t, logo } : t)));
   };
 
   const addClub = (tournamentName, club) => {
-    setClubsByTournament((prev) => {
-      const existing = prev[tournamentName] || [];
-      return { ...prev, [tournamentName]: [...existing, club] };
-    });
+    const tournamentId = tournamentIdByName[tournamentName];
+    if (!tournamentId) return;
+    addClubDB(tournamentId, club).then((row) => setClubRows((prev) => [...prev, row]));
   };
 
   const updateClub = (tournamentName, clubId, updated) => {
-    setClubsByTournament((prev) => {
-      const existing = prev[tournamentName] || [];
-      return {
-        ...prev,
-        [tournamentName]: existing.map((c) => (c.id === clubId ? { ...c, ...updated } : c)),
-      };
-    });
+    updateClubDB(clubId, updated);
+    setClubRows((prev) => prev.map((c) => (c.id === clubId ? { ...c, ...updated } : c)));
   };
 
   const removeClub = (tournamentName, clubId) => {
-    setClubsByTournament((prev) => {
-      const existing = prev[tournamentName] || [];
-      return { ...prev, [tournamentName]: existing.filter((c) => c.id !== clubId) };
-    });
+    removeClubDB(clubId);
+    setClubRows((prev) => prev.filter((c) => c.id !== clubId));
   };
 
   const addMatch = () => {
-    setMatches((m) => [
-      ...m,
-      { id: Date.now(), tournament: "", home: "", away: "", homeLogo: null, awayLogo: null, predHome: "", predAway: "", actualHome: "", actualAway: "", date: "", time: "", doublePoints: false, userBoost: false },
-    ]);
+    addMatchDB().then((row) => setMatchRows((prev) => [...prev, row]));
   };
 
   const updateMatch = (id, updated) => {
-    setMatches((m) => m.map((x) => (x.id === id ? updated : x)));
+    const tournamentId = tournamentIdByName[updated.tournament];
+    const matchFields = {
+      tournamentId,
+      home: updated.home,
+      away: updated.away,
+      homeLogo: updated.homeLogo,
+      awayLogo: updated.awayLogo,
+      actualHome: updated.actualHome,
+      actualAway: updated.actualAway,
+      date: updated.date,
+      time: updated.time,
+      doublePoints: updated.doublePoints,
+    };
+    updateMatchDB(id, matchFields);
+    setMatchRows((prev) => prev.map((x) => (x.id === id ? { ...x, ...matchFields } : x)));
+
+    if (currentUser) {
+      const predictionFields = { predHome: updated.predHome, predAway: updated.predAway, userBoost: updated.userBoost };
+      upsertPredictionDB(currentUser.id, id, predictionFields);
+      setPredictionsByMatch((prev) => ({ ...prev, [id]: predictionFields }));
+    }
   };
 
   const removeMatch = (id) => {
-    setMatches((m) => m.filter((x) => x.id !== id));
+    removeMatchDB(id);
+    setMatchRows((prev) => prev.filter((x) => x.id !== id));
+    setPredictionsByMatch((prev) => {
+      const { [id]: _removed, ...rest } = prev;
+      return rest;
+    });
+  };
+
+  const setBoost = (id, userBoost) => {
+    if (!currentUser) return;
+    const match = matches.find((m) => m.id === id);
+    const predictionFields = { predHome: match?.predHome || "", predAway: match?.predAway || "", userBoost };
+    upsertPredictionDB(currentUser.id, id, predictionFields);
+    setPredictionsByMatch((prev) => ({ ...prev, [id]: predictionFields }));
+    const newBoostsRemaining = boostsRemaining + (userBoost ? -1 : 1);
+    setBoostsRemainingDB(currentUser.id, newBoostsRemaining);
+    setCurrentUser((u) => ({ ...u, boosts_remaining: newBoostsRemaining }));
   };
 
   const useBoostOnMatch = (id) => {
     if (boostsRemaining <= 0) return;
-    setBoostsRemaining((n) => n - 1);
-    setMatches((m) => m.map((x) => (x.id === id ? { ...x, userBoost: true } : x)));
+    setBoost(id, true);
   };
 
   const cancelBoostOnMatch = (id) => {
-    setBoostsRemaining((n) => n + 1);
-    setMatches((m) => m.map((x) => (x.id === id ? { ...x, userBoost: false } : x)));
+    setBoost(id, false);
   };
 
   const tiers = getTiers(theme);

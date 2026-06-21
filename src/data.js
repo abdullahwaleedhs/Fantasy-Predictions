@@ -1,0 +1,179 @@
+import { supabase } from "./supabaseClient";
+
+// ============ TOURNAMENTS ============
+
+export async function fetchTournaments() {
+  const { data, error } = await supabase.from("tournaments").select("id, name, logo").order("created_at");
+  if (error) throw error;
+  return data;
+}
+
+export async function addTournamentDB(name) {
+  const { data, error } = await supabase.from("tournaments").insert({ name }).select().single();
+  if (error) throw error;
+  return data;
+}
+
+export async function setTournamentLogoDB(tournamentId, logo) {
+  const { error } = await supabase.from("tournaments").update({ logo }).eq("id", tournamentId);
+  if (error) throw error;
+}
+
+// ============ CLUBS ============
+
+export async function fetchClubs() {
+  const { data, error } = await supabase.from("clubs").select("id, tournament_id, name, logo").order("created_at");
+  if (error) throw error;
+  return data;
+}
+
+export async function addClubDB(tournamentId, { name, logo }) {
+  const { data, error } = await supabase
+    .from("clubs")
+    .insert({ tournament_id: tournamentId, name, logo: logo || null })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateClubDB(clubId, updated) {
+  const { error } = await supabase.from("clubs").update(updated).eq("id", clubId);
+  if (error) throw error;
+}
+
+export async function removeClubDB(clubId) {
+  const { error } = await supabase.from("clubs").delete().eq("id", clubId);
+  if (error) throw error;
+}
+
+// ============ MATCHES ============
+
+function rowToMatch(row) {
+  return {
+    id: row.id,
+    tournamentId: row.tournament_id,
+    home: row.home,
+    away: row.away,
+    homeLogo: row.home_logo,
+    awayLogo: row.away_logo,
+    actualHome: row.actual_home === null ? "" : String(row.actual_home),
+    actualAway: row.actual_away === null ? "" : String(row.actual_away),
+    date: row.match_date || "",
+    time: row.match_time || "",
+    doublePoints: row.double_points,
+  };
+}
+
+export async function fetchMatches() {
+  const { data, error } = await supabase.from("matches").select("*").order("created_at");
+  if (error) throw error;
+  return data.map(rowToMatch);
+}
+
+export async function addMatchDB() {
+  const { data, error } = await supabase
+    .from("matches")
+    .insert({ home: "", away: "" })
+    .select()
+    .single();
+  if (error) throw error;
+  return rowToMatch(data);
+}
+
+export async function updateMatchDB(matchId, { tournamentId, home, away, homeLogo, awayLogo, actualHome, actualAway, date, time, doublePoints }) {
+  const { error } = await supabase
+    .from("matches")
+    .update({
+      tournament_id: tournamentId || null,
+      home,
+      away,
+      home_logo: homeLogo || null,
+      away_logo: awayLogo || null,
+      actual_home: actualHome === "" || actualHome === undefined ? null : Number(actualHome),
+      actual_away: actualAway === "" || actualAway === undefined ? null : Number(actualAway),
+      match_date: date || null,
+      match_time: time || null,
+      double_points: !!doublePoints,
+    })
+    .eq("id", matchId);
+  if (error) throw error;
+}
+
+export async function removeMatchDB(matchId) {
+  const { error } = await supabase.from("matches").delete().eq("id", matchId);
+  if (error) throw error;
+}
+
+// ============ PREDICTIONS ============
+
+export async function fetchPredictionsForUser(userId) {
+  const { data, error } = await supabase
+    .from("predictions")
+    .select("match_id, pred_home, pred_away, user_boost")
+    .eq("user_id", userId);
+  if (error) throw error;
+  return data;
+}
+
+export async function upsertPredictionDB(userId, matchId, { predHome, predAway, userBoost }) {
+  const { error } = await supabase.from("predictions").upsert(
+    {
+      user_id: userId,
+      match_id: matchId,
+      pred_home: predHome === "" || predHome === undefined ? null : Number(predHome),
+      pred_away: predAway === "" || predAway === undefined ? null : Number(predAway),
+      user_boost: !!userBoost,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "match_id,user_id" }
+  );
+  if (error) throw error;
+}
+
+// ============ LEAGUES ============
+
+function generateLeagueCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+export async function fetchLeaguesWithMembers() {
+  const { data, error } = await supabase
+    .from("leagues")
+    .select("id, code, name, created_by, league_members(id, user_id, display_name)")
+    .order("created_at");
+  if (error) throw error;
+  return data;
+}
+
+export async function createLeagueDB(name, createdBy) {
+  const { data, error } = await supabase
+    .from("leagues")
+    .insert({ name, code: generateLeagueCode(), created_by: createdBy })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function joinLeagueDB(leagueId, userId, displayName) {
+  const { data, error } = await supabase
+    .from("league_members")
+    .insert({ league_id: leagueId, user_id: userId, display_name: displayName })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function renamePlayerInLeagueDB(leagueId, userId, newName) {
+  const { error } = await supabase
+    .from("league_members")
+    .update({ display_name: newName })
+    .eq("league_id", leagueId)
+    .eq("user_id", userId);
+  if (error) throw error;
+}

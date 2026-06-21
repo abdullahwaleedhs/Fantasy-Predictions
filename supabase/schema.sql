@@ -7,6 +7,7 @@ create table if not exists profiles (
   name text not null,
   username text not null unique,
   avatar text,
+  boosts_remaining int not null default 3,
   created_at timestamptz not null default now()
 );
 
