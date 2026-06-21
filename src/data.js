@@ -60,7 +60,7 @@ function rowToMatch(row) {
     actualHome: row.actual_home === null ? "" : String(row.actual_home),
     actualAway: row.actual_away === null ? "" : String(row.actual_away),
     date: row.match_date || "",
-    time: row.match_time || "",
+    time: row.match_time ? row.match_time.slice(0, 5) : "",
     doublePoints: row.double_points,
   };
 }
