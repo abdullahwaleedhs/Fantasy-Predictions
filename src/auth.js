@@ -65,6 +65,13 @@ export async function getSessionUser() {
   const { data } = await supabase.auth.getSession();
   const sessionUser = data.session?.user;
   if (!sessionUser) return null;
-  const profile = await fetchProfile(sessionUser.id);
-  return { id: sessionUser.id, email: sessionUser.email, ...profile };
+  try {
+    const profile = await fetchProfile(sessionUser.id);
+    return { id: sessionUser.id, email: sessionUser.email, ...profile };
+  } catch (e) {
+    // A transient network/profile error here shouldn't be treated as
+    // "logged out" by the caller throwing - surface no user for this
+    // load instead of crashing the auth-restore flow.
+    return null;
+  }
 }
