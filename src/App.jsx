@@ -20,6 +20,7 @@ import {
   joinLeagueDB,
   renamePlayerInLeagueDB,
   fetchAllProfiles,
+  fetchAllPredictionsWithProfiles,
 } from "./data";
 
 const DEFAULT_TOURNAMENTS = [
@@ -3248,17 +3249,63 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, theme }) 
   );
 }
 
-function GlobalLeaderboardPage({ matches, tournaments, tournamentLogos, currentUser, theme }) {
+function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tournamentLogos, currentUser, theme }) {
   const [tournamentFilter, setTournamentFilter] = useState("الكل");
 
   const filteredMatches = tournamentFilter === "الكل" ? matches : matches.filter((m) => (m.tournament || "بدون بطولة") === tournamentFilter);
-  const realStats = computeStats(filteredMatches);
 
-  const players = [
-    { id: "you", name: currentUser?.name || "أنت", username: currentUser?.username || null, isYou: true, points: realStats.totalPoints, tierCounts: realStats.tierCounts },
-    { id: "p3", name: "عبدالله", username: null, isYou: false, points: realStats.totalPoints, tierCounts: realStats.tierCounts },
-    ...GLOBAL_TRIAL_PLAYERS.map((p) => ({ ...p, username: null, isYou: false, points: simulatePlayerPoints(p.id, filteredMatches), tierCounts: simulatePlayerTierCounts(p.id, filteredMatches) })),
-  ];
+  // Real leaderboard: every registered user is scored from their own actual
+  // predictions on the matches in this filter, using the same scoring rules
+  // as the stats page (calcPoints + the admin x2 / personal x3 multiplier).
+  const matchById = Object.fromEntries(filteredMatches.map((m) => [m.id, m]));
+
+  const byUser = {};
+  for (const row of allPredictionRows) {
+    const match = matchById[row.match_id];
+    if (!match) continue; // outside the current tournament filter, or unknown match
+    const hasActual = match.actualHome !== "" && match.actualHome != null && match.actualAway !== "" && match.actualAway != null;
+    if (!hasActual) continue; // match hasn't finished yet
+
+    if (!byUser[row.user_id]) {
+      byUser[row.user_id] = {
+        id: row.user_id,
+        name: row.profiles?.name || "مستخدم",
+        username: row.profiles?.username || null,
+        points: 0,
+        tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 },
+      };
+    }
+    const entry = byUser[row.user_id];
+
+    const adminMultiplier = match.doublePoints ? 2 : 1;
+    const userMultiplier = row.user_boost ? 3 : 1;
+    const multiplier = match.doublePoints ? adminMultiplier : userMultiplier;
+
+    const hasPrediction = row.pred_home !== null && row.pred_home !== undefined && row.pred_away !== null && row.pred_away !== undefined;
+    if (!hasPrediction) {
+      entry.tierCounts.none += 1;
+      continue;
+    }
+    const result = calcPoints(row.pred_home, row.pred_away, match.actualHome, match.actualAway, multiplier);
+    if (result) {
+      entry.tierCounts[result.basePoints] = (entry.tierCounts[result.basePoints] || 0) + 1;
+      entry.points += result.points;
+    }
+  }
+
+  const players = Object.values(byUser).map((p) => ({ ...p, isYou: currentUser && p.id === currentUser.id }));
+
+  // Make sure the current user shows up even before they've made a single prediction.
+  if (currentUser && !players.some((p) => p.id === currentUser.id)) {
+    players.push({
+      id: currentUser.id,
+      name: currentUser.name,
+      username: currentUser.username,
+      points: 0,
+      tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 },
+      isYou: true,
+    });
+  }
 
   const ranked = [...players].sort((a, b) => b.points - a.points || compareTierCounts(a.tierCounts, b.tierCounts));
 
@@ -3280,14 +3327,20 @@ function GlobalLeaderboardPage({ matches, tournaments, tournamentLogos, currentU
           theme={theme}
         />
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-          {ranked.map((p, i) => (
-            <LeaderboardRow key={p.id} rank={i + 1} name={p.name} username={p.username} points={p.points} isYou={p.isYou} theme={theme} />
-          ))}
-        </div>
+        {ranked.length === 0 ? (
+          <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", marginTop: "30px" }}>
+            لا يوجد توقعات لمباريات منتهية بعد
+          </p>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            {ranked.map((p, i) => (
+              <LeaderboardRow key={p.id} rank={i + 1} name={p.name} username={p.username} points={p.points} isYou={p.isYou} theme={theme} />
+            ))}
+          </div>
+        )}
 
         <p style={{ fontSize: "11px", color: theme.muted, textAlign: "center", marginTop: "14px" }}>
-          نقاطك ونقاط عبدالله محسوبة من توقعاتك الحقيقية بصفحة "توقع!"، وباقي الأسماء توقعات تجريبية ثابتة
+          الترتيب محسوب من توقعات المستخدمين الحقيقيين فقط على المباريات اللي انتهت
         </p>
       </div>
     </div>
@@ -4896,14 +4949,16 @@ export default function App() {
   const [clubRows, setClubRows] = useState([]); // [{id, tournament_id, name, logo}]
   const [matchRows, setMatchRows] = useState([]); // raw matches (no per-user prediction fields)
   const [predictionsByMatch, setPredictionsByMatch] = useState({}); // matchId -> {predHome, predAway, userBoost}, for currentUser only
+  const [allPredictionRows, setAllPredictionRows] = useState([]); // every user's predictions, for the global leaderboard
   const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([fetchTournaments(), fetchClubs(), fetchMatches()])
-      .then(([t, c, m]) => {
+    Promise.all([fetchTournaments(), fetchClubs(), fetchMatches(), fetchAllPredictionsWithProfiles()])
+      .then(([t, c, m, p]) => {
         setTournamentRows(t);
         setClubRows(c);
         setMatchRows(m);
+        setAllPredictionRows(p);
       })
       .finally(() => setDataLoading(false));
   }, []);
@@ -5177,6 +5232,18 @@ export default function App() {
       const predictionFields = { predHome: updated.predHome, predAway: updated.predAway, userBoost: updated.userBoost };
       upsertPredictionDB(currentUser.id, id, predictionFields);
       setPredictionsByMatch((prev) => ({ ...prev, [id]: predictionFields }));
+      setAllPredictionRows((prev) => {
+        const exists = prev.some((r) => r.match_id === id && r.user_id === currentUser.id);
+        const row = {
+          match_id: id,
+          user_id: currentUser.id,
+          pred_home: predictionFields.predHome === "" ? null : Number(predictionFields.predHome),
+          pred_away: predictionFields.predAway === "" ? null : Number(predictionFields.predAway),
+          user_boost: !!predictionFields.userBoost,
+          profiles: { name: currentUser.name, username: currentUser.username },
+        };
+        return exists ? prev.map((r) => (r.match_id === id && r.user_id === currentUser.id ? row : r)) : [...prev, row];
+      });
     }
   };
 
@@ -5492,7 +5559,16 @@ export default function App() {
         />
       )}
 
-      {activePage === "globalLeaderboard" && <GlobalLeaderboardPage matches={matches} tournaments={tournaments} tournamentLogos={tournamentLogos} currentUser={currentUser} theme={theme} />}
+      {activePage === "globalLeaderboard" && (
+        <GlobalLeaderboardPage
+          matches={matches}
+          allPredictionRows={allPredictionRows}
+          tournaments={tournaments}
+          tournamentLogos={tournamentLogos}
+          currentUser={currentUser}
+          theme={theme}
+        />
+      )}
 
       {activePage === "pointsSystem" && <PointsSystemPage theme={theme} />}
 

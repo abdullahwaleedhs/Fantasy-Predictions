@@ -142,6 +142,17 @@ export async function upsertPredictionDB(userId, matchId, { predHome, predAway, 
   if (error) throw error;
 }
 
+// Every prediction by every user, with the predicting user's name/username
+// attached, for the real global leaderboard (everyone is scored from their
+// own actual predictions, not simulated).
+export async function fetchAllPredictionsWithProfiles() {
+  const { data, error } = await supabase
+    .from("predictions")
+    .select("match_id, user_id, pred_home, pred_away, user_boost, profiles(name, username)");
+  if (error) throw error;
+  return data;
+}
+
 // ============ LEAGUES ============
 
 function generateLeagueCode() {
