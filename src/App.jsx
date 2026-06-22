@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Plus, Trash2, ChevronDown, Search, Palette, Lock, Unlock, Calendar, Clock, Menu, X, Home, Target, Trophy, BarChart3, Zap, Shield, Upload, CircleDot, Users, Copy, Check, Crown, ArrowDown, Award, TrendingUp, User, LogIn, LogOut, Mail, Camera } from "lucide-react";
+import { Plus, Trash2, ChevronDown, Search, Palette, Lock, Unlock, Calendar, Clock, Menu, X, Home, Target, Trophy, BarChart3, Zap, Shield, Upload, CircleDot, Users, Copy, Check, Crown, ArrowDown, Award, TrendingUp, User, LogIn, LogOut, Mail, Camera, Eye, EyeOff } from "lucide-react";
 import { isUsernameTaken, registerUser, loginUser, logoutUser, updateProfile, getSessionUser, setBoostsRemaining as setBoostsRemainingDB, requestPasswordReset, updatePassword } from "./auth";
 import { supabase } from "./supabaseClient";
 import {
@@ -2713,6 +2713,42 @@ function LeaderboardRow({ rank, name, username, points, isYou, theme }) {
   );
 }
 
+// A password <input> with an eye icon to toggle showing the typed value.
+function PasswordField({ value, onChange, placeholder, inputStyle, theme }) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <div style={{ position: "relative" }}>
+      <input
+        dir="ltr"
+        type={visible ? "text" : "password"}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        style={{ ...inputStyle, paddingRight: "38px" }}
+      />
+      <button
+        type="button"
+        onClick={() => setVisible((v) => !v)}
+        style={{
+          position: "absolute",
+          right: "10px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          background: "transparent",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+        }}
+        aria-label={visible ? "إخفاء كلمة السر" : "إظهار كلمة السر"}
+      >
+        {visible ? <EyeOff size={16} color={theme.muted} /> : <Eye size={16} color={theme.muted} />}
+      </button>
+    </div>
+  );
+}
+
 // Login/register page, backed by Supabase Auth + the profiles table.
 function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme }) {
   const [mode, setMode] = useState("login"); // "register" | "login" | "forgot"
@@ -2720,6 +2756,7 @@ function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [usernameError, setUsernameError] = useState("");
   const [authError, setAuthError] = useState("");
   const [authNotice, setAuthNotice] = useState("");
@@ -2748,6 +2785,11 @@ function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme
     }
 
     if (!name.trim() || !username.trim() || !email.trim() || !password.trim()) return;
+
+    if (password !== confirmPassword) {
+      setAuthError("كلمتا السر غير متطابقتين");
+      return;
+    }
 
     setUsernameError("");
     setSubmitting(true);
@@ -2800,7 +2842,7 @@ function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme
           {mode === "register"
             ? "أدخل بياناتك لإنشاء حسابك"
             : mode === "forgot"
-            ? "أدخل بريدك الإلكتروني أو اليوزرنيم، وبنرسل لك رابط لإعادة تعيين كلمة السر"
+            ? "أدخل بريدك الإلكتروني أو اسم المستخدم، وبنرسل لك رابط لإعادة تعيين كلمة السر"
             : "سجّل دخولك بالبريد وكلمة السر"}
         </p>
 
@@ -2816,7 +2858,7 @@ function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme
 
               <div>
                 <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>
-                  اليوزرنيم
+                  اسم المستخدم
                 </label>
                 <input
                   dir="ltr"
@@ -2831,7 +2873,7 @@ function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme
                 {usernameError ? (
                   <p style={{ fontSize: "11px", color: theme.danger, marginTop: "5px" }}>{usernameError}</p>
                 ) : (
-                  <p style={{ fontSize: "11px", color: theme.muted, marginTop: "5px" }}>يجب أن يكون اليوزرنيم فريد، يظهر بلوحة الترتيب</p>
+                  <p style={{ fontSize: "11px", color: theme.muted, marginTop: "5px" }}>يجب أن يكون اسم المستخدم فريد، يظهر بلوحة الترتيب</p>
                 )}
               </div>
             </>
@@ -2839,7 +2881,7 @@ function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme
 
           <div>
             <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>
-              {mode === "login" || mode === "forgot" ? "البريد الإلكتروني أو اليوزرنيم" : "البريد الإلكتروني"}
+              {mode === "login" || mode === "forgot" ? "البريد الإلكتروني أو اسم المستخدم" : "البريد الإلكتروني"}
             </label>
             <div style={{ position: "relative" }}>
               <input
@@ -2859,17 +2901,28 @@ function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme
               <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>
                 كلمة السر
               </label>
-              <div style={{ position: "relative" }}>
-                <input
-                  dir="ltr"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  style={{ ...inputStyle, paddingRight: "38px" }}
-                />
-                <Lock size={16} color={theme.muted} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)" }} />
-              </div>
+              <PasswordField
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                inputStyle={inputStyle}
+                theme={theme}
+              />
+            </div>
+          )}
+
+          {mode === "register" && (
+            <div>
+              <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>
+                تأكيد كلمة السر
+              </label>
+              <PasswordField
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                inputStyle={inputStyle}
+                theme={theme}
+              />
             </div>
           )}
 
@@ -3020,13 +3073,12 @@ function ResetPasswordPage({ onUpdatePassword, theme }) {
             <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>
               كلمة السر الجديدة
             </label>
-            <input
-              dir="ltr"
-              type="password"
+            <PasswordField
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              style={inputStyle}
+              inputStyle={inputStyle}
+              theme={theme}
             />
           </div>
 
@@ -3034,13 +3086,12 @@ function ResetPasswordPage({ onUpdatePassword, theme }) {
             <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>
               تأكيد كلمة السر
             </label>
-            <input
-              dir="ltr"
-              type="password"
+            <PasswordField
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="••••••••"
-              style={inputStyle}
+              inputStyle={inputStyle}
+              theme={theme}
             />
           </div>
 
@@ -3155,7 +3206,7 @@ function UsersAdminPage({ theme }) {
             lineHeight: 1.7,
           }}
         >
-          عشان تحذف حساب أي مستخدم: روح لموقع Supabase، بعدين Authentication، بعدين Users، دور على اليوزرنيم أو البريد، واضغط حذف. حذف الحساب من هناك يمسح معه كل توقعاته وعضويته في الدوريات تلقائيًا.
+          عشان تحذف حساب أي مستخدم: روح لموقع Supabase، بعدين Authentication، بعدين Users، دور على اسم المستخدم أو البريد، واضغط حذف. حذف الحساب من هناك يمسح معه كل توقعاته وعضويته في الدوريات تلقائيًا.
         </div>
       </div>
     </div>
@@ -3322,7 +3373,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, theme }) 
 
           <div>
             <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>
-              اليوزرنيم
+              اسم المستخدم
             </label>
             <input
               dir="ltr"
@@ -3345,7 +3396,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, theme }) 
               }}
             />
             <p style={{ fontSize: "11px", color: theme.muted, marginTop: "5px" }}>
-              تنبيه: تقدر تغيّر اليوزرنيم مرة واحدة كل 6 شهور فقط
+              تنبيه: تقدر تغيّر اسم المستخدم مرة واحدة كل 6 شهور فقط
             </p>
             {usernameError && <p style={{ fontSize: "11px", color: theme.danger, marginTop: "5px" }}>{usernameError}</p>}
           </div>
@@ -3373,7 +3424,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, theme }) 
         </div>
 
         <p style={{ fontSize: "11px", color: theme.muted, textAlign: "center", marginTop: "16px" }}>
-          اسمك ويوزرنيمك يظهرون بلوحة الترتيب العام - الاسم ممكن يتكرر بين المستخدمين، لكن اليوزرنيم لازم يكون فريد
+          اسمك واسم مستخدمك يظهرون بلوحة الترتيب العام - الاسم ممكن يتكرر بين المستخدمين، لكن اسم المستخدم لازم يكون فريد
         </p>
       </div>
     </div>
@@ -5145,7 +5196,7 @@ export default function App() {
   const handleRegister = async ({ name, username, email, password }) => {
     try {
       if (await isUsernameTaken(username)) {
-        return { usernameError: "اليوزرنيم هذا مستخدم من قبل، جرّب واحد ثاني" };
+        return { usernameError: "اسم المستخدم هذا مستخدم من قبل، جرّب واحد ثاني" };
       }
       const result = await registerUser({ name, username, email, password });
       if (result.needsEmailConfirmation) return { needsEmailConfirmation: true };
@@ -5204,12 +5255,12 @@ export default function App() {
         if (elapsed < USERNAME_COOLDOWN_MS) {
           const nextDate = new Date(lastChange + USERNAME_COOLDOWN_MS);
           const nextDateStr = nextDate.toLocaleDateString("ar-EG");
-          return { usernameError: `ما تقدر تغيّر اليوزرنيم إلا مرة كل 6 شهور. تقدر تغيّره من تاريخ ${nextDateStr}` };
+          return { usernameError: `ما تقدر تغيّر اسم المستخدم إلا مرة كل 6 شهور. تقدر تغيّره من تاريخ ${nextDateStr}` };
         }
       }
 
       if (usernameChanged && (await isUsernameTaken(username, currentUser.id))) {
-        return { usernameError: "اليوزرنيم هذا مستخدم من قبل، جرّب واحد ثاني" };
+        return { usernameError: "اسم المستخدم هذا مستخدم من قبل، جرّب واحد ثاني" };
       }
 
       await updateProfile(currentUser.id, { name, username, avatar, usernameChanged });
