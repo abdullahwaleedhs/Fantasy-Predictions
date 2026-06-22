@@ -3634,7 +3634,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                                 padding: "2px 8px",
                               }}
                             >
-                              {match.actualHome} - {match.actualAway}
+                              {match.actualAway} - {match.actualHome}
                             </span>
                           ) : (
                             <span style={{ fontSize: "11px", color: theme.muted, fontWeight: 600 }}>
@@ -3737,7 +3737,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                                       color: theme.text,
                                     }}
                                   >
-                                    {pred.predHome} - {pred.predAway}
+                                    {pred.predAway} - {pred.predHome}
                                   </span>
                                 ) : (
                                   <span style={{ fontSize: "11px", color: theme.muted }}>لم يتوقع</span>
