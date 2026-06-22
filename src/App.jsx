@@ -5102,26 +5102,40 @@ function NavDrawer({ open, onClose, activePage, onNavigate, viewMode, setViewMod
   );
 }
 
-// Custom logo: a football inside a crosshair/target ring, symbolizing
-// "predicting a match outcome" rather than a generic icon.
+// Custom logo: a football inside a crosshair/target ring with a purple
+// swoosh beneath it, matching the "FANTASY PREDICTIONS" brand mark.
 function PredictionLogo({ theme, size = 30 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Outer crosshair ring */}
-      <circle cx="16" cy="16" r="14" stroke={theme.primary} strokeWidth="1.6" />
-      <line x1="16" y1="0.5" x2="16" y2="5.5" stroke={theme.primary} strokeWidth="1.6" strokeLinecap="round" />
-      <line x1="16" y1="26.5" x2="16" y2="31.5" stroke={theme.primary} strokeWidth="1.6" strokeLinecap="round" />
-      <line x1="0.5" y1="16" x2="5.5" y2="16" stroke={theme.primary} strokeWidth="1.6" strokeLinecap="round" />
-      <line x1="26.5" y1="16" x2="31.5" y2="16" stroke={theme.primary} strokeWidth="1.6" strokeLinecap="round" />
+      <defs>
+        <radialGradient id="ppLogoBall" cx="35%" cy="30%" r="75%">
+          <stop offset="0%" stopColor="#C4B5FD" />
+          <stop offset="55%" stopColor="#7C3AED" />
+          <stop offset="100%" stopColor="#4C1D95" />
+        </radialGradient>
+        <linearGradient id="ppLogoSwoosh" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#A855F7" />
+          <stop offset="100%" stopColor="#5B21B6" />
+        </linearGradient>
+      </defs>
+
+      {/* Swoosh */}
+      <path
+        d="M5 20.5C9 24 15 25.5 19.5 23.5C23 22 25.5 19 27 16.2C25.7 19.7 22.7 23.3 18.5 24.8C13.5 26.6 8 25.4 5 22.2Z"
+        fill="url(#ppLogoSwoosh)"
+      />
+
+      {/* Crosshair ring */}
+      <circle cx="16" cy="14.5" r="11.2" stroke={theme.primary} strokeWidth="1.6" />
+      <line x1="16" y1="1.6" x2="16" y2="5.4" stroke={theme.primary} strokeWidth="1.6" strokeLinecap="round" />
+      <line x1="16" y1="23.6" x2="16" y2="27.4" stroke={theme.primary} strokeWidth="1.6" strokeLinecap="round" />
+      <line x1="2.8" y1="14.5" x2="6.6" y2="14.5" stroke={theme.primary} strokeWidth="1.6" strokeLinecap="round" />
+      <line x1="25.4" y1="14.5" x2="29.2" y2="14.5" stroke={theme.primary} strokeWidth="1.6" strokeLinecap="round" />
 
       {/* Ball */}
-      <circle cx="16" cy="16" r="8.5" fill={theme.surface} stroke={theme.primary} strokeWidth="1.4" />
-      <polygon points="16,11.8 19.99,14.7 18.47,19.4 13.53,19.4 12.01,14.7" fill={theme.violet} />
-      <line x1="16" y1="11.8" x2="16" y2="8.8" stroke={theme.primary} strokeWidth="1.1" strokeLinecap="round" />
-      <line x1="19.99" y1="14.7" x2="22.85" y2="13.78" stroke={theme.primary} strokeWidth="1.1" strokeLinecap="round" />
-      <line x1="18.47" y1="19.4" x2="20.23" y2="21.82" stroke={theme.primary} strokeWidth="1.1" strokeLinecap="round" />
-      <line x1="13.53" y1="19.4" x2="11.77" y2="21.82" stroke={theme.primary} strokeWidth="1.1" strokeLinecap="round" />
-      <line x1="12.01" y1="14.7" x2="9.15" y2="13.78" stroke={theme.primary} strokeWidth="1.1" strokeLinecap="round" />
+      <circle cx="16" cy="14.5" r="7.4" fill="url(#ppLogoBall)" stroke={theme.primary} strokeWidth="1" />
+      <polygon points="16,10.5 19.5,13 18.2,17.2 13.8,17.2 12.5,13" fill="#FFFFFF" opacity="0.92" />
+      <polygon points="16,8 16,10.5" stroke="#FFFFFF" strokeWidth="1" opacity="0.7" />
     </svg>
   );
 }
