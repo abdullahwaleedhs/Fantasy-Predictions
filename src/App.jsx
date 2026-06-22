@@ -3915,10 +3915,11 @@ function PrivateLeaguesPage({ leagues, matches, onCreateLeague, onJoinLeague, on
     );
   }
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!newLeagueName.trim()) return;
-    const id = onCreateLeague(newLeagueName.trim());
+    const name = newLeagueName.trim();
     setNewLeagueName("");
+    const id = await onCreateLeague(name);
     setSelectedLeagueId(id);
   };
 
@@ -5143,13 +5144,11 @@ export default function App() {
     [leagueRows, currentUser]
   );
 
-  const createLeague = (name) => {
+  const createLeague = async (name) => {
     if (!currentUser) return null;
-    const id = `pending-${Date.now()}`;
-    createLeagueDB(name, currentUser.id).then((row) => {
-      setLeagueRows((prev) => [...prev, { ...row, league_members: [] }]);
-    });
-    return id;
+    const row = await createLeagueDB(name, currentUser.id);
+    setLeagueRows((prev) => [...prev, { ...row, league_members: [] }]);
+    return row.id;
   };
 
   const joinLeague = (leagueId, playerName) => {
