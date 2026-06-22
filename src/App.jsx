@@ -22,6 +22,20 @@ import {
   fetchAllPredictionsWithProfiles,
 } from "./data";
 
+// Persists a piece of UI state (active tab, sub-view, open filter, etc.) in
+// sessionStorage, so reloading the page keeps the user exactly where they
+// were instead of resetting to that component's default view.
+function usePersistedState(key, defaultValue) {
+  const [value, setValue] = useState(() => {
+    const saved = sessionStorage.getItem(key);
+    return saved !== null ? JSON.parse(saved) : defaultValue;
+  });
+  useEffect(() => {
+    sessionStorage.setItem(key, JSON.stringify(value));
+  }, [key, value]);
+  return [value, setValue];
+}
+
 const DEFAULT_TOURNAMENTS = [
   "دوري روشن السعودي",
   "الدوري الإنجليزي الممتاز",
@@ -3156,7 +3170,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, theme }) 
 }
 
 function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tournamentLogos, currentUser, theme }) {
-  const [tournamentFilter, setTournamentFilter] = useState("الكل");
+  const [tournamentFilter, setTournamentFilter] = usePersistedState("globalLeaderboard.tournamentFilter", "الكل");
 
   const filteredMatches = tournamentFilter === "الكل" ? matches : matches.filter((m) => (m.tournament || "بدون بطولة") === tournamentFilter);
 
@@ -3255,9 +3269,9 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
 
 function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBack, tournaments, tournamentLogos, currentUser, theme }) {
   const [codeCopied, setCodeCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState("ranking"); // "ranking" | "predictions"
-  const [predictionsView, setPredictionsView] = useState("recent"); // "recent" | "archived"
-  const [tournamentFilter, setTournamentFilter] = useState("الكل");
+  const [activeTab, setActiveTab] = usePersistedState("leagueDetail.activeTab", "ranking"); // "ranking" | "predictions"
+  const [predictionsView, setPredictionsView] = usePersistedState("leagueDetail.predictionsView", "recent"); // "recent" | "archived"
+  const [tournamentFilter, setTournamentFilter] = usePersistedState("leagueDetail.tournamentFilter", "الكل");
 
   const youPlayer = league.players.find((p) => p.isYou);
 
@@ -3746,7 +3760,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
 }
 
 function PrivateLeaguesPage({ leagues, matches, allPredictionRows, onCreateLeague, onJoinLeague, tournaments, tournamentLogos, currentUser, theme }) {
-  const [selectedLeagueId, setSelectedLeagueId] = useState(null);
+  const [selectedLeagueId, setSelectedLeagueId] = usePersistedState("leagues.selectedLeagueId", null);
   const [newLeagueName, setNewLeagueName] = useState("");
   const [joinCodeInput, setJoinCodeInput] = useState("");
   const [joinError, setJoinError] = useState("");
@@ -4246,8 +4260,8 @@ function StatBox({ label, value, theme }) {
 }
 
 function StatsPage({ matches, tournaments, tournamentLogos, theme }) {
-  const [tournamentFilter, setTournamentFilter] = useState("الكل");
-  const [tierView, setTierView] = useState("count"); // "count" | "percent"
+  const [tournamentFilter, setTournamentFilter] = usePersistedState("stats.tournamentFilter", "الكل");
+  const [tierView, setTierView] = usePersistedState("stats.tierView", "count"); // "count" | "percent"
   const statsTiers = getStatsTiers(theme);
 
   const filteredMatches = tournamentFilter === "الكل" ? matches : matches.filter((m) => (m.tournament || "بدون بطولة") === tournamentFilter);
@@ -4869,8 +4883,8 @@ export default function App() {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activePage, setActivePage] = useState(() => sessionStorage.getItem("activePage") || "home");
-  const [viewMode, setViewMode] = useState("user"); // "admin" | "user" - only admins may switch to "admin"
-  const [predictionsTabView, setPredictionsTabView] = useState("current"); // "current" | "archived" - for the توقع! page's match list
+  const [viewMode, setViewMode] = usePersistedState("viewMode", "user"); // "admin" | "user" - only admins may switch to "admin"
+  const [predictionsTabView, setPredictionsTabView] = usePersistedState("predictionsTabView", "current"); // "current" | "archived" - for the توقع! page's match list
   const [currentUser, setCurrentUser] = useState(null); // null when logged out, { id, name, username, email, avatar } when logged in
   const [authLoading, setAuthLoading] = useState(true);
 
