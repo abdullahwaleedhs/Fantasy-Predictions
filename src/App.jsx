@@ -5104,8 +5104,8 @@ function NavDrawer({ open, onClose, activePage, onNavigate, viewMode, setViewMod
 
 // Brand logo: crosshair/target ring around a football with a purple
 // swoosh, matching the "FANTASY PREDICTIONS" brand mark image asset.
-function PredictionLogo({ size = 30 }) {
-  return <img src="/logo-icon.png" alt="" width={size} height={size} style={{ display: "block" }} />;
+function PredictionLogo({ size = 38 }) {
+  return <img src="/logo-icon.png" alt="" width={size} height={size} style={{ display: "block", marginTop: "-4px" }} />;
 }
 
 // A hand-drawn-style wavy divider line, used as a decorative violet accent
