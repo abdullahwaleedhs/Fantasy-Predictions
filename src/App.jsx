@@ -2210,8 +2210,8 @@ function ClubLogo({ logo, name, theme, size = 32 }) {
           src={logo}
           alt={name}
           style={{
-            width: "96%",
-            height: "96%",
+            width: "88%",
+            height: "88%",
             objectFit: "contain",
           }}
         />
