@@ -3242,6 +3242,15 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // currentUser can still be loading (session restore) when this page first
+  // mounts, so re-sync the fields once the real profile data arrives.
+  useEffect(() => {
+    if (!currentUser) return;
+    setName(currentUser.name || "");
+    setUsername(currentUser.username || "");
+    setAvatar(currentUser.avatar || null);
+  }, [currentUser]);
+
   if (!currentUser) {
     return (
       <div style={{ padding: "60px 20px", textAlign: "center" }}>
