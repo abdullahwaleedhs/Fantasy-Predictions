@@ -3030,6 +3030,34 @@ function UsersAdminPage({ theme }) {
   );
 }
 
+// Shown instead of a page's content when the visitor isn't logged in yet.
+function LoginGate({ onNavigateToAuth, theme }) {
+  return (
+    <div style={{ padding: "60px 20px", textAlign: "center" }}>
+      <Lock size={40} color={theme.muted} style={{ marginBottom: "14px" }} />
+      <p style={{ fontSize: "13px", color: theme.muted, marginBottom: "16px" }}>
+        سجّل دخولك عشان تقدر تشوف هذي الصفحة
+      </p>
+      <button
+        onClick={onNavigateToAuth}
+        style={{
+          border: "none",
+          borderRadius: "10px",
+          padding: "10px 24px",
+          background: theme.primary,
+          color: theme.surface,
+          fontFamily: "Tajawal, sans-serif",
+          fontWeight: 700,
+          fontSize: "13px",
+          cursor: "pointer",
+        }}
+      >
+        تسجيل الدخول
+      </button>
+    </div>
+  );
+}
+
 function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, theme }) {
   const [name, setName] = useState(currentUser?.name || "");
   const [username, setUsername] = useState(currentUser?.username || "");
@@ -5216,7 +5244,11 @@ export default function App() {
         theme={theme}
       />
 
-      {activePage === "predictions" && (
+      {activePage === "predictions" && !currentUser && (
+        <LoginGate onNavigateToAuth={() => setActivePage("auth")} theme={theme} />
+      )}
+
+      {activePage === "predictions" && currentUser && (
         <div style={{ padding: "20px 16px 60px" }}>
           <div style={{ maxWidth: "480px", margin: "0 auto" }}>
             {/* Theme switcher - admin only */}
@@ -5442,7 +5474,11 @@ export default function App() {
 
       {activePage === "users" && <UsersAdminPage theme={theme} />}
 
-      {activePage === "leagues" && (
+      {activePage === "leagues" && !currentUser && (
+        <LoginGate onNavigateToAuth={() => setActivePage("auth")} theme={theme} />
+      )}
+
+      {activePage === "leagues" && currentUser && (
         <PrivateLeaguesPage
           leagues={leagues}
           matches={matches}
@@ -5460,9 +5496,17 @@ export default function App() {
 
       {activePage === "pointsSystem" && <PointsSystemPage theme={theme} />}
 
-      {activePage === "stats" && <StatsPage matches={matches} tournaments={tournaments} tournamentLogos={tournamentLogos} theme={theme} />}
+      {activePage === "stats" && !currentUser && <LoginGate onNavigateToAuth={() => setActivePage("auth")} theme={theme} />}
 
-      {activePage === "predictTournaments" && (
+      {activePage === "stats" && currentUser && (
+        <StatsPage matches={matches} tournaments={tournaments} tournamentLogos={tournamentLogos} theme={theme} />
+      )}
+
+      {activePage === "predictTournaments" && !currentUser && (
+        <LoginGate onNavigateToAuth={() => setActivePage("auth")} theme={theme} />
+      )}
+
+      {activePage === "predictTournaments" && currentUser && (
         <div style={{ padding: "40px 20px", textAlign: "center" }}>
           <p style={{ color: theme.muted, fontSize: "14px", fontWeight: 700 }}>قادم قريباً..!</p>
         </div>
