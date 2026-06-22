@@ -30,6 +30,11 @@ export async function setTournamentLogoDB(tournamentId, logo) {
   if (error) throw error;
 }
 
+export async function removeTournamentDB(tournamentId) {
+  const { error } = await supabase.from("tournaments").delete().eq("id", tournamentId);
+  if (error) throw error;
+}
+
 // ============ CLUBS ============
 
 export async function fetchClubs() {

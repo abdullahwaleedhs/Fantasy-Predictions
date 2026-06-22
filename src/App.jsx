@@ -5,6 +5,7 @@ import {
   fetchTournaments,
   addTournamentDB,
   setTournamentLogoDB,
+  removeTournamentDB,
   fetchClubs,
   addClubDB,
   updateClubDB,
@@ -2367,7 +2368,7 @@ function TournamentFilterPicker({ value, onChange, tournaments, tournamentLogos,
   );
 }
 
-function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, onAddClub, onUpdateClub, onRemoveClub, tournamentLogos, onSetTournamentLogo, theme }) {
+function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, onAddClub, onUpdateClub, onRemoveClub, tournamentLogos, onSetTournamentLogo, onRemoveTournament, theme }) {
   const [selectedTournament, setSelectedTournament] = useState(tournaments[0] || "");
   const [newClubName, setNewClubName] = useState("");
   const [newClubLogo, setNewClubLogo] = useState(null);
@@ -2472,6 +2473,27 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
               <Upload size={13} />
               {tournamentLogos?.[selectedTournament] ? "تغيير الشعار" : "رفع شعار"}
             </label>
+            <button
+              onClick={() => {
+                if (!window.confirm(`حذف بطولة "${selectedTournament}" نهائيًا مع كل أنديتها؟`)) return;
+                onRemoveTournament(selectedTournament);
+                setSelectedTournament("");
+              }}
+              aria-label="حذف البطولة"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: `1.5px solid ${theme.danger}`,
+                borderRadius: "8px",
+                padding: "6px",
+                background: "transparent",
+                color: theme.danger,
+                cursor: "pointer",
+              }}
+            >
+              <Trash2 size={13} />
+            </button>
           </div>
         )}
 
@@ -5041,6 +5063,16 @@ export default function App() {
     setTournamentRows((prev) => prev.map((t) => (t.id === id ? { ...t, logo } : t)));
   };
 
+  const removeTournament = (tournamentName) => {
+    const id = tournamentIdByName[tournamentName];
+    if (!id) return;
+    removeTournamentDB(id).then(() => {
+      setTournamentRows((prev) => prev.filter((t) => t.id !== id));
+      setClubRows((prev) => prev.filter((c) => c.tournament_id !== id));
+      setMatchRows((prev) => prev.map((m) => (m.tournament_id === id ? { ...m, tournament_id: null } : m)));
+    });
+  };
+
   const addClub = (tournamentName, club) => {
     const tournamentId = tournamentIdByName[tournamentName];
     if (!tournamentId) return;
@@ -5385,6 +5417,7 @@ export default function App() {
           onRemoveClub={removeClub}
           tournamentLogos={tournamentLogos}
           onSetTournamentLogo={setTournamentLogo}
+          onRemoveTournament={removeTournament}
           theme={theme}
         />
       )}
