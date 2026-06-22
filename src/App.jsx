@@ -1895,8 +1895,11 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                     borderRadius: "8px",
                     border: "2.5px solid #000000",
                     background: theme.bg,
-                    display: "grid",
-                    placeItems: "center",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    lineHeight: "1",
+                    paddingTop: "3px",
                   }}
                 >
                   {match.actualHome}
@@ -1909,8 +1912,11 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                     borderRadius: "8px",
                     border: "2.5px solid #000000",
                     background: theme.bg,
-                    display: "grid",
-                    placeItems: "center",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    lineHeight: "1",
+                    paddingTop: "3px",
                   }}
                 >
                   {match.actualAway}
