@@ -4839,7 +4839,7 @@ export default function App() {
   );
 
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [activePage, setActivePage] = useState("home");
+  const [activePage, setActivePage] = useState(() => sessionStorage.getItem("activePage") || "home");
   const [viewMode, setViewMode] = useState("user"); // "admin" | "user" - only admins may switch to "admin"
   const [predictionsTabView, setPredictionsTabView] = useState("current"); // "current" | "archived" - for the توقع! page's match list
   const [currentUser, setCurrentUser] = useState(null); // null when logged out, { id, name, username, email, avatar } when logged in
@@ -4848,6 +4848,12 @@ export default function App() {
   useEffect(() => {
     if (viewMode === "admin" && !currentUser?.is_admin) setViewMode("user");
   }, [currentUser, viewMode]);
+
+  // Remember the current page across reloads, so refreshing doesn't
+  // bounce the user back to the home page.
+  useEffect(() => {
+    sessionStorage.setItem("activePage", activePage);
+  }, [activePage]);
 
   // Restore the session (if any) when the app first loads, so a refresh
   // doesn't log the user out.
