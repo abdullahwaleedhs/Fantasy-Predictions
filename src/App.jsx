@@ -2728,7 +2728,7 @@ function AuthPage({ onRegister, onLoginExisting, onBack, theme }) {
     if (mode === "login") {
       if (!email.trim() || !password.trim()) return;
       setSubmitting(true);
-      const result = await onLoginExisting({ email: email.trim(), password });
+      const result = await onLoginExisting({ identifier: email.trim(), password });
       setSubmitting(false);
       if (result?.error) setAuthError(result.error);
       return;
@@ -2822,15 +2822,15 @@ function AuthPage({ onRegister, onLoginExisting, onBack, theme }) {
 
           <div>
             <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>
-              البريد الإلكتروني
+              {mode === "login" ? "البريد الإلكتروني أو اليوزرنيم" : "البريد الإلكتروني"}
             </label>
             <div style={{ position: "relative" }}>
               <input
                 dir="ltr"
-                type="email"
+                type={mode === "login" ? "text" : "email"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder={mode === "login" ? "you@example.com أو username" : "you@example.com"}
                 style={{ ...inputStyle, paddingRight: "38px" }}
               />
               <Mail size={16} color={theme.muted} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)" }} />
@@ -4975,9 +4975,9 @@ export default function App() {
     }
   };
 
-  const handleLoginExisting = async ({ email, password }) => {
+  const handleLoginExisting = async ({ identifier, password }) => {
     try {
-      const user = await loginUser({ email, password });
+      const user = await loginUser({ identifier, password });
       setCurrentUser(user);
       setActivePage("home");
       return {};

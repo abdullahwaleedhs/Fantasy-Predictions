@@ -27,7 +27,17 @@ export async function registerUser({ name, username, email, password }) {
   return { user: { id: userId, name, username, email, avatar: null } };
 }
 
-export async function loginUser({ email, password }) {
+// `identifier` can be either an email or a username - if it doesn't look
+// like an email, we resolve it to the matching account's email first.
+export async function loginUser({ identifier, password }) {
+  let email = identifier;
+  if (!identifier.includes("@")) {
+    const { data, error } = await supabase.rpc("get_email_for_username", { p_username: identifier });
+    if (error) throw error;
+    if (!data) throw new Error("بيانات الدخول غير صحيحة");
+    email = data;
+  }
+
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw error;
   const profile = await fetchProfile(data.user.id);
