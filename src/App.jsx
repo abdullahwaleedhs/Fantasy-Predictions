@@ -4821,7 +4821,6 @@ function StatsPage({ matches, tournaments, tournamentLogos, theme }) {
 const NAV_ITEMS = [
   { id: "home", label: "الرئيسية", icon: Home, color: (t) => t.violet },
   { id: "predictions", label: "توقع المباريات", icon: Target, color: (t) => t.danger },
-  { id: "predictTournaments", label: "توقع البطولات", icon: Trophy, color: (t) => t.yellow },
   { id: "leagues", label: "الدوريات", icon: Users, color: (t) => t.blue },
   { id: "globalLeaderboard", label: "لوحة الترتيب العام", icon: Crown, color: (t) => "#D4AF37" },
   { id: "stats", label: "الإحصائيات", icon: BarChart3, color: (t) => t.accent },
@@ -5859,16 +5858,6 @@ export default function App() {
 
       {activePage === "stats" && currentUser && (
         <StatsPage matches={matches} tournaments={tournaments} tournamentLogos={tournamentLogos} theme={theme} />
-      )}
-
-      {activePage === "predictTournaments" && !authLoading && !currentUser && (
-        <LoginGate onNavigateToAuth={() => setActivePage("auth")} theme={theme} />
-      )}
-
-      {activePage === "predictTournaments" && currentUser && (
-        <div style={{ padding: "40px 20px", textAlign: "center" }}>
-          <p style={{ color: theme.muted, fontSize: "14px", fontWeight: 700 }}>قادم قريباً..!</p>
-        </div>
       )}
 
       {activePage === "profile" && (
