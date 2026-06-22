@@ -568,7 +568,6 @@ function TournamentIcon({ name, logo, size = 14, color, theme }) {
           width: size,
           height: size,
           borderRadius: "50%",
-          background: theme?.surface,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -580,8 +579,8 @@ function TournamentIcon({ name, logo, size = 14, color, theme }) {
           src={logo}
           alt={name}
           style={{
-            width: "80%",
-            height: "80%",
+            width: "96%",
+            height: "96%",
             objectFit: "contain",
             display: "block",
           }}
@@ -2211,9 +2210,9 @@ function ClubLogo({ logo, name, theme, size = 32 }) {
           src={logo}
           alt={name}
           style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
+            width: "96%",
+            height: "96%",
+            objectFit: "contain",
           }}
         />
       </div>
