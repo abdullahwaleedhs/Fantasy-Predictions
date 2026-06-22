@@ -5161,7 +5161,7 @@ export default function App() {
         theme={theme}
       />
 
-      {activePage === "predictions" && !currentUser && (
+      {activePage === "predictions" && !authLoading && !currentUser && (
         <LoginGate onNavigateToAuth={() => setActivePage("auth")} theme={theme} />
       )}
 
@@ -5391,7 +5391,7 @@ export default function App() {
 
       {activePage === "users" && <UsersAdminPage theme={theme} />}
 
-      {activePage === "leagues" && !currentUser && (
+      {activePage === "leagues" && !authLoading && !currentUser && (
         <LoginGate onNavigateToAuth={() => setActivePage("auth")} theme={theme} />
       )}
 
@@ -5422,13 +5422,13 @@ export default function App() {
 
       {activePage === "pointsSystem" && <PointsSystemPage theme={theme} />}
 
-      {activePage === "stats" && !currentUser && <LoginGate onNavigateToAuth={() => setActivePage("auth")} theme={theme} />}
+      {activePage === "stats" && !authLoading && !currentUser && <LoginGate onNavigateToAuth={() => setActivePage("auth")} theme={theme} />}
 
       {activePage === "stats" && currentUser && (
         <StatsPage matches={matches} tournaments={tournaments} tournamentLogos={tournamentLogos} theme={theme} />
       )}
 
-      {activePage === "predictTournaments" && !currentUser && (
+      {activePage === "predictTournaments" && !authLoading && !currentUser && (
         <LoginGate onNavigateToAuth={() => setActivePage("auth")} theme={theme} />
       )}
 
