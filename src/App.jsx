@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Plus, Trash2, ChevronDown, Search, Palette, Lock, Unlock, Calendar, Clock, Menu, X, Home, Target, Trophy, BarChart3, Zap, Shield, Upload, CircleDot, Users, Copy, Check, Crown, ArrowDown, Award, TrendingUp, User, LogIn, LogOut, Mail, Camera, Eye, EyeOff } from "lucide-react";
-import { isUsernameTaken, registerUser, loginUser, logoutUser, updateProfile, getSessionUser, setBoostsRemaining as setBoostsRemainingDB, requestPasswordReset, updatePassword } from "./auth";
+import { isUsernameTaken, registerUser, loginUser, logoutUser, deleteAccount, updateProfile, getSessionUser, setBoostsRemaining as setBoostsRemainingDB, requestPasswordReset, updatePassword } from "./auth";
 import { supabase } from "./supabaseClient";
 import {
   fetchTournaments,
@@ -3232,13 +3232,15 @@ function LoginGate({ onNavigateToAuth, theme }) {
   );
 }
 
-function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, theme }) {
+function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteAccount, theme }) {
   const [name, setName] = useState(currentUser?.name || "");
   const [username, setUsername] = useState(currentUser?.username || "");
   const [avatar, setAvatar] = useState(currentUser?.avatar || null);
   const [usernameError, setUsernameError] = useState("");
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   if (!currentUser) {
     return (
@@ -3285,6 +3287,16 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, theme }) 
     }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      await onDeleteAccount();
+    } catch (err) {
+      setDeleting(false);
+      alert("تعذّر حذف الحساب: " + (err?.message || "خطأ غير متوقع"));
+    }
   };
 
   return (
@@ -3417,6 +3429,100 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, theme }) 
         <p style={{ fontSize: "11px", color: theme.muted, textAlign: "center", marginTop: "16px" }}>
           اسمك واسم مستخدمك يظهرون بلوحة الترتيب العام - الاسم ممكن يتكرر بين المستخدمين، لكن اسم المستخدم لازم يكون فريد
         </p>
+
+        <div style={{ marginTop: "32px", borderTop: `1px solid ${theme.border}`, paddingTop: "20px" }}>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            style={{
+              width: "100%",
+              padding: "12px 0",
+              borderRadius: "10px",
+              border: `1.5px solid ${theme.danger}`,
+              background: "transparent",
+              color: theme.danger,
+              fontFamily: "Tajawal, sans-serif",
+              fontWeight: 700,
+              fontSize: "13px",
+              cursor: "pointer",
+            }}
+          >
+            حذف الحساب نهائياً
+          </button>
+        </div>
+
+        {showDeleteConfirm && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.5)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 100,
+              padding: "20px",
+            }}
+            onClick={() => !deleting && setShowDeleteConfirm(false)}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                background: theme.surface,
+                borderRadius: "14px",
+                padding: "24px 20px",
+                maxWidth: "340px",
+                width: "100%",
+                textAlign: "center",
+              }}
+            >
+              <p style={{ fontSize: "14px", fontWeight: 700, color: theme.text, marginBottom: "8px" }}>
+                هل أنت متأكد؟
+              </p>
+              <p style={{ fontSize: "12px", color: theme.muted, marginBottom: "20px" }}>
+                سيتم حذف حسابك وجميع توقعاتك نهائياً، ولا يمكن التراجع عن هذا الإجراء
+              </p>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={deleting}
+                  style={{
+                    flex: 1,
+                    padding: "11px 0",
+                    borderRadius: "10px",
+                    border: `1.5px solid ${theme.inputBorder}`,
+                    background: "transparent",
+                    color: theme.text,
+                    fontFamily: "Tajawal, sans-serif",
+                    fontWeight: 700,
+                    fontSize: "13px",
+                    cursor: deleting ? "not-allowed" : "pointer",
+                  }}
+                >
+                  إلغاء
+                </button>
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={deleting}
+                  style={{
+                    flex: 1,
+                    padding: "11px 0",
+                    borderRadius: "10px",
+                    border: "none",
+                    background: theme.danger,
+                    color: "#FFFFFF",
+                    fontFamily: "Tajawal, sans-serif",
+                    fontWeight: 700,
+                    fontSize: "13px",
+                    cursor: deleting ? "not-allowed" : "pointer",
+                    opacity: deleting ? 0.6 : 1,
+                  }}
+                >
+                  {deleting ? "..." : "حذف نهائياً"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -5215,6 +5321,12 @@ export default function App() {
     setCurrentUser(null);
   };
 
+  const handleDeleteAccount = async () => {
+    await deleteAccount();
+    setCurrentUser(null);
+    setActivePage("home");
+  };
+
   const handleForgotPassword = async ({ identifier }) => {
     try {
       await requestPasswordReset(identifier);
@@ -5738,6 +5850,7 @@ export default function App() {
           currentUser={currentUser}
           onUpdateProfile={handleUpdateProfile}
           onNavigateToAuth={() => setActivePage("auth")}
+          onDeleteAccount={handleDeleteAccount}
           theme={theme}
         />
       )}

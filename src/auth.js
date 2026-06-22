@@ -48,6 +48,12 @@ export async function logoutUser() {
   await supabase.auth.signOut();
 }
 
+export async function deleteAccount() {
+  const { error } = await supabase.rpc("delete_own_account");
+  if (error) throw error;
+  await supabase.auth.signOut();
+}
+
 // Sends a "reset your password" email with a link back to this site;
 // clicking it puts the browser into a recovery session (handled in
 // App.jsx via onAuthStateChange) so the user can pick a new password.
