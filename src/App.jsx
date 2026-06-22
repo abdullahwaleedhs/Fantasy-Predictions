@@ -2157,65 +2157,6 @@ function generateLeagueCode() {
   return code;
 }
 
-// Deterministic pseudo-random number generator seeded by a string, so each
-// simulated player gets stable (non-reshuffling) predictions across renders.
-function seededRandom(seed) {
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) {
-    h = (h << 5) - h + seed.charCodeAt(i);
-    h |= 0;
-  }
-  return () => {
-    h = (h * 1103515245 + 12345) & 0x7fffffff;
-    return h / 0x7fffffff;
-  };
-}
-
-// Simulates a player's predictions for every match, then sums their points
-// using the same calcPoints logic and multipliers as the real scoring page.
-// manualPredictions: optional { [matchId]: { predHome, predAway } } - used by
-// the testing mode to let the admin manually control specific players'
-// predictions match-by-match, instead of the deterministic random simulation.
-// noRandomFallback: if true, matches without a manual prediction score 0
-// instead of falling back to the random simulation (so a player starts at
-// zero until you've actually set predictions for them in testing mode).
-function simulatePlayerPoints(playerId, matches, manualPredictions, noRandomFallback) {
-  const rand = seededRandom(playerId);
-  let total = 0;
-  matches.forEach((match) => {
-    const hasActual = match.actualHome !== "" && match.actualHome != null && match.actualAway !== "" && match.actualAway != null;
-    if (!hasActual) return;
-    const manual = manualPredictions?.[match.id];
-    const hasManual = manual && manual.predHome !== "" && manual.predHome != null && manual.predAway !== "" && manual.predAway != null;
-    if (!hasManual && noRandomFallback) return;
-    const predHome = hasManual ? Number(manual.predHome) : Math.floor(rand() * 5);
-    const predAway = hasManual ? Number(manual.predAway) : Math.floor(rand() * 5);
-    const multiplier = match.doublePoints ? 2 : 1;
-    const result = calcPoints(predHome, predAway, match.actualHome, match.actualAway, multiplier);
-    if (result) total += result.points;
-  });
-  return total;
-}
-
-// Same deterministic simulation as simulatePlayerPoints, but returns a
-// tierCounts breakdown ({10,5,4,3,1,0: count}) instead of a summed total -
-// used for the tiebreaker rule on leaderboards. Uses the identical seeded
-// sequence, so counts here are always consistent with that player's total.
-function simulatePlayerTierCounts(playerId, matches) {
-  const rand = seededRandom(playerId);
-  const tierCounts = { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0 };
-  matches.forEach((match) => {
-    const hasActual = match.actualHome !== "" && match.actualHome != null && match.actualAway !== "" && match.actualAway != null;
-    if (!hasActual) return;
-    const predHome = Math.floor(rand() * 5);
-    const predAway = Math.floor(rand() * 5);
-    const multiplier = match.doublePoints ? 2 : 1;
-    const result = calcPoints(predHome, predAway, match.actualHome, match.actualAway, multiplier);
-    if (result) tierCounts[result.basePoints] = (tierCounts[result.basePoints] || 0) + 1;
-  });
-  return tierCounts;
-}
-
 // Tiebreaker comparator: when total points are equal, the player with more
 // 10-point results ranks higher; if still tied, compare 5-point counts,
 // then 4, then 3, then 1, in that order, until the tie is broken.
@@ -2226,25 +2167,6 @@ function compareTierCounts(a, b) {
     if (diff !== 0) return diff;
   }
   return 0;
-}
-
-// Same deterministic simulation as simulatePlayerPoints, but returns the
-// per-match predicted scores instead of a summed total - used to show a
-// simulated player's individual predictions (e.g. in the "التوقعات" tab).
-// Uses the exact same seeded sequence, so the numbers shown here are
-// consistent with that player's total on the leaderboard.
-function simulatePlayerPredictions(playerId, matches) {
-  const rand = seededRandom(playerId);
-  const predictions = {};
-  matches.forEach((match) => {
-    const hasActual = match.actualHome !== "" && match.actualHome != null && match.actualAway !== "" && match.actualAway != null;
-    if (!hasActual) return;
-    predictions[match.id] = {
-      predHome: Math.floor(rand() * 5),
-      predAway: Math.floor(rand() * 5),
-    };
-  });
-  return predictions;
 }
 
 function fileToBase64(file, callback) {
@@ -2736,29 +2658,6 @@ function LeaderboardRow({ rank, name, username, points, isYou, theme }) {
     </div>
   );
 }
-
-// The site-wide leaderboard - shows everyone, regardless of whether they've
-// joined a private league. Real-prediction-based identities (أنت، عبدالله)
-// share the exact same scoring as the stats page and the private leagues
-// feature, so a single person's points stay consistent everywhere they
-// appear. The other names are fixed trial players with deterministic
-// (non-reshuffling) random points, standing in for other real users who
-// would eventually have their own real accounts. Generated to reach a
-// top-100 leaderboard (98 trial players + أنت + عبدالله = 100).
-const GLOBAL_TRIAL_NAME_POOL = [
-  "سلطان", "فيصل", "تركي", "بندر", "ناصر", "خالد", "سعود", "عبدالعزيز", "فهد", "محمد",
-  "أحمد", "عبدالرحمن", "عبدالله", "يوسف", "إبراهيم", "عمر", "علي", "حمد", "راشد", "ماجد",
-  "وليد", "زياد", "نواف", "مشعل", "عبدالإله", "ريان", "سامي", "هتان", "نايف", "صالح",
-];
-
-const GLOBAL_TRIAL_PLAYERS = Array.from({ length: 98 }, (_, i) => {
-  const baseName = GLOBAL_TRIAL_NAME_POOL[i % GLOBAL_TRIAL_NAME_POOL.length];
-  const round = Math.floor(i / GLOBAL_TRIAL_NAME_POOL.length) + 1;
-  return {
-    id: `global-${i + 1}`,
-    name: round > 1 ? `${baseName} ${round}` : baseName,
-  };
-});
 
 // Login/register page, backed by Supabase Auth + the profiles table.
 function AuthPage({ onRegister, onLoginExisting, onBack, theme }) {
@@ -3354,7 +3253,7 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
   );
 }
 
-function PrivateLeagueDetail({ league, matches, onJoin, onBack, tournaments, tournamentLogos, currentUser, theme }) {
+function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBack, tournaments, tournamentLogos, currentUser, theme }) {
   const [codeCopied, setCodeCopied] = useState(false);
   const [activeTab, setActiveTab] = useState("ranking"); // "ranking" | "predictions"
   const [predictionsView, setPredictionsView] = useState("recent"); // "recent" | "archived"
@@ -3375,19 +3274,46 @@ function PrivateLeagueDetail({ league, matches, onJoin, onBack, tournaments, tou
   // to "الكل" (no filter), scoping every downstream computation below.
   const filteredMatches = tournamentFilter === "الكل" ? matches : matches.filter((m) => (m.tournament || "بدون بطولة") === tournamentFilter);
 
-  // "أنت" (if joined) and "عبدالله" (the fixed placeholder representing the
-  // participant/المشارك view) are both scored from the actual entered
-  // predictions on the توقع! page (same logic as the stats page), not the
-  // random simulation used for any other placeholder player.
-  const realStats = computeStats(filteredMatches);
+  // Every league member is scored from their own real predictions and the
+  // real match results, same scoring rules as the global leaderboard - no
+  // simulated/fake data for other members anymore.
+  const matchById = Object.fromEntries(filteredMatches.map((m) => [m.id, m]));
+
+  const realPointsByUserId = {};
+  for (const row of allPredictionRows) {
+    const match = matchById[row.match_id];
+    if (!match) continue;
+    const hasActual = match.actualHome !== "" && match.actualHome != null && match.actualAway !== "" && match.actualAway != null;
+    if (!hasActual) continue;
+
+    if (!realPointsByUserId[row.user_id]) {
+      realPointsByUserId[row.user_id] = { points: 0, tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 } };
+    }
+    const entry = realPointsByUserId[row.user_id];
+
+    const adminMultiplier = match.doublePoints ? 2 : 1;
+    const userMultiplier = row.user_boost ? 3 : 1;
+    const multiplier = match.doublePoints ? adminMultiplier : userMultiplier;
+
+    const hasPrediction = row.pred_home !== null && row.pred_home !== undefined && row.pred_away !== null && row.pred_away !== undefined;
+    if (!hasPrediction) {
+      entry.tierCounts.none += 1;
+      continue;
+    }
+    const result = calcPoints(row.pred_home, row.pred_away, match.actualHome, match.actualAway, multiplier);
+    if (result) {
+      entry.tierCounts[result.basePoints] = (entry.tierCounts[result.basePoints] || 0) + 1;
+      entry.points += result.points;
+    }
+  }
 
   const ranked = [...league.players]
     .map((p) => {
-      const isRealPlayer = p.isYou || p.name === "عبدالله";
+      const stats = realPointsByUserId[p.userId];
       return {
         ...p,
-        points: isRealPlayer ? realStats.totalPoints : simulatePlayerPoints(p.id, filteredMatches),
-        tierCounts: isRealPlayer ? realStats.tierCounts : simulatePlayerTierCounts(p.id, filteredMatches),
+        points: stats ? stats.points : 0,
+        tierCounts: stats ? stats.tierCounts : { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 },
       };
     })
     .sort((a, b) => b.points - a.points || compareTierCounts(a.tierCounts, b.tierCounts));
@@ -3414,18 +3340,18 @@ function PrivateLeagueDetail({ league, matches, onJoin, onBack, tournaments, tou
     return now - kickoff >= ONE_DAY_MS;
   });
 
+  const predictionRowsByUserId = {};
+  for (const row of allPredictionRows) {
+    if (!predictionRowsByUserId[row.user_id]) predictionRowsByUserId[row.user_id] = {};
+    const hasPrediction = row.pred_home !== null && row.pred_home !== undefined && row.pred_away !== null && row.pred_away !== undefined;
+    if (hasPrediction) {
+      predictionRowsByUserId[row.user_id][row.match_id] = { predHome: row.pred_home, predAway: row.pred_away };
+    }
+  }
+
   const playerPredictionsById = {};
   league.players.forEach((p) => {
-    if (p.isYou || p.name === "عبدالله") {
-      const real = {};
-      matches.forEach((m) => {
-        const hasPrediction = m.predHome !== "" && m.predHome != null && m.predAway !== "" && m.predAway != null;
-        if (hasPrediction) real[m.id] = { predHome: m.predHome, predAway: m.predAway };
-      });
-      playerPredictionsById[p.id] = real;
-    } else {
-      playerPredictionsById[p.id] = simulatePlayerPredictions(p.id, matches);
-    }
+    playerPredictionsById[p.id] = predictionRowsByUserId[p.userId] || {};
   });
 
   const copyCode = () => {
@@ -3819,7 +3745,7 @@ function PrivateLeagueDetail({ league, matches, onJoin, onBack, tournaments, tou
   );
 }
 
-function PrivateLeaguesPage({ leagues, matches, onCreateLeague, onJoinLeague, tournaments, tournamentLogos, currentUser, theme }) {
+function PrivateLeaguesPage({ leagues, matches, allPredictionRows, onCreateLeague, onJoinLeague, tournaments, tournamentLogos, currentUser, theme }) {
   const [selectedLeagueId, setSelectedLeagueId] = useState(null);
   const [newLeagueName, setNewLeagueName] = useState("");
   const [joinCodeInput, setJoinCodeInput] = useState("");
@@ -3832,6 +3758,7 @@ function PrivateLeaguesPage({ leagues, matches, onCreateLeague, onJoinLeague, to
       <PrivateLeagueDetail
         league={selectedLeague}
         matches={matches}
+        allPredictionRows={allPredictionRows}
         onJoin={onJoinLeague}
         onBack={() => setSelectedLeagueId(null)}
         tournaments={tournaments}
@@ -5064,6 +4991,7 @@ export default function App() {
         name: l.name,
         players: (l.league_members || []).map((m) => ({
           id: m.id,
+          userId: m.user_id,
           name: m.display_name,
           isYou: currentUser ? m.user_id === currentUser.id : false,
         })),
@@ -5457,6 +5385,7 @@ export default function App() {
         <PrivateLeaguesPage
           leagues={leagues}
           matches={matches}
+          allPredictionRows={allPredictionRows}
           onCreateLeague={createLeague}
           onJoinLeague={joinLeague}
           tournaments={tournaments}
