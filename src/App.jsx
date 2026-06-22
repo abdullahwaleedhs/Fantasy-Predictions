@@ -635,7 +635,7 @@ function TournamentPicker({ value, onChange, tournaments, onAddTournament, tourn
       >
         <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           {value && <TournamentIcon name={value} logo={tournamentLogos?.[value]} theme={theme} color={theme.bg === theme.surface ? theme.accentSoft : (theme.highlight || theme.accent)} />}
-          {value || "اختر البطولة"}
+          {value || (tournaments.length === 0 ? "+ أضف بطولة" : "اختر البطولة")}
         </span>
         <ChevronDown size={14} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
       </button>
@@ -731,7 +731,7 @@ function TournamentPicker({ value, onChange, tournaments, onAddTournament, tourn
 
           {filtered.length === 0 && !query.trim() && (
             <div style={{ padding: "14px", fontSize: "12px", color: theme.muted, textAlign: "center" }}>
-              لا توجد بطولات
+              لا توجد بطولات بعد — اكتب اسم البطولة بخانة البحث بالأعلى لإضافتها
             </div>
           )}
         </div>
