@@ -3094,6 +3094,9 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, theme }) 
                 textAlign: "right",
               }}
             />
+            <p style={{ fontSize: "11px", color: theme.muted, marginTop: "5px" }}>
+              تنبيه: تقدر تغيّر اليوزرنيم مرة واحدة كل 6 شهور فقط
+            </p>
             {usernameError && <p style={{ fontSize: "11px", color: theme.danger, marginTop: "5px" }}>{usernameError}</p>}
           </div>
 
@@ -4900,13 +4903,34 @@ export default function App() {
     setCurrentUser(null);
   };
 
+  const USERNAME_COOLDOWN_MS = 6 * 30 * 24 * 60 * 60 * 1000; // ~6 months
+
   const handleUpdateProfile = async ({ name, username, avatar }) => {
     try {
-      if (username !== currentUser.username && (await isUsernameTaken(username, currentUser.id))) {
+      const usernameChanged = username !== currentUser.username;
+
+      if (usernameChanged && currentUser.username_changed_at) {
+        const lastChange = new Date(currentUser.username_changed_at).getTime();
+        const elapsed = Date.now() - lastChange;
+        if (elapsed < USERNAME_COOLDOWN_MS) {
+          const nextDate = new Date(lastChange + USERNAME_COOLDOWN_MS);
+          const nextDateStr = nextDate.toLocaleDateString("ar-EG");
+          return { usernameError: `ما تقدر تغيّر اليوزرنيم إلا مرة كل 6 شهور. تقدر تغيّره من تاريخ ${nextDateStr}` };
+        }
+      }
+
+      if (usernameChanged && (await isUsernameTaken(username, currentUser.id))) {
         return { usernameError: "اليوزرنيم هذا مستخدم من قبل، جرّب واحد ثاني" };
       }
-      await updateProfile(currentUser.id, { name, username, avatar });
-      setCurrentUser((u) => ({ ...u, name, username, avatar }));
+
+      await updateProfile(currentUser.id, { name, username, avatar, usernameChanged });
+      setCurrentUser((u) => ({
+        ...u,
+        name,
+        username,
+        avatar,
+        username_changed_at: usernameChanged ? new Date().toISOString() : u.username_changed_at,
+      }));
       return {};
     } catch (err) {
       return { error: err.message || "حدث خطأ، حاول مرة أخرى" };

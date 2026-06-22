@@ -9,6 +9,7 @@ create table if not exists profiles (
   avatar text,
   boosts_remaining int not null default 3,
   is_admin boolean not null default false,
+  username_changed_at timestamptz,
   created_at timestamptz not null default now()
 );
 
