@@ -153,7 +153,7 @@ export async function upsertPredictionDB(userId, matchId, { predHome, predAway, 
 export async function fetchAllPredictionsWithProfiles() {
   const { data, error } = await supabase
     .from("predictions")
-    .select("match_id, user_id, pred_home, pred_away, user_boost, profiles(name, username)");
+    .select("match_id, user_id, pred_home, pred_away, user_boost, profiles(name, username, avatar)");
   if (error) throw error;
   return data;
 }
@@ -170,7 +170,7 @@ function generateLeagueCode() {
 export async function fetchLeaguesWithMembers() {
   const { data, error } = await supabase
     .from("leagues")
-    .select("id, code, name, created_by, league_members(id, user_id, display_name)")
+    .select("id, code, name, created_by, league_members(id, user_id, display_name, profiles(avatar))")
     .order("created_at");
   if (error) throw error;
   return data;

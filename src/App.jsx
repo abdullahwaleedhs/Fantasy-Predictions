@@ -2632,8 +2632,23 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
   );
 }
 
-function PlayerAvatar({ name, isYou, theme, size = 32 }) {
+function PlayerAvatar({ name, avatar, isYou, theme, size = 32 }) {
   const initial = (name || "").trim().charAt(0) || "؟";
+  if (avatar) {
+    return (
+      <div
+        style={{
+          width: size,
+          height: size,
+          borderRadius: "50%",
+          overflow: "hidden",
+          flexShrink: 0,
+        }}
+      >
+        <img src={avatar} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      </div>
+    );
+  }
   return (
     <div
       style={{
@@ -2656,8 +2671,7 @@ function PlayerAvatar({ name, isYou, theme, size = 32 }) {
   );
 }
 
-function LeaderboardRow({ rank, name, username, points, isYou, theme }) {
-  const medalColor = rank === 1 ? theme.yellow : rank === 2 ? theme.muted : rank === 3 ? theme.primary : null;
+function LeaderboardRow({ rank, name, username, avatar, points, isYou, theme }) {
   return (
     <div
       style={{
@@ -2671,15 +2685,15 @@ function LeaderboardRow({ rank, name, username, points, isYou, theme }) {
       }}
     >
       <div style={{ width: "22px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-        {rank <= 3 ? (
-          <Crown size={15} color={medalColor} />
+        {rank === 1 ? (
+          <Crown size={15} color={theme.yellow} />
         ) : (
           <span style={{ fontFamily: "Tajawal, sans-serif", fontSize: "12px", fontWeight: 700, color: theme.muted }}>
             {rank}
           </span>
         )}
       </div>
-      <PlayerAvatar name={name} isYou={isYou} theme={theme} />
+      <PlayerAvatar name={name} avatar={avatar} isYou={isYou} theme={theme} />
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
         <span
           style={{
@@ -3559,6 +3573,7 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
         id: row.user_id,
         name: row.profiles?.name || "مستخدم",
         username: row.profiles?.username || null,
+        avatar: row.profiles?.avatar || null,
         points: 0,
         tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 },
       };
@@ -3589,6 +3604,7 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
       id: currentUser.id,
       name: currentUser.name,
       username: currentUser.username,
+      avatar: currentUser.avatar,
       points: 0,
       tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 },
       isYou: true,
@@ -3622,7 +3638,7 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
             {ranked.map((p, i) => (
-              <LeaderboardRow key={p.id} rank={i + 1} name={p.name} username={p.username} points={p.points} isYou={p.isYou} theme={theme} />
+              <LeaderboardRow key={p.id} rank={i + 1} name={p.name} username={p.username} avatar={p.avatar} points={p.points} isYou={p.isYou} theme={theme} />
             ))}
           </div>
         )}
@@ -3877,7 +3893,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
           <>
             <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
               {ranked.map((p, i) => (
-                <LeaderboardRow key={p.id} rank={i + 1} name={p.name} username={p.username} points={p.points} isYou={p.isYou} theme={theme} />
+                <LeaderboardRow key={p.id} rank={i + 1} name={p.name} username={p.username} avatar={p.avatar} points={p.points} isYou={p.isYou} theme={theme} />
               ))}
             </div>
 
@@ -4041,7 +4057,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                               }}
                             >
                               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                                <PlayerAvatar name={p.name} isYou={p.isYou} theme={theme} size={26} />
+                                <PlayerAvatar name={p.name} avatar={p.avatar} isYou={p.isYou} theme={theme} size={26} />
                                 <span style={{ fontFamily: "Tajawal, sans-serif", fontWeight: p.isYou ? 700 : 600, fontSize: "12px", color: theme.text }}>
                                   {p.name} {p.isYou && <span style={{ fontSize: "10px", color: theme.primary }}>(أنت)</span>}
                                 </span>
@@ -5410,6 +5426,7 @@ export default function App() {
           id: m.id,
           userId: m.user_id,
           name: m.display_name,
+          avatar: m.profiles?.avatar || null,
           isYou: currentUser ? m.user_id === currentUser.id : false,
         })),
       })),
