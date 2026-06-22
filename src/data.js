@@ -1,5 +1,16 @@
 import { supabase } from "./supabaseClient";
 
+// ============ PROFILES (admin user list) ============
+
+export async function fetchAllProfiles() {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, name, username, is_admin, created_at")
+    .order("created_at");
+  if (error) throw error;
+  return data;
+}
+
 // ============ TOURNAMENTS ============
 
 export async function fetchTournaments() {

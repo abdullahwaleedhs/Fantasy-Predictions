@@ -19,6 +19,7 @@ import {
   createLeagueDB,
   joinLeagueDB,
   renamePlayerInLeagueDB,
+  fetchAllProfiles,
 } from "./data";
 
 const DEFAULT_TOURNAMENTS = [
@@ -2940,6 +2941,95 @@ function AuthPage({ onRegister, onLoginExisting, onBack, theme }) {
 }
 
 // Profile page: edit avatar, name, and username after registering.
+// Admin-only page: shows how many people registered, and their basic
+// info, so the organizer can find someone they want to remove. Actually
+// deleting an account has to happen from the Supabase dashboard (it
+// requires admin-level access we don't expose in the browser), so this
+// page just helps the organizer find the right person and explains the
+// one extra step.
+function UsersAdminPage({ theme }) {
+  const [profiles, setProfiles] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAllProfiles()
+      .then(setProfiles)
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <div style={{ padding: "24px 18px 60px" }}>
+      <div style={{ maxWidth: "560px", margin: "0 auto" }}>
+        <h2 style={{ fontSize: "16px", fontWeight: 800, color: theme.primary, marginBottom: "6px", textAlign: "center" }}>
+          المستخدمون المسجّلون
+        </h2>
+        <p style={{ fontSize: "13px", color: theme.muted, textAlign: "center", marginBottom: "18px" }}>
+          العدد الكلي: {loading ? "..." : profiles.length}
+        </p>
+
+        <div
+          style={{
+            background: theme.surface,
+            border: `1.5px solid ${theme.border}`,
+            borderRadius: "14px",
+            overflow: "hidden",
+            marginBottom: "18px",
+          }}
+        >
+          {loading ? (
+            <div style={{ padding: "24px", textAlign: "center", fontSize: "13px", color: theme.muted }}>
+              جاري التحميل...
+            </div>
+          ) : profiles.length === 0 ? (
+            <div style={{ padding: "24px", textAlign: "center", fontSize: "13px", color: theme.muted }}>
+              لا يوجد مستخدمون بعد
+            </div>
+          ) : (
+            profiles.map((p, i) => (
+              <div
+                key={p.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "12px 14px",
+                  borderTop: i === 0 ? "none" : `1px solid ${theme.border}`,
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: "13px", fontWeight: 700, color: theme.text }}>
+                    {p.name} {p.is_admin && <span style={{ color: theme.primary }}>(منظّم)</span>}
+                  </div>
+                  <div dir="ltr" style={{ fontSize: "12px", color: theme.muted, textAlign: "right" }}>
+                    @{p.username}
+                  </div>
+                </div>
+                <div style={{ fontSize: "11px", color: theme.muted }}>
+                  {p.created_at ? new Date(p.created_at).toLocaleDateString("ar-EG") : ""}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div
+          style={{
+            background: theme.bg,
+            border: `1px solid ${theme.border}`,
+            borderRadius: "12px",
+            padding: "14px",
+            fontSize: "12px",
+            color: theme.muted,
+            lineHeight: 1.7,
+          }}
+        >
+          عشان تحذف حساب أي مستخدم: روح لموقع Supabase، بعدين Authentication، بعدين Users، دور على اليوزرنيم أو البريد، واضغط حذف. حذف الحساب من هناك يمسح معه كل توقعاته وعضويته في الدوريات تلقائيًا.
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, theme }) {
   const [name, setName] = useState(currentUser?.name || "");
   const [username, setUsername] = useState(currentUser?.username || "");
@@ -4409,6 +4499,7 @@ const NAV_ITEMS = [
 // items (only visible when viewMode === "admin").
 const ADMIN_NAV_ITEMS = [
   { id: "clubs", label: "إدارة الأندية", icon: Shield, color: (t) => t.muted },
+  { id: "users", label: "المستخدمون", icon: Users, color: (t) => t.muted },
 ];
 
 function NavDrawer({ open, onClose, activePage, onNavigate, viewMode, setViewMode, currentUser, onLogout, theme }) {
@@ -5348,6 +5439,8 @@ export default function App() {
           theme={theme}
         />
       )}
+
+      {activePage === "users" && <UsersAdminPage theme={theme} />}
 
       {activePage === "leagues" && (
         <PrivateLeaguesPage
