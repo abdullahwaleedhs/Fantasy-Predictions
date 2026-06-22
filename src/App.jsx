@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Plus, Trash2, ChevronDown, Search, Palette, Lock, Unlock, Calendar, Clock, Menu, X, Home, Target, Trophy, BarChart3, Zap, Shield, Upload, CircleDot, Users, Copy, Check, Crown, ArrowDown, Award, TrendingUp, User, LogIn, LogOut, Mail, Camera } from "lucide-react";
-import { isUsernameTaken, registerUser, loginUser, logoutUser, updateProfile, getSessionUser, setBoostsRemaining as setBoostsRemainingDB } from "./auth";
+import { isUsernameTaken, registerUser, loginUser, logoutUser, updateProfile, getSessionUser, setBoostsRemaining as setBoostsRemainingDB, requestPasswordReset, updatePassword } from "./auth";
+import { supabase } from "./supabaseClient";
 import {
   fetchTournaments,
   addTournamentDB,
@@ -2713,18 +2714,30 @@ function LeaderboardRow({ rank, name, username, points, isYou, theme }) {
 }
 
 // Login/register page, backed by Supabase Auth + the profiles table.
-function AuthPage({ onRegister, onLoginExisting, onBack, theme }) {
-  const [mode, setMode] = useState("login"); // "register" | "login"
+function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme }) {
+  const [mode, setMode] = useState("login"); // "register" | "login" | "forgot"
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [usernameError, setUsernameError] = useState("");
   const [authError, setAuthError] = useState("");
+  const [authNotice, setAuthNotice] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async () => {
     setAuthError("");
+    setAuthNotice("");
+    if (mode === "forgot") {
+      if (!email.trim()) return;
+      setSubmitting(true);
+      const result = await onForgotPassword({ identifier: email.trim() });
+      setSubmitting(false);
+      if (result?.error) setAuthError(result.error);
+      else setAuthNotice("تم إرسال رابط لإعادة تعيين كلمة السر إلى بريدك الإلكتروني");
+      return;
+    }
+
     if (mode === "login") {
       if (!email.trim() || !password.trim()) return;
       setSubmitting(true);
@@ -2781,10 +2794,14 @@ function AuthPage({ onRegister, onLoginExisting, onBack, theme }) {
         </button>
 
         <h2 style={{ fontSize: "20px", fontWeight: 800, color: theme.primary, marginBottom: "6px", textAlign: "center" }}>
-          {mode === "register" ? "إنشاء حساب جديد" : "تسجيل الدخول"}
+          {mode === "register" ? "إنشاء حساب جديد" : mode === "forgot" ? "نسيت كلمة السر" : "تسجيل الدخول"}
         </h2>
         <p style={{ fontSize: "12px", color: theme.muted, marginBottom: "24px", textAlign: "center" }}>
-          {mode === "register" ? "أدخل بياناتك لإنشاء حسابك" : "سجّل دخولك بالبريد وكلمة السر"}
+          {mode === "register"
+            ? "أدخل بياناتك لإنشاء حسابك"
+            : mode === "forgot"
+            ? "أدخل بريدك الإلكتروني أو اليوزرنيم، وبنرسل لك رابط لإعادة تعيين كلمة السر"
+            : "سجّل دخولك بالبريد وكلمة السر"}
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -2822,40 +2839,69 @@ function AuthPage({ onRegister, onLoginExisting, onBack, theme }) {
 
           <div>
             <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>
-              {mode === "login" ? "البريد الإلكتروني أو اليوزرنيم" : "البريد الإلكتروني"}
+              {mode === "login" || mode === "forgot" ? "البريد الإلكتروني أو اليوزرنيم" : "البريد الإلكتروني"}
             </label>
             <div style={{ position: "relative" }}>
               <input
                 dir="ltr"
-                type={mode === "login" ? "text" : "email"}
+                type={mode === "register" ? "email" : "text"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={mode === "login" ? "you@example.com أو username" : "you@example.com"}
+                placeholder={mode === "register" ? "you@example.com" : "you@example.com أو username"}
                 style={{ ...inputStyle, paddingRight: "38px" }}
               />
               <Mail size={16} color={theme.muted} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)" }} />
             </div>
           </div>
 
-          <div>
-            <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>
-              كلمة السر
-            </label>
-            <div style={{ position: "relative" }}>
-              <input
-                dir="ltr"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                style={{ ...inputStyle, paddingRight: "38px" }}
-              />
-              <Lock size={16} color={theme.muted} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)" }} />
+          {mode !== "forgot" && (
+            <div>
+              <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>
+                كلمة السر
+              </label>
+              <div style={{ position: "relative" }}>
+                <input
+                  dir="ltr"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  style={{ ...inputStyle, paddingRight: "38px" }}
+                />
+                <Lock size={16} color={theme.muted} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)" }} />
+              </div>
             </div>
-          </div>
+          )}
+
+          {mode === "login" && (
+            <button
+              onClick={() => {
+                setMode("forgot");
+                setAuthError("");
+                setAuthNotice("");
+              }}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: theme.muted,
+                fontFamily: "Tajawal, sans-serif",
+                fontWeight: 600,
+                fontSize: "12px",
+                cursor: "pointer",
+                padding: 0,
+                textAlign: "right",
+                alignSelf: "flex-end",
+              }}
+            >
+              نسيت كلمة السر؟
+            </button>
+          )}
 
           {authError && (
             <p style={{ fontSize: "12px", color: theme.danger, textAlign: "center" }}>{authError}</p>
+          )}
+          {authNotice && (
+            <p style={{ fontSize: "12px", color: theme.primary, textAlign: "center" }}>{authNotice}</p>
           )}
 
           <button
@@ -2876,23 +2922,149 @@ function AuthPage({ onRegister, onLoginExisting, onBack, theme }) {
               opacity: submitting ? 0.6 : 1,
             }}
           >
-            {submitting ? "..." : mode === "register" ? "إنشاء الحساب" : "دخول"}
+            {submitting ? "..." : mode === "register" ? "إنشاء الحساب" : mode === "forgot" ? "إرسال رابط إعادة التعيين" : "دخول"}
           </button>
 
+          {mode === "forgot" ? (
+            <button
+              onClick={() => {
+                setMode("login");
+                setAuthError("");
+                setAuthNotice("");
+              }}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: theme.violet,
+                fontFamily: "Tajawal, sans-serif",
+                fontWeight: 700,
+                fontSize: "12px",
+                cursor: "pointer",
+                padding: "8px 0",
+              }}
+            >
+              رجوع لتسجيل الدخول
+            </button>
+          ) : (
+            <button
+              onClick={() => setMode((m) => (m === "register" ? "login" : "register"))}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: theme.violet,
+                fontFamily: "Tajawal, sans-serif",
+                fontWeight: 700,
+                fontSize: "12px",
+                cursor: "pointer",
+                padding: "8px 0",
+              }}
+            >
+              {mode === "register" ? "عندك حساب؟ سجّل دخولك" : "ما عندك حساب؟ سوّ حساب جديد"}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Shown after the user clicks the reset-password link from their email;
+// Supabase puts the browser into a "recovery" session so updateUser can
+// set the new password without needing the old one.
+function ResetPasswordPage({ onUpdatePassword, theme }) {
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const inputStyle = {
+    width: "100%",
+    border: `1.5px solid ${theme.inputBorder}`,
+    borderRadius: "10px",
+    padding: "12px 14px",
+    fontFamily: "Tajawal, sans-serif",
+    fontSize: "16px",
+    color: theme.text,
+    background: theme.surface,
+    outline: "none",
+  };
+
+  const handleSubmit = async () => {
+    setError("");
+    if (!password.trim() || password.length < 6) {
+      setError("كلمة السر يجب أن تكون 6 أحرف على الأقل");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("كلمتا السر غير متطابقتين");
+      return;
+    }
+    setSubmitting(true);
+    const result = await onUpdatePassword(password);
+    setSubmitting(false);
+    if (result?.error) setError(result.error);
+  };
+
+  return (
+    <div style={{ padding: "30px 20px 60px" }}>
+      <div style={{ maxWidth: "420px", margin: "0 auto" }}>
+        <h2 style={{ fontSize: "20px", fontWeight: 800, color: theme.primary, marginBottom: "6px", textAlign: "center" }}>
+          اختر كلمة سر جديدة
+        </h2>
+        <p style={{ fontSize: "12px", color: theme.muted, marginBottom: "24px", textAlign: "center" }}>
+          أدخل كلمة السر الجديدة لحسابك
+        </p>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div>
+            <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>
+              كلمة السر الجديدة
+            </label>
+            <input
+              dir="ltr"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              style={inputStyle}
+            />
+          </div>
+
+          <div>
+            <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>
+              تأكيد كلمة السر
+            </label>
+            <input
+              dir="ltr"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="••••••••"
+              style={inputStyle}
+            />
+          </div>
+
+          {error && <p style={{ fontSize: "12px", color: theme.danger, textAlign: "center" }}>{error}</p>}
+
           <button
-            onClick={() => setMode((m) => (m === "register" ? "login" : "register"))}
+            onClick={handleSubmit}
+            disabled={submitting}
             style={{
-              background: "transparent",
+              width: "100%",
+              marginTop: "8px",
+              padding: "13px 0",
+              borderRadius: "10px",
               border: "none",
-              color: theme.violet,
+              background: theme.primary,
+              color: theme.surface,
               fontFamily: "Tajawal, sans-serif",
               fontWeight: 700,
-              fontSize: "12px",
-              cursor: "pointer",
-              padding: "8px 0",
+              fontSize: "14px",
+              cursor: submitting ? "not-allowed" : "pointer",
+              opacity: submitting ? 0.6 : 1,
             }}
           >
-            {mode === "register" ? "عندك حساب؟ سجّل دخولك" : "ما عندك حساب؟ سوّ حساب جديد"}
+            {submitting ? "..." : "حفظ كلمة السر"}
           </button>
         </div>
       </div>
@@ -4945,6 +5117,16 @@ export default function App() {
       .finally(() => setAuthLoading(false));
   }, []);
 
+  // Clicking the password-reset link from the email lands back here and
+  // Supabase fires this event instead of a normal sign-in - send the user
+  // to the "pick a new password" page rather than treating it as a login.
+  useEffect(() => {
+    const { data: subscription } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") setActivePage("resetPassword");
+    });
+    return () => subscription.subscription.unsubscribe();
+  }, []);
+
   // Load this user's own predictions whenever they log in; clear them on logout.
   useEffect(() => {
     if (!currentUser) {
@@ -4989,6 +5171,25 @@ export default function App() {
   const handleLogout = async () => {
     await logoutUser();
     setCurrentUser(null);
+  };
+
+  const handleForgotPassword = async ({ identifier }) => {
+    try {
+      await requestPasswordReset(identifier);
+      return {};
+    } catch (err) {
+      return { error: err.message || "حدث خطأ، حاول مرة أخرى" };
+    }
+  };
+
+  const handleUpdatePassword = async (newPassword) => {
+    try {
+      await updatePassword(newPassword);
+      setActivePage("home");
+      return {};
+    } catch (err) {
+      return { error: err.message || "حدث خطأ، حاول مرة أخرى" };
+    }
   };
 
   const USERNAME_COOLDOWN_MS = 6 * 30 * 24 * 60 * 60 * 1000; // ~6 months
@@ -5503,9 +5704,14 @@ export default function App() {
         <AuthPage
           onRegister={handleRegister}
           onLoginExisting={handleLoginExisting}
+          onForgotPassword={handleForgotPassword}
           onBack={() => setActivePage("profile")}
           theme={theme}
         />
+      )}
+
+      {activePage === "resetPassword" && (
+        <ResetPasswordPage onUpdatePassword={handleUpdatePassword} theme={theme} />
       )}
     </div>
   );

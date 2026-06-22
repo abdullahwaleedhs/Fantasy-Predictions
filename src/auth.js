@@ -48,6 +48,29 @@ export async function logoutUser() {
   await supabase.auth.signOut();
 }
 
+// Sends a "reset your password" email with a link back to this site;
+// clicking it puts the browser into a recovery session (handled in
+// App.jsx via onAuthStateChange) so the user can pick a new password.
+export async function requestPasswordReset(identifier) {
+  let email = identifier;
+  if (!identifier.includes("@")) {
+    const { data, error } = await supabase.rpc("get_email_for_username", { p_username: identifier });
+    if (error) throw error;
+    if (!data) throw new Error("لم يتم العثور على حساب بهذا الاسم");
+    email = data;
+  }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin,
+  });
+  if (error) throw error;
+}
+
+export async function updatePassword(newPassword) {
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) throw error;
+}
+
 export async function fetchProfile(userId) {
   const { data, error } = await supabase
     .from("profiles")
