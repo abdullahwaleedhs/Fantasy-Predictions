@@ -1697,11 +1697,15 @@ function TeamDisplay({ name, logo, theme }) {
         style={{
           fontFamily: "Tajawal, sans-serif",
           fontWeight: 700,
-          fontSize: "13px",
+          fontSize: "10.5px",
           color: theme.primary,
           textAlign: "center",
           borderBottom: `2px solid ${theme.primary}`,
           paddingBottom: "2px",
+          width: "100%",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
         }}
       >
         {name || "—"}
