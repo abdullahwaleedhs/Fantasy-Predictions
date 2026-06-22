@@ -760,7 +760,7 @@ function TeamField({ value, onChange, placeholder, theme, disabled }) {
           borderBottom: `2px solid ${theme.primary}`,
           fontFamily: "Tajawal, sans-serif",
           fontWeight: 700,
-          fontSize: "16px",
+          fontSize: "12px",
           color: theme.primary,
           padding: "4px 2px",
           outline: "none",
@@ -814,15 +814,15 @@ function TeamPicker({ value, logo, onChange, clubs, placeholder, theme, disabled
           style={{
             fontFamily: "Tajawal, sans-serif",
             fontWeight: 700,
-            fontSize: "13px",
+            fontSize: "10.5px",
             color: theme.primary,
             borderBottom: `2px solid ${theme.primary}`,
             paddingBottom: "2px",
             width: "100%",
             textAlign: "center",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
+            whiteSpace: "normal",
+            overflowWrap: "break-word",
+            lineHeight: "1.2",
           }}
         >
           {value || placeholder}
@@ -1535,15 +1535,17 @@ function DateTimeRow({ match, onChange, theme }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        gap: "8px",
+        gap: "6px",
         padding: "10px 12px",
         background: theme.bg,
         borderBottom: `1px solid ${theme.border}`,
+        flexWrap: "nowrap",
+        overflowX: "auto",
       }}
     >
       {/* Right side (in RTL, appears first): date + time pickers */}
-      <div style={{ display: "flex", alignItems: "center", gap: "6px", minWidth: 0, flexWrap: "wrap" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "4px", minWidth: 0, flexWrap: "nowrap", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
           <Calendar size={13} color={theme.muted} />
           <DateCalendarPicker
             value={match.date || ""}
@@ -1552,7 +1554,7 @@ function DateTimeRow({ match, onChange, theme }) {
           />
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
           <Clock size={13} color={theme.muted} />
           <TimeFlexPicker
             value={match.time || ""}
@@ -1563,7 +1565,9 @@ function DateTimeRow({ match, onChange, theme }) {
       </div>
 
       {/* Left side: countdown badge, always stays on this line */}
-      <CountdownBadge kickoffISO={kickoffISO} theme={theme} />
+      <div style={{ flexShrink: 0 }}>
+        <CountdownBadge kickoffISO={kickoffISO} theme={theme} />
+      </div>
     </div>
   );
 }
