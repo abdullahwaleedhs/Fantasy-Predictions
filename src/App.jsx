@@ -2754,7 +2754,7 @@ const GLOBAL_TRIAL_PLAYERS = Array.from({ length: 98 }, (_, i) => {
 
 // Login/register page, backed by Supabase Auth + the profiles table.
 function AuthPage({ onRegister, onLoginExisting, onBack, theme }) {
-  const [mode, setMode] = useState("register"); // "register" | "login"
+  const [mode, setMode] = useState("login"); // "register" | "login"
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
