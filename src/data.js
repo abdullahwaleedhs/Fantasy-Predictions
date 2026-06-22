@@ -190,12 +190,3 @@ export async function joinLeagueDB(leagueId, userId, displayName) {
   if (error) throw error;
   return data;
 }
-
-export async function renamePlayerInLeagueDB(leagueId, userId, newName) {
-  const { error } = await supabase
-    .from("league_members")
-    .update({ display_name: newName })
-    .eq("league_id", leagueId)
-    .eq("user_id", userId);
-  if (error) throw error;
-}

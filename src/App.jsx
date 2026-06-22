@@ -18,7 +18,6 @@ import {
   fetchLeaguesWithMembers,
   createLeagueDB,
   joinLeagueDB,
-  renamePlayerInLeagueDB,
   fetchAllProfiles,
   fetchAllPredictionsWithProfiles,
 } from "./data";
@@ -3347,9 +3346,7 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
   );
 }
 
-function PrivateLeagueDetail({ league, matches, onJoin, onRename, onBack, tournaments, tournamentLogos, currentUser, theme }) {
-  const [renameOpen, setRenameOpen] = useState(false);
-  const [renameValue, setRenameValue] = useState("");
+function PrivateLeagueDetail({ league, matches, onJoin, onBack, tournaments, tournamentLogos, currentUser, theme }) {
   const [codeCopied, setCodeCopied] = useState(false);
   const [activeTab, setActiveTab] = useState("ranking"); // "ranking" | "predictions"
   const [predictionsView, setPredictionsView] = useState("recent"); // "recent" | "archived"
@@ -3501,83 +3498,6 @@ function PrivateLeagueDetail({ league, matches, onJoin, onRename, onBack, tourna
             <p style={{ fontSize: "12px", color: theme.muted }}>
               سجّل دخولك عشان تنضم للدوري وتدخل الترتيب
             </p>
-          </div>
-        )}
-
-        {youPlayer && (
-          <div style={{ marginBottom: "18px" }}>
-            {!renameOpen ? (
-              <button
-                onClick={() => {
-                  setRenameValue(youPlayer.name);
-                  setRenameOpen(true);
-                }}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: theme.violet,
-                  fontFamily: "Tajawal, sans-serif",
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  padding: 0,
-                }}
-              >
-                تعديل اسمك بالترتيب ({youPlayer.name})
-              </button>
-            ) : (
-              <div
-                style={{
-                  background: theme.surface,
-                  border: `1.5px solid ${theme.violet}`,
-                  borderRadius: "12px",
-                  padding: "14px",
-                }}
-              >
-                <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>
-                  تعديل اسمك بالترتيب
-                </label>
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <input
-                    value={renameValue}
-                    onChange={(e) => setRenameValue(e.target.value)}
-                    style={{
-                      flex: 1,
-                      border: `1.5px solid ${theme.inputBorder}`,
-                      borderRadius: "8px",
-                      padding: "8px 10px",
-                      fontFamily: "Tajawal, sans-serif",
-                      fontSize: "16px",
-                      color: theme.text,
-                      background: theme.bg,
-                      outline: "none",
-                    }}
-                  />
-                  <button
-                    onClick={() => {
-                      if (!renameValue.trim()) return;
-                      onRename(league.id, renameValue.trim());
-                      setRenameOpen(false);
-                    }}
-                    disabled={!renameValue.trim()}
-                    style={{
-                      border: "none",
-                      borderRadius: "8px",
-                      padding: "8px 16px",
-                      background: renameValue.trim() ? theme.primary : theme.inputBorder,
-                      color: theme.surface,
-                      fontFamily: "Tajawal, sans-serif",
-                      fontWeight: 700,
-                      fontSize: "12px",
-                      cursor: renameValue.trim() ? "pointer" : "not-allowed",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    حفظ
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
@@ -3891,7 +3811,7 @@ function PrivateLeagueDetail({ league, matches, onJoin, onRename, onBack, tourna
   );
 }
 
-function PrivateLeaguesPage({ leagues, matches, onCreateLeague, onJoinLeague, onRenamePlayer, tournaments, tournamentLogos, currentUser, theme }) {
+function PrivateLeaguesPage({ leagues, matches, onCreateLeague, onJoinLeague, tournaments, tournamentLogos, currentUser, theme }) {
   const [selectedLeagueId, setSelectedLeagueId] = useState(null);
   const [newLeagueName, setNewLeagueName] = useState("");
   const [joinCodeInput, setJoinCodeInput] = useState("");
@@ -3905,7 +3825,6 @@ function PrivateLeaguesPage({ leagues, matches, onCreateLeague, onJoinLeague, on
         league={selectedLeague}
         matches={matches}
         onJoin={onJoinLeague}
-        onRename={onRenamePlayer}
         onBack={() => setSelectedLeagueId(null)}
         tournaments={tournaments}
         tournamentLogos={tournamentLogos}
@@ -5160,24 +5079,6 @@ export default function App() {
     });
   };
 
-  const renamePlayerInLeague = (leagueId, newName) => {
-    if (!currentUser) return;
-    renamePlayerInLeagueDB(leagueId, currentUser.id, newName).then(() => {
-      setLeagueRows((prev) =>
-        prev.map((l) =>
-          l.id === leagueId
-            ? {
-                ...l,
-                league_members: (l.league_members || []).map((m) =>
-                  m.user_id === currentUser.id ? { ...m, display_name: newName } : m
-                ),
-              }
-            : l
-        )
-      );
-    });
-  };
-
   const addTournament = (name) => {
     if (tournaments.includes(name)) return;
     addTournamentDB(name).then((row) => setTournamentRows((prev) => [...prev, row]));
@@ -5550,7 +5451,6 @@ export default function App() {
           matches={matches}
           onCreateLeague={createLeague}
           onJoinLeague={joinLeague}
-          onRenamePlayer={renamePlayerInLeague}
           tournaments={tournaments}
           tournamentLogos={tournamentLogos}
           currentUser={currentUser}
