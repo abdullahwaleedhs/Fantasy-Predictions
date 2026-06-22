@@ -5053,7 +5053,9 @@ export default function App() {
 
   const addTournament = (name) => {
     if (tournaments.includes(name)) return;
-    addTournamentDB(name).then((row) => setTournamentRows((prev) => [...prev, row]));
+    addTournamentDB(name)
+      .then((row) => setTournamentRows((prev) => [...prev, row]))
+      .catch((err) => alert("تعذّرت إضافة البطولة: " + (err?.message || "خطأ غير متوقع")));
   };
 
   const setTournamentLogo = (tournamentName, logo) => {
