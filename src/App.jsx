@@ -2498,6 +2498,22 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
         )}
 
         {/* Club list for the selected tournament */}
+        {!selectedTournament ? (
+          <div
+            style={{
+              background: theme.surface,
+              border: `1px solid ${theme.border}`,
+              borderTop: "none",
+              borderRadius: "0 0 14px 14px",
+              padding: "16px",
+              marginBottom: "18px",
+            }}
+          >
+            <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "12px 0" }}>
+              أضف بطولة أولاً من الأعلى عشان تقدر تضيف أنديتها
+            </p>
+          </div>
+        ) : (
         <div
           style={{
             background: theme.surface,
@@ -2618,6 +2634,7 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
