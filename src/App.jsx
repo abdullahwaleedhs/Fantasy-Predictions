@@ -1785,7 +1785,7 @@ function TeamDisplay({ name, logo, theme }) {
 // Restricted match card for regular participants: everything is read-only
 // (tournament, teams, schedule, actual result) except the prediction inputs.
 // Also supports the personal "double points" boost (limited uses per season).
-function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, onCancelBoost, tournamentLogos }) {
+function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, onCancelBoost, tournamentLogos, hideResult }) {
   const userMultiplier = match.userBoost ? 3 : 1;
   const adminMultiplier = match.doublePoints ? 2 : 1;
   const effectiveMultiplier = match.doublePoints ? adminMultiplier : userMultiplier;
@@ -1929,7 +1929,11 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
             </div>
           </div>
 
-          {/* Actual result: shared centered row beneath both columns */}
+          {/* Actual result: shared centered row beneath both columns - not
+              meaningful in القادمة (match hasn't happened yet), so the
+              participant view skips it there entirely to keep the card short. */}
+          {!hideResult && (
+          <>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             <div style={{ fontSize: "11px", color: theme.muted, fontWeight: 600, marginBottom: "8px" }}>
               النتيجة الفعلية
@@ -2059,6 +2063,8 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
               </span>
             )}
           </div>
+          </>
+          )}
 
           {result && (
             <div
@@ -6172,6 +6178,7 @@ export default function App() {
                           onUseBoost={() => useBoostOnMatch(match.id)}
                           onCancelBoost={() => cancelBoostOnMatch(match.id)}
                           tournamentLogos={tournamentLogos}
+                          hideResult={predictionsTabView === "current"}
                         />
                       ))}
                   {hasMoreArchived && (
