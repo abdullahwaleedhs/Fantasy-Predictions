@@ -5916,11 +5916,11 @@ export default function App() {
               </div>
             )}
 
-            <p style={{ fontSize: "12px", color: theme.muted, marginBottom: "16px", textAlign: "center" }}>
-              {viewMode === "admin"
-                ? "وضع المنظّم — أضف المباريات وأدخل النتائج الفعلية"
-                : "وضع المشارك — أدخل توقعك فقط"}
-            </p>
+            {viewMode === "admin" && (
+              <p style={{ fontSize: "12px", color: theme.muted, marginBottom: "16px", textAlign: "center" }}>
+                وضع المنظّم — أضف المباريات وأدخل النتائج الفعلية
+              </p>
+            )}
 
             {/* Tabs: القادمة والحالية / المنتهية - a match moves to المنتهية
                 once 24 hours have passed since its kickoff deadline. Admin
@@ -5990,66 +5990,100 @@ export default function App() {
                 tabMatches = tabMatches.filter((m) => m.date && m.time);
               }
 
+              const isLocked = (m) => {
+                if (!m.date || !m.time) return false;
+                return new Date(`${m.date}T${m.time}:00`).getTime() - serverNow() <= 0;
+              };
+
+              const countBox =
+                viewMode === "user" && predictionsTabView === "current" ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      background: theme.surface,
+                      border: `1px solid ${theme.border}`,
+                      borderRadius: "10px",
+                      padding: "10px 14px",
+                      marginBottom: "16px",
+                      fontFamily: "Cairo, sans-serif",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      color: theme.muted,
+                    }}
+                  >
+                    <span>
+                      عدد المباريات المتاحة للتوقع: <span style={{ color: theme.primary }}>{tabMatches.filter((m) => !isLocked(m)).length}</span>
+                    </span>
+                    <span>
+                      عدد المباريات المعروضة: <span style={{ color: theme.primary }}>{tabMatches.length}</span>
+                    </span>
+                  </div>
+                ) : null;
+
               if (dataLoading) {
                 return (
-                  <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "30px 0" }}>
-                    جاري التحميل...
-                  </p>
+                  <>
+                    {countBox}
+                    <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "30px 0" }}>
+                      جاري التحميل...
+                    </p>
+                  </>
                 );
               }
 
               if (tabMatches.length === 0) {
                 return (
-                  <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "30px 0" }}>
-                    {predictionsTabView === "archived" ? "ما فيه مباريات منتهية بعد" : "ما فيه مباريات قادمة أو حالية"}
-                  </p>
+                  <>
+                    {countBox}
+                    <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "30px 0" }}>
+                      {predictionsTabView === "archived" ? "ما فيه مباريات منتهية بعد" : "ما فيه مباريات قادمة أو حالية"}
+                    </p>
+                  </>
                 );
               }
 
-              return viewMode === "admin"
-                ? [...tabMatches]
-                    .sort((a, b) => {
-                      const aTime = a.date && a.time ? new Date(`${a.date}T${a.time}:00`).getTime() : null;
-                      const bTime = b.date && b.time ? new Date(`${b.date}T${b.time}:00`).getTime() : null;
-                      if (aTime === null && bTime === null) return 0;
-                      if (aTime === null) return 1; // matches without a date/time go last
-                      if (bTime === null) return -1;
-                      return aTime - bTime; // nearest to farthest
-                    })
-                    .map((match) => (
-                      <Scoreboard
-                        key={match.id}
-                        match={match}
-                        onChange={(updated) => updateMatch(match.id, updated)}
-                        onRemove={() => removeMatch(match.id)}
-                        tournaments={tournaments}
-                        onAddTournament={addTournament}
-                        clubsByTournament={clubsByTournament}
-                        tournamentLogos={tournamentLogos}
-                        theme={theme}
-                      />
-                    ))
-                : [...tabMatches]
-                    .sort((a, b) => {
-                      const aTime = a.date && a.time ? new Date(`${a.date}T${a.time}:00`).getTime() : null;
-                      const bTime = b.date && b.time ? new Date(`${b.date}T${b.time}:00`).getTime() : null;
-                      if (aTime === null && bTime === null) return 0;
-                      if (aTime === null) return 1;
-                      if (bTime === null) return -1;
-                      return aTime - bTime;
-                    })
-                    .map((match) => (
-                    <UserMatchCard
-                      key={match.id}
-                      match={match}
-                      onChange={(updated) => updateMatch(match.id, updated)}
-                      theme={theme}
-                      boostsRemaining={boostsRemaining}
-                      onUseBoost={() => useBoostOnMatch(match.id)}
-                      onCancelBoost={() => cancelBoostOnMatch(match.id)}
-                      tournamentLogos={tournamentLogos}
-                    />
-                  ));
+              const sortByKickoff = (a, b) => {
+                const aTime = a.date && a.time ? new Date(`${a.date}T${a.time}:00`).getTime() : null;
+                const bTime = b.date && b.time ? new Date(`${b.date}T${b.time}:00`).getTime() : null;
+                if (aTime === null && bTime === null) return 0;
+                if (aTime === null) return 1; // matches without a date/time go last
+                if (bTime === null) return -1;
+                return aTime - bTime; // nearest to farthest
+              };
+
+              return (
+                <>
+                  {countBox}
+                  {viewMode === "admin"
+                    ? [...tabMatches].sort(sortByKickoff).map((match) => (
+                        <Scoreboard
+                          key={match.id}
+                          match={match}
+                          onChange={(updated) => updateMatch(match.id, updated)}
+                          onRemove={() => removeMatch(match.id)}
+                          tournaments={tournaments}
+                          onAddTournament={addTournament}
+                          clubsByTournament={clubsByTournament}
+                          tournamentLogos={tournamentLogos}
+                          theme={theme}
+                        />
+                      ))
+                    : [...tabMatches].sort(sortByKickoff).map((match) => (
+                        <UserMatchCard
+                          key={match.id}
+                          match={match}
+                          onChange={(updated) => updateMatch(match.id, updated)}
+                          theme={theme}
+                          boostsRemaining={boostsRemaining}
+                          onUseBoost={() => useBoostOnMatch(match.id)}
+                          onCancelBoost={() => cancelBoostOnMatch(match.id)}
+                          tournamentLogos={tournamentLogos}
+                        />
+                      ))}
+                </>
+              );
             })()}
 
             {/* Add button - admin only */}
