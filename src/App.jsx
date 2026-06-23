@@ -1947,8 +1947,9 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                   borderRadius: "50%",
                   background: colors.bg,
                   border: `2px solid ${colors.ring}`,
-                  display: "grid",
-                  placeItems: "center",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                   color: colors.text,
                 }}
               >
@@ -1959,6 +1960,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                     fontSize: "16px",
                     lineHeight: "1",
                     display: "block",
+                    paddingTop: "3px",
                   }}
                 >
                   {result.points}
@@ -4107,10 +4109,10 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                                     <span
                                       style={{
                                         fontSize: "10px",
-                                        lineHeight: "10px",
+                                        lineHeight: "1",
                                         fontWeight: 800,
                                         display: "inline-block",
-                                        transform: "translateY(0.5px)",
+                                        paddingTop: "2px",
                                       }}
                                     >
                                       {pointResult.points}
