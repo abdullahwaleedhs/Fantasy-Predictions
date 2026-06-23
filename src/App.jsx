@@ -25,12 +25,19 @@ import {
   fetchServerTimeOffset,
 } from "./data";
 
-// Offset (ms) between the server's clock and this device's clock, used so
-// that match-lock timing can't be bypassed by changing the device's date/time.
-// Synced once on app load (and periodically) in App(); read via serverNow().
-let serverTimeOffsetMs = 0;
+// Tracks the server's clock relative to a *monotonic* timer (performance.now),
+// not the device's wall clock - so that changing the phone's date/time after
+// the app loaded can't move the countdown/lock at all, since performance.now()
+// keeps ticking at a steady rate regardless of what the user sets the system
+// date/time to. Synced once on app load (and periodically) in App().
+let serverSyncedAtMs = Date.now();
+let serverSyncedPerf = performance.now();
+function setServerTimeSync(serverNowMs) {
+  serverSyncedAtMs = serverNowMs;
+  serverSyncedPerf = performance.now();
+}
 function serverNow() {
-  return Date.now() + serverTimeOffsetMs;
+  return serverSyncedAtMs + (performance.now() - serverSyncedPerf);
 }
 
 // Persists a piece of UI state (active tab, sub-view, open filter, etc.) in
@@ -5512,7 +5519,7 @@ export default function App() {
   // Keep the server-time offset fresh so match locking can't be tricked by
   // changing the device's date/time; re-sync on load and every 2 minutes.
   useEffect(() => {
-    const sync = () => fetchServerTimeOffset().then((offset) => { serverTimeOffsetMs = offset; });
+    const sync = () => fetchServerTimeOffset().then((offset) => { setServerTimeSync(Date.now() + offset); });
     sync();
     const id = setInterval(sync, 2 * 60 * 1000);
     return () => clearInterval(id);
