@@ -6110,7 +6110,7 @@ export default function App() {
                   <>
                     {countBox}
                     <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "30px 0" }}>
-                      {predictionsTabView === "archived" ? "ما فيه مباريات منتهية بعد" : "ما فيه مباريات قادمة أو حالية"}
+                      {predictionsTabView === "archived" ? "ما فيه مباريات منتهية بعد" : "ما فيه مباريات قادمة"}
                     </p>
                   </>
                 );
@@ -6159,8 +6159,8 @@ export default function App() {
               );
             })()}
 
-            {/* Add button - admin only */}
-            {viewMode === "admin" && (
+            {/* Add button - admin only, and only in القادمة (no point adding a new match directly into المنتهية) */}
+            {viewMode === "admin" && predictionsTabView !== "archived" && (
               <button
                 onClick={addMatch}
                 style={{
