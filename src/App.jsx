@@ -1918,7 +1918,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
           </div>
 
           {isLocked && (match.predHome === "" || match.predHome == null || match.predAway === "" || match.predAway == null) && (
-            <div style={{ textAlign: "center", marginBottom: "14px" }}>
+            <div style={{ textAlign: "center" }}>
               <span style={{ color: theme.danger, fontWeight: 700, fontSize: "12px" }}>لم تتوقع المباراة</span>
             </div>
           )}
