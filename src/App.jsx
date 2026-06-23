@@ -4120,7 +4120,6 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                                         lineHeight: "1",
                                         fontWeight: 800,
                                         display: "inline-block",
-                                        paddingTop: "1px",
                                       }}
                                     >
                                       {pointResult.points}
