@@ -2239,9 +2239,27 @@ function compareTierCounts(a, b) {
   return 0;
 }
 
+// Logos/avatars are stored as base64 directly in the database (no file
+// storage bucket), so an unresized phone photo can be several MB - and since
+// every match/club/tournament row embeds its logo, that gets re-downloaded
+// in full on every page load. Downscaling to a small logo-sized canvas before
+// encoding keeps each image to a few KB so the page loads quickly.
 function fileToBase64(file, callback) {
+  const MAX_SIZE = 200;
+  const img = new Image();
   const reader = new FileReader();
-  reader.onload = () => callback(reader.result);
+  reader.onload = () => {
+    img.onload = () => {
+      const scale = Math.min(1, MAX_SIZE / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      callback(canvas.toDataURL("image/png"));
+    };
+    img.src = reader.result;
+  };
   reader.readAsDataURL(file);
 }
 
