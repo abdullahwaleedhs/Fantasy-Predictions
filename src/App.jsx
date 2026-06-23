@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Plus, Trash2, ChevronDown, Search, Palette, Lock, Unlock, Calendar, Clock, Menu, X, Home, Target, Trophy, BarChart3, Zap, Shield, Upload, CircleDot, Users, Copy, Check, Crown, ArrowDown, Award, TrendingUp, User, LogIn, LogOut, Mail, Camera, Eye, EyeOff } from "lucide-react";
+import { Plus, Trash2, ChevronDown, Search, Palette, Lock, Unlock, Calendar, Clock, Menu, X, Home, Target, Trophy, BarChart3, Zap, Shield, Upload, CircleDot, Users, Copy, Check, Crown, ArrowDown, Award, TrendingUp, User, LogIn, LogOut, Mail, Camera, Eye, EyeOff, Pencil } from "lucide-react";
 import { isUsernameTaken, registerUser, loginUser, logoutUser, deleteAccount, updateProfile, getSessionUser, setBoostsRemaining as setBoostsRemainingDB, requestPasswordReset, updatePassword } from "./auth";
 import { supabase } from "./supabaseClient";
 import {
@@ -2696,6 +2696,25 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
                   <span style={{ flex: 1, fontFamily: "Cairo, sans-serif", fontSize: "10px", fontWeight: 600, color: theme.text }}>
                     {club.name}
                   </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      e.target.value = "";
+                      if (!file) return;
+                      fileToBase64(file, (dataUrl) => onUpdateClub(selectedTournament, club.id, { name: club.name, logo: dataUrl }));
+                    }}
+                    style={{ display: "none" }}
+                    id={`club-logo-edit-${club.id}`}
+                  />
+                  <label
+                    htmlFor={`club-logo-edit-${club.id}`}
+                    aria-label="تعديل شعار النادي"
+                    style={{ background: "transparent", border: "none", color: theme.muted, cursor: "pointer", display: "flex" }}
+                  >
+                    <Pencil size={15} />
+                  </label>
                   <button
                     onClick={() => onRemoveClub(selectedTournament, club.id)}
                     aria-label="حذف النادي"
