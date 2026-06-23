@@ -1855,7 +1855,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
               boost control sitting in the middle gap between the two
               prediction boxes - hidden entirely if admin already doubled
               this match. */}
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px", marginBottom: showUnpredictedNotice ? "0px" : "16px" }}>
+          <div style={{ position: "relative", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px", marginBottom: "16px" }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", flex: 1 }}>
               <TeamDisplay name={match.home} logo={match.homeLogo} theme={theme} />
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", marginTop: "4px" }}>
@@ -1917,13 +1917,13 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                 <ScoreInput value={match.predAway} onChange={(v) => onChange({ ...match, predAway: num(v) })} theme={theme} disabled={isLocked} />
               </div>
             </div>
-          </div>
 
-          {showUnpredictedNotice && (
-            <div style={{ textAlign: "center", marginBottom: "8px" }}>
-              <span style={{ color: theme.danger, fontWeight: 700, fontSize: "12px" }}>لم تتوقع المباراة</span>
-            </div>
-          )}
+            {showUnpredictedNotice && (
+              <div style={{ position: "absolute", top: "100%", left: 0, right: 0, textAlign: "center" }}>
+                <span style={{ color: theme.danger, fontWeight: 700, fontSize: "10px" }}>لم تتوقع المباراة</span>
+              </div>
+            )}
+          </div>
 
           {/* Actual result: shared centered row beneath both columns */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
