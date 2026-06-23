@@ -901,7 +901,7 @@ function ScoreInput({ value, onChange, actual, theme, disabled, small }) {
       disabled={disabled}
       style={{
         width: small ? "38px" : "48px",
-        height: small ? "32px" : "40px",
+        height: small ? "36px" : "44px",
         textAlign: "center",
         textAlignLast: "center",
         borderRadius: "8px",
@@ -917,7 +917,7 @@ function ScoreInput({ value, onChange, actual, theme, disabled, small }) {
         WebkitAppearance: "none",
         cursor: disabled ? "not-allowed" : "pointer",
         padding: 0,
-        paddingTop: small ? "2px" : "3px",
+        paddingTop: "1px",
         margin: "0",
         boxSizing: "border-box",
         opacity: disabled ? 0.55 : 1,
@@ -1893,7 +1893,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                 <span
                   style={{
                     width: "40px",
-                    height: "40px",
+                    height: "44px",
                     borderRadius: "8px",
                     border: "2.5px solid #000000",
                     background: theme.bg,
@@ -1901,7 +1901,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                     alignItems: "center",
                     justifyContent: "center",
                     lineHeight: "1",
-                    paddingTop: "3px",
+                    paddingTop: "1px",
                   }}
                 >
                   {match.actualHome}
@@ -1910,7 +1910,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                 <span
                   style={{
                     width: "40px",
-                    height: "40px",
+                    height: "44px",
                     borderRadius: "8px",
                     border: "2.5px solid #000000",
                     background: theme.bg,
@@ -1918,7 +1918,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                     alignItems: "center",
                     justifyContent: "center",
                     lineHeight: "1",
-                    paddingTop: "3px",
+                    paddingTop: "1px",
                   }}
                 >
                   {match.actualAway}
@@ -1944,8 +1944,8 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
             {result ? (
               <div
                 style={{
-                  width: "44px",
-                  height: "44px",
+                  width: "48px",
+                  height: "48px",
                   borderRadius: "50%",
                   background: colors.bg,
                   border: `2px solid ${colors.ring}`,
@@ -1962,7 +1962,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                     fontSize: "16px",
                     lineHeight: "1",
                     display: "block",
-                    paddingTop: "3px",
+                    paddingTop: "1px",
                   }}
                 >
                   {result.points}
@@ -4096,8 +4096,8 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                                 {pointResult && (
                                   <div
                                     style={{
-                                      width: "24px",
-                                      height: "24px",
+                                      width: "26px",
+                                      height: "26px",
                                       borderRadius: "50%",
                                       background: tierColors.bg,
                                       border: `1.5px solid ${tierColors.ring}`,
@@ -4114,7 +4114,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                                         lineHeight: "1",
                                         fontWeight: 800,
                                         display: "inline-block",
-                                        paddingTop: "2px",
+                                        paddingTop: "1px",
                                       }}
                                     >
                                       {pointResult.points}
