@@ -2727,6 +2727,35 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
                         </p>
                       ) : (
                         <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px" }}>
+                          {(() => {
+                            const selectableIds = importCandidates.filter((c) => !existingNames.has(c.name)).map((c) => c.id);
+                            const allSelected = selectableIds.length > 0 && selectableIds.every((id) => importSelected.includes(id));
+                            return (
+                              <label
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "10px",
+                                  padding: "6px 8px",
+                                  borderRadius: "8px",
+                                  borderBottom: `1px solid ${theme.border}`,
+                                  marginBottom: "4px",
+                                  cursor: selectableIds.length > 0 ? "pointer" : "not-allowed",
+                                  opacity: selectableIds.length > 0 ? 1 : 0.5,
+                                }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  disabled={selectableIds.length === 0}
+                                  checked={allSelected}
+                                  onChange={() => setImportSelected(allSelected ? [] : selectableIds)}
+                                />
+                                <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "12px", fontWeight: 700, color: theme.text }}>
+                                  تحديد الكل
+                                </span>
+                              </label>
+                            );
+                          })()}
                           {importCandidates.map((c) => {
                             const alreadyAdded = existingNames.has(c.name);
                             return (
