@@ -4026,10 +4026,12 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                                 color: theme.text,
                                 background: theme.surface,
                                 borderRadius: "6px",
-                                padding: "2px 8px",
+                                padding: "0 8px",
+                                height: "24px",
                                 display: "inline-flex",
                                 alignItems: "center",
-                                paddingTop: "3px",
+                                paddingTop: "1px",
+                                boxSizing: "border-box",
                               }}
                             >
                               {match.actualAway} - {match.actualHome}
@@ -4136,7 +4138,9 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                                       color: theme.text,
                                       display: "inline-flex",
                                       alignItems: "center",
-                                      paddingTop: "3px",
+                                      height: "24px",
+                                      paddingTop: "1px",
+                                      boxSizing: "border-box",
                                     }}
                                   >
                                     {pred.predAway} - {pred.predHome}
