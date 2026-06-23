@@ -4022,10 +4022,14 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                                 fontFamily: "monospace",
                                 fontWeight: 800,
                                 fontSize: "13px",
+                                lineHeight: "1",
                                 color: theme.text,
                                 background: theme.surface,
                                 borderRadius: "6px",
                                 padding: "2px 8px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                paddingTop: "3px",
                               }}
                             >
                               {match.actualAway} - {match.actualHome}
@@ -4128,7 +4132,11 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                                       fontFamily: "monospace",
                                       fontWeight: 700,
                                       fontSize: "13px",
+                                      lineHeight: "1",
                                       color: theme.text,
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      paddingTop: "3px",
                                     }}
                                   >
                                     {pred.predAway} - {pred.predHome}
