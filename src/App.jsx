@@ -590,7 +590,7 @@ function TournamentIcon({ name, logo, size = 14, color, theme }) {
   return <Icon size={size} color={color} style={{ flexShrink: 0 }} />;
 }
 
-function TournamentPicker({ value, onChange, tournaments, onAddTournament, tournamentLogos, theme }) {
+function TournamentPicker({ value, onChange, tournaments, onAddTournament, tournamentLogos, theme, allowAdd = true }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const ref = useRef(null);
@@ -700,7 +700,7 @@ function TournamentPicker({ value, onChange, tournaments, onAddTournament, tourn
             </div>
           ))}
 
-          {query.trim() && !exactExists && (
+          {allowAdd && query.trim() && !exactExists && (
             <div
               onClick={() => {
                 onAddTournament(query.trim());
@@ -728,7 +728,7 @@ function TournamentPicker({ value, onChange, tournaments, onAddTournament, tourn
 
           {filtered.length === 0 && !query.trim() && (
             <div style={{ padding: "14px", fontSize: "12px", color: theme.muted, textAlign: "center" }}>
-              لا توجد بطولات بعد — اكتب اسم البطولة بخانة البحث بالأعلى لإضافتها
+              {allowAdd ? "لا توجد بطولات بعد — اكتب اسم البطولة بخانة البحث بالأعلى لإضافتها" : "لا توجد بطولات بعد"}
             </div>
           )}
         </div>
@@ -2371,10 +2371,19 @@ function TournamentFilterPicker({ value, onChange, tournaments, tournamentLogos,
 }
 
 function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, onAddClub, onUpdateClub, onRemoveClub, tournamentLogos, onSetTournamentLogo, onRemoveTournament, theme }) {
-  const [selectedTournament, setSelectedTournament] = useState(tournaments[0] || "");
+  const [selectedTournament, setSelectedTournament] = useState("");
   const [newClubName, setNewClubName] = useState("");
   const [newClubLogo, setNewClubLogo] = useState(null);
+  const [newTournamentName, setNewTournamentName] = useState("");
   const fileInputRef = useRef(null);
+
+  const handleAddTournament = () => {
+    const name = newTournamentName.trim();
+    if (!name || tournaments.includes(name)) return;
+    onAddTournament(name);
+    setSelectedTournament(name);
+    setNewTournamentName("");
+  };
 
   const clubs = clubsByTournament[selectedTournament] || [];
 
@@ -2406,15 +2415,69 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
           اختر بطولة، وأضف أنديتها مع شعاراتها — تظهر تلقائيًا عند إدخال المباريات
         </p>
 
-        {/* Tournament selector (reusing the same searchable picker style) */}
+        {/* Add a new tournament - separate from the picker below */}
+        <div
+          style={{
+            background: theme.surface,
+            border: `1.5px solid ${theme.violet}`,
+            borderRadius: "12px",
+            padding: "14px",
+            marginBottom: "14px",
+          }}
+        >
+          <p style={{ fontSize: "12px", fontWeight: 700, color: theme.text, marginBottom: "10px" }}>
+            إضافة بطولة جديدة
+          </p>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <input
+              value={newTournamentName}
+              onChange={(e) => setNewTournamentName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAddTournament()}
+              placeholder="اسم البطولة (مثلاً: الدوري الإنقليزي)"
+              style={{
+                flex: 1,
+                border: `1.5px solid ${theme.inputBorder}`,
+                borderRadius: "8px",
+                padding: "8px 10px",
+                fontFamily: "Cairo, sans-serif",
+                fontSize: "16px",
+                color: theme.text,
+                background: theme.bg,
+                outline: "none",
+              }}
+            />
+            <button
+              onClick={handleAddTournament}
+              disabled={!newTournamentName.trim()}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                border: "none",
+                borderRadius: "8px",
+                padding: "8px 14px",
+                background: newTournamentName.trim() ? theme.primary : theme.inputBorder,
+                color: theme.surface,
+                fontFamily: "Cairo, sans-serif",
+                fontWeight: 700,
+                fontSize: "12px",
+                cursor: newTournamentName.trim() ? "pointer" : "not-allowed",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <Plus size={14} />
+              إضافة
+            </button>
+          </div>
+        </div>
+
+        {/* Tournament selector (reusing the same searchable picker style) - no inline add here */}
         <TournamentPicker
           value={selectedTournament}
           onChange={setSelectedTournament}
           tournaments={tournaments}
-          onAddTournament={(name) => {
-            onAddTournament(name);
-            setSelectedTournament(name);
-          }}
+          onAddTournament={onAddTournament}
+          allowAdd={false}
           tournamentLogos={tournamentLogos}
           theme={theme}
         />
