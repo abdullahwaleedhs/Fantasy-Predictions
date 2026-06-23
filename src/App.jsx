@@ -6029,7 +6029,16 @@ export default function App() {
                         theme={theme}
                       />
                     ))
-                : tabMatches.map((match) => (
+                : [...tabMatches]
+                    .sort((a, b) => {
+                      const aTime = a.date && a.time ? new Date(`${a.date}T${a.time}:00`).getTime() : null;
+                      const bTime = b.date && b.time ? new Date(`${b.date}T${b.time}:00`).getTime() : null;
+                      if (aTime === null && bTime === null) return 0;
+                      if (aTime === null) return 1;
+                      if (bTime === null) return -1;
+                      return aTime - bTime;
+                    })
+                    .map((match) => (
                     <UserMatchCard
                       key={match.id}
                       match={match}
