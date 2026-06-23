@@ -1792,6 +1792,8 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
 
   const boostDisabled = match.doublePoints || isLocked || (!match.userBoost && boostsRemaining <= 0);
 
+  const noPrediction = match.predHome === "" || match.predHome == null || match.predAway === "" || match.predAway == null;
+
   return (
     <div style={{ marginBottom: "14px" }}>
       <div
@@ -2012,6 +2014,8 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                   {result.points}
                 </span>
               </div>
+            ) : noPrediction ? (
+              <span style={{ color: theme.danger, fontWeight: 700, fontSize: "12px" }}>لم تتوقع المباراة</span>
             ) : (
               <div
                 style={{
