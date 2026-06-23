@@ -5355,6 +5355,7 @@ function NavDrawer({ open, onClose, activePage, onNavigate, viewMode, setViewMod
             onClick={() => {
               if (currentUser) {
                 onLogout();
+                onClose();
               } else {
                 onNavigate("auth");
                 onClose();
