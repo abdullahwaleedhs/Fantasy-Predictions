@@ -1855,7 +1855,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
               boost control sitting in the middle gap between the two
               prediction boxes - hidden entirely if admin already doubled
               this match. */}
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px", marginBottom: showUnpredictedNotice ? "2px" : "16px" }}>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px", marginBottom: showUnpredictedNotice ? "0px" : "16px" }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", flex: 1 }}>
               <TeamDisplay name={match.home} logo={match.homeLogo} theme={theme} />
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", marginTop: "4px" }}>
