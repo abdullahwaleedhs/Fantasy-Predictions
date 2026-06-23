@@ -672,7 +672,6 @@ function TournamentPicker({ value, onChange, tournaments, onAddTournament, tourn
             <div style={{ padding: "10px", borderBottom: `1px solid ${theme.border}`, display: "flex", alignItems: "center", gap: "6px" }}>
               <Search size={14} color={theme.muted} />
               <input
-                autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="بحث أو إضافة بطولة جديدة..."
