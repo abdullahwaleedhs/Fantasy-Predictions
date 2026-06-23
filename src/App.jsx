@@ -1028,9 +1028,9 @@ function CountdownBadge({ kickoffISO, theme }) {
       }}
     >
       {locked ? (
-        <Lock size={16} color={stateColor} style={{ flexShrink: 0, marginTop: "-1px" }} />
+        <Lock size={20} color={stateColor} style={{ flexShrink: 0, marginTop: "-1px" }} />
       ) : (
-        <Unlock size={16} color={stateColor} style={{ flexShrink: 0, marginTop: "-1px" }} />
+        <Unlock size={20} color={stateColor} style={{ flexShrink: 0, marginTop: "-1px" }} />
       )}
       {locked ? (
         <span
