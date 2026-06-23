@@ -1792,6 +1792,8 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
 
   const boostDisabled = match.doublePoints || isLocked || (!match.userBoost && boostsRemaining <= 0);
 
+  const showUnpredictedNotice = isLocked && (match.predHome === "" || match.predHome == null || match.predAway === "" || match.predAway == null);
+
   return (
     <div style={{ marginBottom: "14px" }}>
       <div
@@ -1853,7 +1855,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
               boost control sitting in the middle gap between the two
               prediction boxes - hidden entirely if admin already doubled
               this match. */}
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px", marginBottom: "16px" }}>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px", marginBottom: showUnpredictedNotice ? "2px" : "16px" }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", flex: 1 }}>
               <TeamDisplay name={match.home} logo={match.homeLogo} theme={theme} />
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", marginTop: "4px" }}>
@@ -1917,8 +1919,8 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
             </div>
           </div>
 
-          {isLocked && (match.predHome === "" || match.predHome == null || match.predAway === "" || match.predAway == null) && (
-            <div style={{ textAlign: "center" }}>
+          {showUnpredictedNotice && (
+            <div style={{ textAlign: "center", marginBottom: "8px" }}>
               <span style={{ color: theme.danger, fontWeight: 700, fontSize: "12px" }}>لم تتوقع المباراة</span>
             </div>
           )}
