@@ -485,7 +485,7 @@ function ThemeSwitcher({ theme, setTheme }) {
           border: `1.5px solid ${theme.violet}`,
           borderRadius: "10px",
           padding: "8px 12px",
-          fontFamily: "Tajawal, sans-serif",
+          fontFamily: "Cairo, sans-serif",
           fontWeight: 600,
           fontSize: "12px",
           color: theme.text,
@@ -541,7 +541,7 @@ function ThemeSwitcher({ theme, setTheme }) {
                 <span style={{ width: "14px", height: "14px", borderRadius: "50%", background: t.primary, marginRight: "-4px" }} />
                 <span style={{ width: "14px", height: "14px", borderRadius: "50%", background: t.accent, marginRight: "-4px" }} />
               </div>
-              <span style={{ fontFamily: "Tajawal, sans-serif", fontSize: "13px", fontWeight: 600, color: theme.text }}>
+              <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "13px", fontWeight: 600, color: theme.text }}>
                 {t.name}
               </span>
             </div>
@@ -622,7 +622,7 @@ function TournamentPicker({ value, onChange, tournaments, onAddTournament, tourn
           border: "none",
           borderRadius: "8px 8px 0 0",
           padding: "6px 12px",
-          fontFamily: "Tajawal, sans-serif",
+          fontFamily: "Cairo, sans-serif",
           fontWeight: 700,
           fontSize: "12px",
           cursor: "pointer",
@@ -664,7 +664,7 @@ function TournamentPicker({ value, onChange, tournaments, onAddTournament, tourn
                 border: "none",
                 outline: "none",
                 flex: 1,
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 fontSize: "16px",
                 color: theme.text,
                 background: "transparent",
@@ -683,7 +683,7 @@ function TournamentPicker({ value, onChange, tournaments, onAddTournament, tourn
               style={{
                 padding: "10px 12px",
                 fontSize: "13px",
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 color: t === value ? theme.primary : theme.text,
                 fontWeight: t === value ? 700 : 400,
                 background: t === value ? theme.primarySoft : "transparent",
@@ -711,7 +711,7 @@ function TournamentPicker({ value, onChange, tournaments, onAddTournament, tourn
               style={{
                 padding: "10px 12px",
                 fontSize: "13px",
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 color: theme.accent,
                 fontWeight: 700,
                 cursor: "pointer",
@@ -770,7 +770,7 @@ function TeamField({ value, onChange, placeholder, theme, disabled }) {
           textAlign: "center",
           border: "none",
           borderBottom: `2px solid ${theme.primary}`,
-          fontFamily: "Tajawal, sans-serif",
+          fontFamily: "Cairo, sans-serif",
           fontWeight: 700,
           fontSize: "12px",
           color: theme.primary,
@@ -824,7 +824,7 @@ function TeamPicker({ value, logo, onChange, clubs, placeholder, theme, disabled
         <ClubLogo logo={logo} name={value} theme={theme} />
         <span
           style={{
-            fontFamily: "Tajawal, sans-serif",
+            fontFamily: "Cairo, sans-serif",
             fontWeight: 700,
             fontSize: "10.5px",
             color: theme.primary,
@@ -882,7 +882,7 @@ function TeamPicker({ value, logo, onChange, clubs, placeholder, theme, disabled
               }}
             >
               <ClubLogo logo={club.logo} name={club.name} theme={theme} size={24} />
-              <span style={{ fontFamily: "Tajawal, sans-serif", fontSize: "12px", fontWeight: 600, color: theme.text }}>
+              <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "12px", fontWeight: 600, color: theme.text }}>
                 {club.name}
               </span>
             </div>
@@ -907,7 +907,7 @@ function ScoreInput({ value, onChange, actual, theme, disabled, small }) {
         borderRadius: "8px",
         border: "2.5px solid #000000",
         background: theme.bg,
-        fontFamily: "Tajawal, sans-serif",
+        fontFamily: "Cairo, sans-serif",
         fontWeight: 700,
         fontSize: small ? "13px" : "16px",
         lineHeight: "1",
@@ -1008,7 +1008,7 @@ function CountdownBadge({ kickoffISO, theme }) {
         <span
           dir="rtl"
           style={{
-            fontFamily: "Tajawal, sans-serif",
+            fontFamily: "Cairo, sans-serif",
             fontSize: "10px",
             fontWeight: 700,
             color: stateColor,
@@ -1160,7 +1160,7 @@ function DateCalendarPicker({ value, onChange, theme }) {
           borderRadius: "6px",
           background: theme.surface,
           color: theme.text,
-          fontFamily: "Tajawal, sans-serif",
+          fontFamily: "Cairo, sans-serif",
           fontSize: "11px",
           fontWeight: 600,
           padding: "4px 6px",
@@ -1218,7 +1218,7 @@ function DateCalendarPicker({ value, onChange, theme }) {
                   border: "none",
                   background: viewYear === y ? theme.primary : theme.bg,
                   color: viewYear === y ? theme.surface : theme.muted,
-                  fontFamily: "Tajawal, sans-serif",
+                  fontFamily: "Cairo, sans-serif",
                   fontWeight: 700,
                   fontSize: "11px",
                   cursor: "pointer",
@@ -1243,7 +1243,7 @@ function DateCalendarPicker({ value, onChange, theme }) {
                   border: "none",
                   background: viewMonth === month ? theme.violetSoft : theme.bg,
                   color: viewMonth === month ? theme.violet : theme.muted,
-                  fontFamily: "Tajawal, sans-serif",
+                  fontFamily: "Cairo, sans-serif",
                   fontWeight: 700,
                   fontSize: "10px",
                   cursor: "pointer",
@@ -1286,7 +1286,7 @@ function DateCalendarPicker({ value, onChange, theme }) {
                     borderRadius: "6px",
                     background: selected ? theme.primary : "transparent",
                     color: selected ? theme.surface : selectable ? theme.text : theme.inputBorder,
-                    fontFamily: "Tajawal, sans-serif",
+                    fontFamily: "Cairo, sans-serif",
                     fontSize: "11px",
                     fontWeight: selected ? 800 : 500,
                     cursor: selectable ? "pointer" : "not-allowed",
@@ -1335,7 +1335,7 @@ function TimePicker({ value, onChange, theme }) {
         borderRadius: "6px",
         background: theme.surface,
         color: theme.text,
-        fontFamily: "Tajawal, sans-serif",
+        fontFamily: "Cairo, sans-serif",
         fontSize: "11px",
         fontWeight: 600,
         padding: "4px 6px",
@@ -1391,7 +1391,7 @@ function TimeFlexPicker({ value, onChange, theme }) {
           borderRadius: "6px",
           background: theme.surface,
           color: theme.text,
-          fontFamily: "Tajawal, sans-serif",
+          fontFamily: "Cairo, sans-serif",
           fontSize: "11px",
           fontWeight: 600,
           padding: "4px 6px",
@@ -1432,10 +1432,10 @@ function TimeFlexPicker({ value, onChange, theme }) {
             }}
           >
             <div dir="ltr" style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-              <span style={{ flex: 1, textAlign: "center", fontFamily: "Tajawal, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>
+              <span style={{ flex: 1, textAlign: "center", fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>
                 الدقيقة
               </span>
-              <span style={{ flex: 1, textAlign: "center", fontFamily: "Tajawal, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>
+              <span style={{ flex: 1, textAlign: "center", fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>
                 الساعة
               </span>
             </div>
@@ -1465,7 +1465,7 @@ function TimeFlexPicker({ value, onChange, theme }) {
                       border: "none",
                       background: selectedMinute === m ? theme.primary : "transparent",
                       color: selectedMinute === m ? theme.surface : theme.text,
-                      fontFamily: "Tajawal, sans-serif",
+                      fontFamily: "Cairo, sans-serif",
                       fontWeight: selectedMinute === m ? 800 : 500,
                       fontSize: "12px",
                       cursor: "pointer",
@@ -1501,7 +1501,7 @@ function TimeFlexPicker({ value, onChange, theme }) {
                       border: "none",
                       background: selectedHour === h ? theme.primary : "transparent",
                       color: selectedHour === h ? theme.surface : theme.text,
-                      fontFamily: "Tajawal, sans-serif",
+                      fontFamily: "Cairo, sans-serif",
                       fontWeight: selectedHour === h ? 800 : 500,
                       fontSize: "12px",
                       cursor: "pointer",
@@ -1525,7 +1525,7 @@ function TimeFlexPicker({ value, onChange, theme }) {
                 border: "none",
                 background: theme.primary,
                 color: theme.surface,
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 fontWeight: 700,
                 fontSize: "12px",
                 cursor: "pointer",
@@ -1606,7 +1606,7 @@ function DoublePointsToggle({ match, onChange, theme }) {
         <Zap size={13} color={match.doublePoints ? theme.yellow : theme.muted} />
         <span
           style={{
-            fontFamily: "Tajawal, sans-serif",
+            fontFamily: "Cairo, sans-serif",
             fontSize: "11px",
             fontWeight: 600,
             color: match.doublePoints ? theme.text : theme.muted,
@@ -1685,13 +1685,13 @@ function MatchInfoBar({ match, theme, dark }) {
       <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0, flexWrap: "wrap" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
           <Calendar size={13} color={iconColor} />
-          <span dir="ltr" style={{ fontFamily: "Tajawal, sans-serif", fontSize: "11px", fontWeight: 600, color: textColor }}>
+          <span dir="ltr" style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 600, color: textColor }}>
             {dateLabel}
           </span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
           <Clock size={13} color={iconColor} />
-          <span dir="ltr" style={{ fontFamily: "Tajawal, sans-serif", fontSize: "11px", fontWeight: 600, color: textColor }}>
+          <span dir="ltr" style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 600, color: textColor }}>
             {timeLabel}
           </span>
         </div>
@@ -1709,7 +1709,7 @@ function TeamDisplay({ name, logo, theme }) {
       <ClubLogo logo={logo} name={name} theme={theme} size={48} />
       <span
         style={{
-          fontFamily: "Tajawal, sans-serif",
+          fontFamily: "Cairo, sans-serif",
           fontWeight: 700,
           fontSize: "10.5px",
           color: theme.primary,
@@ -1762,7 +1762,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
         <div
           style={{
             padding: "10px 12px",
-            fontFamily: "Tajawal, sans-serif",
+            fontFamily: "Cairo, sans-serif",
             fontWeight: 700,
             fontSize: "13px",
             color: theme.primary,
@@ -1798,7 +1798,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
             }}
           >
             <Zap size={13} color={theme.yellow} />
-            <span style={{ fontFamily: "Tajawal, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.text }}>
+            <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.text }}>
               مباراة الدبل (x2)
             </span>
           </div>
@@ -1837,7 +1837,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                     color: match.userBoost ? theme.text : theme.muted,
                     borderRadius: "20px",
                     padding: "7px 16px",
-                    fontFamily: "Tajawal, sans-serif",
+                    fontFamily: "Cairo, sans-serif",
                     fontWeight: 700,
                     fontSize: "11px",
                     cursor: boostDisabled ? "not-allowed" : "pointer",
@@ -1884,7 +1884,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                   display: "flex",
                   gap: "8px",
                   alignItems: "center",
-                  fontFamily: "Tajawal, sans-serif",
+                  fontFamily: "Cairo, sans-serif",
                   fontWeight: 700,
                   fontSize: "16px",
                   color: theme.text,
@@ -1957,7 +1957,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
               >
                 <span
                   style={{
-                    fontFamily: "Tajawal, sans-serif",
+                    fontFamily: "Cairo, sans-serif",
                     fontWeight: 800,
                     fontSize: "16px",
                     lineHeight: "1",
@@ -1988,7 +1988,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
             {effectiveMultiplier > 1 && (
               <span
                 style={{
-                  fontFamily: "Tajawal, sans-serif",
+                  fontFamily: "Cairo, sans-serif",
                   fontWeight: 800,
                   fontSize: "12px",
                   color: theme.yellow,
@@ -2010,7 +2010,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                 lineHeight: "15px",
                 color: theme.muted,
                 textAlign: "center",
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
               }}
             >
               {result.label}
@@ -2151,7 +2151,7 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
               border: "none",
               background: dirty ? theme.violet : theme.inputBorder,
               color: dirty ? "#FFFFFF" : theme.muted,
-              fontFamily: "Tajawal, sans-serif",
+              fontFamily: "Cairo, sans-serif",
               fontWeight: 700,
               fontSize: "13px",
               cursor: dirty ? "pointer" : "not-allowed",
@@ -2280,7 +2280,7 @@ function TournamentFilterPicker({ value, onChange, tournaments, tournamentLogos,
           border: `1.5px solid ${theme.violet}`,
           borderRadius: open ? "10px 10px 0 0" : "10px",
           padding: "10px 14px",
-          fontFamily: "Tajawal, sans-serif",
+          fontFamily: "Cairo, sans-serif",
           fontWeight: 700,
           fontSize: "13px",
           cursor: "pointer",
@@ -2323,7 +2323,7 @@ function TournamentFilterPicker({ value, onChange, tournaments, tournamentLogos,
                 border: "none",
                 outline: "none",
                 flex: 1,
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 fontSize: "16px",
                 color: theme.text,
                 background: "transparent",
@@ -2342,7 +2342,7 @@ function TournamentFilterPicker({ value, onChange, tournaments, tournamentLogos,
               style={{
                 padding: "10px 12px",
                 fontSize: "13px",
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 color: t === value ? theme.violet : theme.text,
                 fontWeight: t === value ? 700 : 400,
                 background: t === value ? theme.violetSoft : "transparent",
@@ -2441,7 +2441,7 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
               theme={theme}
               color={theme.muted}
             />
-            <span style={{ flex: 1, fontFamily: "Tajawal, sans-serif", fontSize: "12px", color: theme.muted }}>
+            <span style={{ flex: 1, fontFamily: "Cairo, sans-serif", fontSize: "12px", color: theme.muted }}>
               شعار البطولة (يظهر بدل الأيقونة العامة بكل مكان)
             </span>
             <input
@@ -2464,7 +2464,7 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
                 border: `1.5px dashed ${theme.inputBorder}`,
                 borderRadius: "8px",
                 padding: "6px 10px",
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 fontSize: "11px",
                 fontWeight: 600,
                 color: theme.muted,
@@ -2545,7 +2545,7 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
                   }}
                 >
                   <ClubLogo logo={club.logo} name={club.name} theme={theme} />
-                  <span style={{ flex: 1, fontFamily: "Tajawal, sans-serif", fontSize: "13px", fontWeight: 600, color: theme.text }}>
+                  <span style={{ flex: 1, fontFamily: "Cairo, sans-serif", fontSize: "13px", fontWeight: 600, color: theme.text }}>
                     {club.name}
                   </span>
                   <button
@@ -2573,7 +2573,7 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
                   border: `1.5px solid ${theme.inputBorder}`,
                   borderRadius: "8px",
                   padding: "8px 10px",
-                  fontFamily: "Tajawal, sans-serif",
+                  fontFamily: "Cairo, sans-serif",
                   fontSize: "16px",
                   color: theme.text,
                   background: theme.bg,
@@ -2600,7 +2600,7 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
                   border: `1.5px dashed ${theme.inputBorder}`,
                   borderRadius: "8px",
                   padding: "7px 12px",
-                  fontFamily: "Tajawal, sans-serif",
+                  fontFamily: "Cairo, sans-serif",
                   fontSize: "12px",
                   fontWeight: 600,
                   color: theme.muted,
@@ -2624,7 +2624,7 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
                   padding: "8px",
                   background: newClubName.trim() ? theme.primary : theme.inputBorder,
                   color: theme.surface,
-                  fontFamily: "Tajawal, sans-serif",
+                  fontFamily: "Cairo, sans-serif",
                   fontWeight: 700,
                   fontSize: "12px",
                   cursor: newClubName.trim() ? "pointer" : "not-allowed",
@@ -2698,7 +2698,7 @@ function LeaderboardRow({ rank, name, username, avatar, points, isYou, theme }) 
         {rank === 1 ? (
           <Crown size={15} color={theme.yellow} />
         ) : (
-          <span style={{ fontFamily: "Tajawal, sans-serif", fontSize: "12px", fontWeight: 700, color: theme.muted }}>
+          <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "12px", fontWeight: 700, color: theme.muted }}>
             {rank}
           </span>
         )}
@@ -2707,7 +2707,7 @@ function LeaderboardRow({ rank, name, username, avatar, points, isYou, theme }) 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
         <span
           style={{
-            fontFamily: "Tajawal, sans-serif",
+            fontFamily: "Cairo, sans-serif",
             fontWeight: isYou ? 700 : 600,
             fontSize: "13px",
             color: theme.text,
@@ -2721,7 +2721,7 @@ function LeaderboardRow({ rank, name, username, avatar, points, isYou, theme }) 
           </span>
         )}
       </div>
-      <span style={{ fontFamily: "Tajawal, sans-serif", fontWeight: 800, fontSize: "14px", color: theme.primary }}>
+      <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: 800, fontSize: "14px", color: theme.primary }}>
         {points}
       </span>
     </div>
@@ -2824,7 +2824,7 @@ function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme
     border: `1.5px solid ${theme.inputBorder}`,
     borderRadius: "10px",
     padding: "12px 14px",
-    fontFamily: "Tajawal, sans-serif",
+    fontFamily: "Cairo, sans-serif",
     fontSize: "16px",
     color: theme.text,
     background: theme.surface,
@@ -2952,7 +2952,7 @@ function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme
                 background: "transparent",
                 border: "none",
                 color: theme.muted,
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 fontWeight: 600,
                 fontSize: "12px",
                 cursor: "pointer",
@@ -2983,7 +2983,7 @@ function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme
               border: "none",
               background: theme.primary,
               color: theme.surface,
-              fontFamily: "Tajawal, sans-serif",
+              fontFamily: "Cairo, sans-serif",
               fontWeight: 700,
               fontSize: "14px",
               cursor: submitting ? "not-allowed" : "pointer",
@@ -3004,7 +3004,7 @@ function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme
                 background: "transparent",
                 border: "none",
                 color: theme.violet,
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 fontWeight: 700,
                 fontSize: "12px",
                 cursor: "pointer",
@@ -3020,7 +3020,7 @@ function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme
                 background: "transparent",
                 border: "none",
                 color: theme.violet,
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 fontWeight: 700,
                 fontSize: "12px",
                 cursor: "pointer",
@@ -3050,7 +3050,7 @@ function ResetPasswordPage({ onUpdatePassword, theme }) {
     border: `1.5px solid ${theme.inputBorder}`,
     borderRadius: "10px",
     padding: "12px 14px",
-    fontFamily: "Tajawal, sans-serif",
+    fontFamily: "Cairo, sans-serif",
     fontSize: "16px",
     color: theme.text,
     background: theme.surface,
@@ -3123,7 +3123,7 @@ function ResetPasswordPage({ onUpdatePassword, theme }) {
               border: "none",
               background: theme.primary,
               color: theme.surface,
-              fontFamily: "Tajawal, sans-serif",
+              fontFamily: "Cairo, sans-serif",
               fontWeight: 700,
               fontSize: "14px",
               cursor: submitting ? "not-allowed" : "pointer",
@@ -3244,7 +3244,7 @@ function LoginGate({ onNavigateToAuth, theme }) {
           padding: "10px 24px",
           background: theme.primary,
           color: theme.surface,
-          fontFamily: "Tajawal, sans-serif",
+          fontFamily: "Cairo, sans-serif",
           fontWeight: 700,
           fontSize: "13px",
           cursor: "pointer",
@@ -3290,7 +3290,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
             padding: "10px 24px",
             background: theme.primary,
             color: theme.surface,
-            fontFamily: "Tajawal, sans-serif",
+            fontFamily: "Cairo, sans-serif",
             fontWeight: 700,
             fontSize: "13px",
             cursor: "pointer",
@@ -3398,7 +3398,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
                 border: `1.5px solid ${theme.inputBorder}`,
                 borderRadius: "10px",
                 padding: "12px 14px",
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 fontSize: "16px",
                 color: theme.text,
                 background: theme.surface,
@@ -3423,7 +3423,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
                 border: `1.5px solid ${usernameError ? theme.danger : theme.inputBorder}`,
                 borderRadius: "10px",
                 padding: "12px 14px",
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 fontSize: "16px",
                 color: theme.text,
                 background: theme.surface,
@@ -3448,7 +3448,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
               border: "none",
               background: saved ? theme.accent : theme.violet,
               color: "#FFFFFF",
-              fontFamily: "Tajawal, sans-serif",
+              fontFamily: "Cairo, sans-serif",
               fontWeight: 700,
               fontSize: "14px",
               cursor: saving ? "not-allowed" : "pointer",
@@ -3473,7 +3473,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
               border: `1.5px solid ${theme.danger}`,
               background: "transparent",
               color: theme.danger,
-              fontFamily: "Tajawal, sans-serif",
+              fontFamily: "Cairo, sans-serif",
               fontWeight: 700,
               fontSize: "13px",
               cursor: "pointer",
@@ -3525,7 +3525,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
                     border: `1.5px solid ${theme.inputBorder}`,
                     background: "transparent",
                     color: theme.text,
-                    fontFamily: "Tajawal, sans-serif",
+                    fontFamily: "Cairo, sans-serif",
                     fontWeight: 700,
                     fontSize: "13px",
                     cursor: deleting ? "not-allowed" : "pointer",
@@ -3543,7 +3543,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
                     border: "none",
                     background: theme.danger,
                     color: "#FFFFFF",
-                    fontFamily: "Tajawal, sans-serif",
+                    fontFamily: "Cairo, sans-serif",
                     fontWeight: 700,
                     fontSize: "13px",
                     cursor: deleting ? "not-allowed" : "pointer",
@@ -3872,7 +3872,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
               border: "none",
               background: activeTab === "ranking" ? theme.primary : "transparent",
               color: activeTab === "ranking" ? theme.surface : theme.muted,
-              fontFamily: "Tajawal, sans-serif",
+              fontFamily: "Cairo, sans-serif",
               fontWeight: 700,
               fontSize: "12px",
               cursor: "pointer",
@@ -3889,7 +3889,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
               border: "none",
               background: activeTab === "predictions" ? theme.primary : "transparent",
               color: activeTab === "predictions" ? theme.surface : theme.muted,
-              fontFamily: "Tajawal, sans-serif",
+              fontFamily: "Cairo, sans-serif",
               fontWeight: 700,
               fontSize: "12px",
               cursor: "pointer",
@@ -3930,7 +3930,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                   border: `1px solid ${predictionsView === "recent" ? theme.primary : theme.border}`,
                   background: predictionsView === "recent" ? theme.primarySoft : theme.surface,
                   color: predictionsView === "recent" ? theme.primary : theme.muted,
-                  fontFamily: "Tajawal, sans-serif",
+                  fontFamily: "Cairo, sans-serif",
                   fontWeight: 700,
                   fontSize: "11px",
                   cursor: "pointer",
@@ -3947,7 +3947,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                   border: `1px solid ${predictionsView === "archived" ? theme.primary : theme.border}`,
                   background: predictionsView === "archived" ? theme.primarySoft : theme.surface,
                   color: predictionsView === "archived" ? theme.primary : theme.muted,
-                  fontFamily: "Tajawal, sans-serif",
+                  fontFamily: "Cairo, sans-serif",
                   fontWeight: 700,
                   fontSize: "11px",
                   cursor: "pointer",
@@ -3990,7 +3990,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                       >
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                            <span style={{ fontFamily: "Tajawal, sans-serif", fontWeight: 700, fontSize: "13px", color: theme.primary }}>
+                            <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "13px", color: theme.primary }}>
                               {match.home || "؟"} ضد {match.away || "؟"}
                             </span>
                             {match.doublePoints && (
@@ -3999,7 +3999,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                                   display: "flex",
                                   alignItems: "center",
                                   gap: "3px",
-                                  fontFamily: "Tajawal, sans-serif",
+                                  fontFamily: "Cairo, sans-serif",
                                   fontWeight: 800,
                                   fontSize: "10px",
                                   color: theme.yellow,
@@ -4039,7 +4039,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
 
                         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                           <Calendar size={11} color={theme.muted} />
-                          <span dir="ltr" style={{ fontFamily: "Tajawal, sans-serif", fontSize: "10px", fontWeight: 600, color: theme.muted }}>
+                          <span dir="ltr" style={{ fontFamily: "Cairo, sans-serif", fontSize: "10px", fontWeight: 600, color: theme.muted }}>
                             {dateLabel}
                           </span>
                         </div>
@@ -4068,7 +4068,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                             >
                               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                                 <PlayerAvatar name={p.name} avatar={p.avatar} isYou={p.isYou} theme={theme} size={26} />
-                                <span style={{ fontFamily: "Tajawal, sans-serif", fontWeight: p.isYou ? 700 : 600, fontSize: "12px", color: theme.text }}>
+                                <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: p.isYou ? 700 : 600, fontSize: "12px", color: theme.text }}>
                                   {p.name} {p.isYou && <span style={{ fontSize: "10px", color: theme.primary }}>(أنت)</span>}
                                 </span>
                                 {playerHasTribl && (
@@ -4077,7 +4077,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                                       display: "flex",
                                       alignItems: "center",
                                       gap: "3px",
-                                      fontFamily: "Tajawal, sans-serif",
+                                      fontFamily: "Cairo, sans-serif",
                                       fontWeight: 800,
                                       fontSize: "9px",
                                       color: theme.yellow,
@@ -4231,7 +4231,7 @@ function PrivateLeaguesPage({ leagues, matches, allPredictionRows, onCreateLeagu
                 border: `1.5px solid ${theme.inputBorder}`,
                 borderRadius: "8px",
                 padding: "8px 10px",
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 fontSize: "16px",
                 color: theme.text,
                 background: theme.bg,
@@ -4250,7 +4250,7 @@ function PrivateLeaguesPage({ leagues, matches, allPredictionRows, onCreateLeagu
                 padding: "8px 14px",
                 background: newLeagueName.trim() ? theme.primary : theme.inputBorder,
                 color: theme.surface,
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 fontWeight: 700,
                 fontSize: "12px",
                 cursor: newLeagueName.trim() ? "pointer" : "not-allowed",
@@ -4306,7 +4306,7 @@ function PrivateLeaguesPage({ leagues, matches, allPredictionRows, onCreateLeagu
                 padding: "8px 16px",
                 background: joinCodeInput.trim() ? theme.primary : theme.inputBorder,
                 color: theme.surface,
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 fontWeight: 700,
                 fontSize: "12px",
                 cursor: joinCodeInput.trim() ? "pointer" : "not-allowed",
@@ -4351,7 +4351,7 @@ function PrivateLeaguesPage({ leagues, matches, allPredictionRows, onCreateLeagu
                   }}
                 >
                   <Users size={16} color={theme.primary} />
-                  <span style={{ flex: 1, fontFamily: "Tajawal, sans-serif", fontWeight: 700, fontSize: "13px", color: theme.text }}>
+                  <span style={{ flex: 1, fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "13px", color: theme.text }}>
                     {league.name}
                   </span>
                   <span style={{ fontSize: "11px", color: theme.muted }}>
@@ -4415,7 +4415,7 @@ function HomePage({ theme, onNavigate }) {
               padding: "14px",
               background: theme.primary,
               color: theme.surface,
-              fontFamily: "Tajawal, sans-serif",
+              fontFamily: "Cairo, sans-serif",
               fontWeight: 700,
               fontSize: "15px",
               cursor: "pointer",
@@ -4433,7 +4433,7 @@ function HomePage({ theme, onNavigate }) {
               padding: "14px",
               background: theme.surface,
               color: theme.text,
-              fontFamily: "Tajawal, sans-serif",
+              fontFamily: "Cairo, sans-serif",
               fontWeight: 700,
               fontSize: "15px",
               cursor: "pointer",
@@ -4493,7 +4493,7 @@ function ExampleTable({ example, theme }) {
 
   return (
     <div style={{ overflow: "hidden", borderRadius: "8px", border: `1px solid ${theme.border}` }}>
-      <table dir="rtl" style={{ width: "100%", borderCollapse: "collapse", fontFamily: "Tajawal, sans-serif" }}>
+      <table dir="rtl" style={{ width: "100%", borderCollapse: "collapse", fontFamily: "Cairo, sans-serif" }}>
         <tbody>
           <tr>
             <td style={{ ...cellStyle, fontWeight: 700, color: theme.text }}>{away}</td>
@@ -4550,9 +4550,10 @@ function PointsSystemPage({ theme }) {
         <div
           style={{
             background: theme.surface,
-            border: `1.5px solid ${theme.violet}`,
-            borderRadius: "12px",
+            border: `1px solid ${theme.border}`,
+            borderRadius: "14px",
             padding: "4px 18px",
+            boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
           }}
         >
           {tiers.map((t, i) => {
@@ -4576,8 +4577,8 @@ function PointsSystemPage({ theme }) {
                 >
                   <div
                     style={{
-                      width: "32px",
-                      height: "32px",
+                      width: "34px",
+                      height: "34px",
                       borderRadius: "50%",
                       background: t.bg,
                       border: `1.5px solid ${t.ring}`,
@@ -4591,10 +4592,10 @@ function PointsSystemPage({ theme }) {
                     <span
                       style={{
                         fontSize: "13px",
-                        lineHeight: "13px",
+                        lineHeight: "1",
                         fontWeight: 800,
                         display: "inline-block",
-                        transform: "translateY(0.5px)",
+                        paddingTop: "1px",
                       }}
                     >
                       {t.points}
@@ -4647,7 +4648,7 @@ function StatBox({ label, value, theme }) {
         textAlign: "center",
       }}
     >
-      <div style={{ fontSize: "22px", fontWeight: 800, color: theme.primary, fontFamily: "Tajawal" }}>{value}</div>
+      <div style={{ fontSize: "22px", fontWeight: 800, color: theme.primary, fontFamily: "Cairo" }}>{value}</div>
       <div style={{ fontSize: "11px", color: theme.muted, marginTop: "4px" }}>{label}</div>
     </div>
   );
@@ -4705,7 +4706,7 @@ function StatsPage({ matches, tournaments, tournamentLogos, theme }) {
             <span style={{ flex: 1, fontSize: "12px", color: theme.text }}>
               أكثر فريق جابلك نقاط: <strong>{stats.topTeam.name}</strong>
             </span>
-            <span style={{ fontFamily: "Tajawal", fontWeight: 800, fontSize: "16px", color: theme.violet }}>
+            <span style={{ fontFamily: "Cairo", fontWeight: 800, fontSize: "16px", color: theme.violet }}>
               {stats.topTeam.points}
             </span>
           </div>
@@ -4730,7 +4731,7 @@ function StatsPage({ matches, tournaments, tournamentLogos, theme }) {
                 border: "none",
                 background: tierView === "count" ? theme.violet : "transparent",
                 color: tierView === "count" ? "#FFFFFF" : theme.muted,
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 fontWeight: 700,
                 fontSize: "11px",
                 cursor: "pointer",
@@ -4746,7 +4747,7 @@ function StatsPage({ matches, tournaments, tournamentLogos, theme }) {
                 border: "none",
                 background: tierView === "percent" ? theme.violet : "transparent",
                 color: tierView === "percent" ? "#FFFFFF" : theme.muted,
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 fontWeight: 700,
                 fontSize: "11px",
                 cursor: "pointer",
@@ -4809,7 +4810,7 @@ function StatsPage({ matches, tournaments, tournamentLogos, theme }) {
                 <span style={{ flex: 1, fontSize: "13px", color: theme.text, fontWeight: 600 }}>{t.label}</span>
                 <div
                   style={{
-                    fontFamily: "Tajawal, sans-serif",
+                    fontFamily: "Cairo, sans-serif",
                     fontWeight: 800,
                     fontSize: "20px",
                     color: theme.violet,
@@ -4885,7 +4886,7 @@ function NavDrawer({ open, onClose, activePage, onNavigate, viewMode, setViewMod
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-          <span style={{ fontFamily: "Tajawal, sans-serif", fontWeight: 800, fontSize: "16px", color: theme.primary }}>
+          <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: 800, fontSize: "16px", color: theme.primary }}>
             القوائم
           </span>
           <button
@@ -4911,7 +4912,7 @@ function NavDrawer({ open, onClose, activePage, onNavigate, viewMode, setViewMod
                 border: `1px solid ${theme.violet}`,
                 background: theme.violetSoft,
                 color: theme.violet,
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 fontWeight: 700,
                 fontSize: "13px",
                 cursor: "pointer",
@@ -4947,7 +4948,7 @@ function NavDrawer({ open, onClose, activePage, onNavigate, viewMode, setViewMod
                         border: "none",
                         background: isActive ? theme.primarySoft : theme.bg,
                         color: isActive ? theme.primary : theme.text,
-                        fontFamily: "Tajawal, sans-serif",
+                        fontFamily: "Cairo, sans-serif",
                         fontWeight: isActive ? 700 : 500,
                         fontSize: "13px",
                         cursor: "pointer",
@@ -4985,7 +4986,7 @@ function NavDrawer({ open, onClose, activePage, onNavigate, viewMode, setViewMod
                   border: "none",
                   background: isActive ? theme.primarySoft : "transparent",
                   color: isActive ? theme.primary : theme.text,
-                  fontFamily: "Tajawal, sans-serif",
+                  fontFamily: "Cairo, sans-serif",
                   fontWeight: isActive ? 700 : 500,
                   fontSize: "14px",
                   cursor: "pointer",
@@ -5022,7 +5023,7 @@ function NavDrawer({ open, onClose, activePage, onNavigate, viewMode, setViewMod
         <div style={{ marginTop: "auto", paddingTop: "16px", borderTop: `1px solid ${theme.border}` }}>
           {currentUser?.is_admin && (
           <>
-          <span style={{ fontFamily: "Tajawal, sans-serif", fontSize: "11px", fontWeight: 600, color: theme.muted, display: "block", marginBottom: "8px" }}>
+          <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 600, color: theme.muted, display: "block", marginBottom: "8px" }}>
             وضع الاستخدام
           </span>
           <div
@@ -5044,7 +5045,7 @@ function NavDrawer({ open, onClose, activePage, onNavigate, viewMode, setViewMod
                 border: "none",
                 background: viewMode === "admin" ? theme.primary : "transparent",
                 color: viewMode === "admin" ? theme.surface : theme.muted,
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 fontWeight: 700,
                 fontSize: "12px",
                 cursor: "pointer",
@@ -5064,7 +5065,7 @@ function NavDrawer({ open, onClose, activePage, onNavigate, viewMode, setViewMod
                 border: "none",
                 background: viewMode === "user" ? theme.primary : "transparent",
                 color: viewMode === "user" ? theme.surface : theme.muted,
-                fontFamily: "Tajawal, sans-serif",
+                fontFamily: "Cairo, sans-serif",
                 fontWeight: 700,
                 fontSize: "12px",
                 cursor: "pointer",
@@ -5097,7 +5098,7 @@ function NavDrawer({ open, onClose, activePage, onNavigate, viewMode, setViewMod
               border: `1px solid ${currentUser ? theme.danger : theme.primary}`,
               background: "transparent",
               color: currentUser ? theme.danger : theme.primary,
-              fontFamily: "Tajawal, sans-serif",
+              fontFamily: "Cairo, sans-serif",
               fontWeight: 700,
               fontSize: "13px",
               cursor: "pointer",
@@ -5162,7 +5163,7 @@ function TopBar({ onMenuClick, theme }) {
               fontWeight: 800,
               color: theme.primary,
               margin: 0,
-              fontFamily: "Tajawal, sans-serif",
+              fontFamily: "Cairo, sans-serif",
             }}
           >
             فانتسي التوقعات
@@ -5174,7 +5175,7 @@ function TopBar({ onMenuClick, theme }) {
               fontWeight: 500,
               color: theme.muted,
               margin: 0,
-              fontFamily: "Tajawal, sans-serif",
+              fontFamily: "Cairo, sans-serif",
               letterSpacing: "0.3px",
             }}
           >
@@ -5575,12 +5576,12 @@ export default function App() {
       style={{
         minHeight: "100vh",
         background: theme.bg,
-        fontFamily: "Tajawal, system-ui, sans-serif",
+        fontFamily: "Cairo, system-ui, sans-serif",
         transition: "background 0.2s",
       }}
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700;800&display=swap');
         * { box-sizing: border-box; }
         input::placeholder { color: ${theme.muted}; opacity: 0.7; }
       `}</style>
@@ -5645,7 +5646,7 @@ export default function App() {
                   border: "none",
                   background: predictionsTabView === "current" ? theme.primary : "transparent",
                   color: predictionsTabView === "current" ? theme.surface : theme.muted,
-                  fontFamily: "Tajawal, sans-serif",
+                  fontFamily: "Cairo, sans-serif",
                   fontWeight: 700,
                   fontSize: "12px",
                   cursor: "pointer",
@@ -5662,7 +5663,7 @@ export default function App() {
                   border: "none",
                   background: predictionsTabView === "archived" ? theme.primary : "transparent",
                   color: predictionsTabView === "archived" ? theme.surface : theme.muted,
-                  fontFamily: "Tajawal, sans-serif",
+                  fontFamily: "Cairo, sans-serif",
                   fontWeight: 700,
                   fontSize: "12px",
                   cursor: "pointer",
@@ -5746,7 +5747,7 @@ export default function App() {
                   border: `1.5px dashed ${theme.inputBorder}`,
                   background: "transparent",
                   color: theme.text,
-                  fontFamily: "Tajawal, sans-serif",
+                  fontFamily: "Cairo, sans-serif",
                   fontWeight: 600,
                   fontSize: "14px",
                   cursor: "pointer",
