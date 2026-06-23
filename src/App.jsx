@@ -1019,25 +1019,25 @@ function CountdownBadge({ kickoffISO, theme }) {
       style={{
         display: "flex",
         flexDirection: "row",
-        alignItems: "flex-start",
-        gap: "4px",
+        alignItems: "center",
+        gap: "5px",
         background: theme.surface,
         border: `1px solid ${stateColor}`,
         borderRadius: "6px",
-        padding: "4px 6px",
+        padding: "5px 7px",
       }}
     >
       {locked ? (
-        <Lock size={20} color={stateColor} style={{ flexShrink: 0, marginTop: "-1px" }} />
+        <Lock size={14} color={stateColor} style={{ flexShrink: 0 }} />
       ) : (
-        <Unlock size={20} color={stateColor} style={{ flexShrink: 0, marginTop: "-1px" }} />
+        <Unlock size={14} color={stateColor} style={{ flexShrink: 0 }} />
       )}
       {locked ? (
         <span
           dir="rtl"
           style={{
             fontFamily: "Cairo, sans-serif",
-            fontSize: "10px",
+            fontSize: "13px",
             fontWeight: 700,
             color: stateColor,
             whiteSpace: "nowrap",
@@ -1047,14 +1047,14 @@ function CountdownBadge({ kickoffISO, theme }) {
         </span>
       ) : (
         segments && (
-          <div style={{ display: "flex", alignItems: "flex-start", gap: "3px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
             {segments.map((seg, i) => (
-              <div key={seg.label} style={{ display: "flex", alignItems: "flex-start" }}>
+              <div key={seg.label} style={{ display: "flex", alignItems: "center" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                   <span
                     style={{
                       fontFamily: "monospace",
-                      fontSize: "10px",
+                      fontSize: "13px",
                       fontWeight: 700,
                       color: stateColor,
                       fontVariantNumeric: "tabular-nums",
@@ -1066,7 +1066,7 @@ function CountdownBadge({ kickoffISO, theme }) {
                   <span
                     style={{
                       fontFamily: "monospace",
-                      fontSize: "5.5px",
+                      fontSize: "7px",
                       fontWeight: 600,
                       color: stateColor,
                       letterSpacing: "0.2px",
@@ -1077,7 +1077,7 @@ function CountdownBadge({ kickoffISO, theme }) {
                   </span>
                 </div>
                 {i < segments.length - 1 && (
-                  <span style={{ fontSize: "10px", fontWeight: 700, color: stateColor, margin: "0 1px" }}>:</span>
+                  <span style={{ fontSize: "13px", fontWeight: 700, color: stateColor, margin: "0 1px" }}>:</span>
                 )}
               </div>
             ))}
