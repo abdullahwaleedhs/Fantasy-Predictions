@@ -1878,6 +1878,10 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "62px" }}>
                 <span style={{ color: theme.muted, fontSize: "12px", fontWeight: 700 }}>ضد</span>
               </div>
+            ) : isLocked && !match.userBoost ? (
+              // Match is over and the personal boost was never used on it -
+              // nothing meaningful to show once it can't be toggled anymore.
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "62px" }} />
             ) : (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", paddingTop: "62px" }}>
                 <button
@@ -1902,21 +1906,23 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                     width: "100%",
                   }}
                 >
-                  {match.userBoost ? "إلغاء (x3)" : "التربل (x3)"}
+                  {isLocked ? "تربل (x3)" : match.userBoost ? "إلغاء (x3)" : "التربل (x3)"}
                   <Zap size={12} color={match.userBoost ? theme.yellow : theme.muted} />
                 </button>
-                <span
-                  style={{
-                    fontSize: "9px",
-                    color: theme.muted,
-                    fontWeight: 600,
-                    whiteSpace: "nowrap",
-                    width: "100%",
-                    textAlign: "center",
-                  }}
-                >
-                  ({boostsRemaining} متبقية)
-                </span>
+                {!isLocked && (
+                  <span
+                    style={{
+                      fontSize: "9px",
+                      color: theme.muted,
+                      fontWeight: 600,
+                      whiteSpace: "nowrap",
+                      width: "100%",
+                      textAlign: "center",
+                    }}
+                  >
+                    ({boostsRemaining} متبقية)
+                  </span>
+                )}
               </div>
             )}
 
