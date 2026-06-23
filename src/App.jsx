@@ -887,50 +887,60 @@ function TeamPicker({ value, logo, onChange, clubs, placeholder, theme, disabled
 
       {open && (
         <div
+          onClick={() => setOpen(false)}
           style={{
-            position: "absolute",
-            top: "calc(100% + 4px)",
-            right: "50%",
-            transform: "translateX(50%)",
-            zIndex: 25,
-            background: theme.surface,
-            border: `1px solid ${theme.border}`,
-            borderRadius: "10px",
-            boxShadow: "0 8px 20px rgba(0,0,0,0.18)",
-            maxHeight: "220px",
-            overflowY: "auto",
-            minWidth: "160px",
-            maxWidth: "calc(100vw - 32px)",
+            position: "fixed",
+            inset: 0,
+            zIndex: 100,
+            background: "rgba(0,0,0,0.45)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "24px",
           }}
         >
-          {clubs.map((club) => (
-            <div
-              key={club.id}
-              onClick={() => {
-                onChange(club.name, club.logo);
-                setOpen(false);
-              }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px 10px",
-                cursor: "pointer",
-                background: club.name === value ? theme.primarySoft : "transparent",
-              }}
-              onMouseEnter={(e) => {
-                if (club.name !== value) e.currentTarget.style.background = theme.bg;
-              }}
-              onMouseLeave={(e) => {
-                if (club.name !== value) e.currentTarget.style.background = "transparent";
-              }}
-            >
-              <ClubLogo logo={club.logo} name={club.name} theme={theme} size={24} />
-              <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "12px", fontWeight: 600, color: theme.text }}>
-                {club.name}
-              </span>
-            </div>
-          ))}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: theme.surface,
+              border: `1px solid ${theme.border}`,
+              borderRadius: "14px",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+              width: "100%",
+              maxWidth: "320px",
+              maxHeight: "70vh",
+              overflowY: "auto",
+            }}
+          >
+            {clubs.map((club) => (
+              <div
+                key={club.id}
+                onClick={() => {
+                  onChange(club.name, club.logo);
+                  setOpen(false);
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "10px 12px",
+                  cursor: "pointer",
+                  background: club.name === value ? theme.primarySoft : "transparent",
+                }}
+                onMouseEnter={(e) => {
+                  if (club.name !== value) e.currentTarget.style.background = theme.bg;
+                }}
+                onMouseLeave={(e) => {
+                  if (club.name !== value) e.currentTarget.style.background = "transparent";
+                }}
+              >
+                <ClubLogo logo={club.logo} name={club.name} theme={theme} size={26} />
+                <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "13px", fontWeight: 600, color: theme.text }}>
+                  {club.name}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
