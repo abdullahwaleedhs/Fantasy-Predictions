@@ -5951,7 +5951,7 @@ export default function App() {
                   cursor: "pointer",
                 }}
               >
-                القادمة والحالية
+                القادمة
               </button>
               <button
                 onClick={() => setPredictionsTabView("archived")}
@@ -5974,12 +5974,11 @@ export default function App() {
 
             {/* Matches */}
             {(() => {
-              const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-              const nowTs = Date.now();
+              const nowTs = serverNow();
               const isArchived = (m) => {
                 if (!m.date || !m.time) return false; // no deadline yet => never archived
                 const kickoff = new Date(`${m.date}T${m.time}:00`).getTime();
-                return nowTs - kickoff >= ONE_DAY_MS;
+                return nowTs - kickoff >= 0; // moves to المنتهية the moment it locks
               };
               let tabMatches = matches.filter((m) => (predictionsTabView === "archived" ? isArchived(m) : !isArchived(m)));
 
@@ -6080,7 +6079,8 @@ export default function App() {
                 if (aTime === null && bTime === null) return 0;
                 if (aTime === null) return 1; // matches without a date/time go last
                 if (bTime === null) return -1;
-                return aTime - bTime; // nearest to farthest
+                // المنتهية: most recently finished first. القادمة: nearest to farthest.
+                return predictionsTabView === "archived" ? bTime - aTime : aTime - bTime;
               };
 
               return (
