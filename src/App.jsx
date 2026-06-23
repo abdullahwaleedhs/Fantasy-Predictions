@@ -4601,7 +4601,7 @@ function PointsSystemPage({ theme }) {
                       {t.points}
                     </span>
                   </div>
-                  <span style={{ flex: 1, fontSize: "13px", color: theme.text, fontWeight: 600 }}>{t.label}</span>
+                  <span style={{ flex: 1, fontSize: "13px", color: theme.text, fontWeight: 600, fontFamily: "Cairo, sans-serif" }}>{t.label}</span>
                   <ChevronDown
                     size={16}
                     color={theme.muted}
