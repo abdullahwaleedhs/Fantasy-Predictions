@@ -2375,6 +2375,9 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
   const [newClubName, setNewClubName] = useState("");
   const [newClubLogo, setNewClubLogo] = useState(null);
   const [newTournamentName, setNewTournamentName] = useState("");
+  const [importOpen, setImportOpen] = useState(false);
+  const [importSource, setImportSource] = useState("");
+  const [importSelected, setImportSelected] = useState([]);
   const fileInputRef = useRef(null);
 
   const handleAddTournament = () => {
@@ -2383,6 +2386,24 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
     onAddTournament(name);
     setSelectedTournament(name);
     setNewTournamentName("");
+  };
+
+  const importCandidates = clubsByTournament[importSource] || [];
+  const existingNames = new Set(clubs.map((c) => c.name));
+
+  const toggleImportClub = (clubId) => {
+    setImportSelected((prev) => (prev.includes(clubId) ? prev.filter((id) => id !== clubId) : [...prev, clubId]));
+  };
+
+  const handleImportClubs = () => {
+    const toImport = importCandidates.filter((c) => importSelected.includes(c.id));
+    toImport.forEach((c) => {
+      if (existingNames.has(c.name)) return;
+      onAddClub(selectedTournament, { id: `c${Date.now()}${Math.random().toString(36).slice(2, 7)}`, name: c.name, logo: c.logo });
+    });
+    setImportSelected([]);
+    setImportOpen(false);
+    setImportSource("");
   };
 
   const clubs = clubsByTournament[selectedTournament] || [];
@@ -2620,6 +2641,129 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
                   </button>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Import existing clubs from another tournament */}
+          {tournaments.filter((t) => t !== selectedTournament).length > 0 && (
+            <div style={{ marginBottom: "16px" }}>
+              <button
+                onClick={() => setImportOpen((o) => !o)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                  width: "100%",
+                  border: `1.5px dashed ${theme.violet}`,
+                  borderRadius: "8px",
+                  padding: "8px",
+                  background: "transparent",
+                  color: theme.violet,
+                  fontFamily: "Cairo, sans-serif",
+                  fontWeight: 700,
+                  fontSize: "12px",
+                  cursor: "pointer",
+                }}
+              >
+                <Upload size={14} />
+                استيراد أندية من بطولة أخرى
+              </button>
+
+              {importOpen && (
+                <div
+                  style={{
+                    marginTop: "10px",
+                    border: `1px solid ${theme.border}`,
+                    borderRadius: "10px",
+                    padding: "12px",
+                    background: theme.bg,
+                  }}
+                >
+                  <TournamentPicker
+                    value={importSource}
+                    onChange={(name) => {
+                      setImportSource(name);
+                      setImportSelected([]);
+                    }}
+                    tournaments={tournaments.filter((t) => t !== selectedTournament)}
+                    onAddTournament={() => {}}
+                    allowAdd={false}
+                    tournamentLogos={tournamentLogos}
+                    theme={theme}
+                  />
+
+                  {importSource && (
+                    <>
+                      {importCandidates.length === 0 ? (
+                        <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "10px 0" }}>
+                          هذي البطولة ما فيها أندية بعد
+                        </p>
+                      ) : (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px" }}>
+                          {importCandidates.map((c) => {
+                            const alreadyAdded = existingNames.has(c.name);
+                            return (
+                              <label
+                                key={c.id}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "10px",
+                                  padding: "6px 8px",
+                                  borderRadius: "8px",
+                                  background: theme.surface,
+                                  opacity: alreadyAdded ? 0.5 : 1,
+                                  cursor: alreadyAdded ? "not-allowed" : "pointer",
+                                }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  disabled={alreadyAdded}
+                                  checked={importSelected.includes(c.id)}
+                                  onChange={() => toggleImportClub(c.id)}
+                                />
+                                <ClubLogo logo={c.logo} name={c.name} theme={theme} size={26} />
+                                <span style={{ flex: 1, fontFamily: "Cairo, sans-serif", fontSize: "12px", fontWeight: 600, color: theme.text }}>
+                                  {c.name}
+                                </span>
+                                {alreadyAdded && (
+                                  <span style={{ fontSize: "10px", color: theme.muted }}>مضاف بالفعل</span>
+                                )}
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      <button
+                        onClick={handleImportClubs}
+                        disabled={importSelected.length === 0}
+                        style={{
+                          marginTop: "10px",
+                          width: "100%",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "6px",
+                          border: "none",
+                          borderRadius: "8px",
+                          padding: "8px",
+                          background: importSelected.length > 0 ? theme.primary : theme.inputBorder,
+                          color: theme.surface,
+                          fontFamily: "Cairo, sans-serif",
+                          fontWeight: 700,
+                          fontSize: "12px",
+                          cursor: importSelected.length > 0 ? "pointer" : "not-allowed",
+                        }}
+                      >
+                        <Plus size={14} />
+                        استيراد المحدد ({importSelected.length})
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
