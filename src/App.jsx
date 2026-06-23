@@ -2001,76 +2001,11 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
               participant view skips it there entirely to keep the card short. */}
           {!hideResult && (
           <>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <div style={{ fontSize: "11px", color: theme.muted, fontWeight: 600, marginBottom: "8px" }}>
-              النتيجة الفعلية
-            </div>
-            {hasActual ? (
-              <div
-                style={{
-                  display: "flex",
-                  gap: "8px",
-                  alignItems: "center",
-                  fontFamily: "Cairo, sans-serif",
-                  fontWeight: 700,
-                  fontSize: "16px",
-                  color: theme.text,
-                }}
-              >
-                <span
-                  style={{
-                    width: "40px",
-                    height: "44px",
-                    borderRadius: "8px",
-                    border: "2.5px solid #000000",
-                    background: theme.bg,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    lineHeight: "1",
-                    paddingTop: "1px",
-                  }}
-                >
-                  {match.actualHome}
-                </span>
-                <span style={{ color: theme.muted, fontWeight: 700 }}>-</span>
-                <span
-                  style={{
-                    width: "40px",
-                    height: "44px",
-                    borderRadius: "8px",
-                    border: "2.5px solid #000000",
-                    background: theme.bg,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    lineHeight: "1",
-                    paddingTop: "1px",
-                  }}
-                >
-                  {match.actualAway}
-                </span>
-              </div>
-            ) : (
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: theme.muted,
-                  height: "40px",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                لم تنتهِ المباراة
-              </div>
-            )}
-          </div>
-
           {/* Points badge: only meaningful once both prediction and actual exist.
               Skipped here when already shown in the middle slot above (locked,
               boost unused) to avoid showing it twice. */}
           {!(isLocked && !match.userBoost && !match.doublePoints) && (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", marginTop: "16px" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
             {result ? (
               <div
                 style={{
@@ -2134,6 +2069,71 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
             )}
           </div>
           )}
+
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: "16px" }}>
+            <div style={{ fontSize: "11px", color: theme.muted, fontWeight: 600, marginBottom: "8px" }}>
+              النتيجة الفعلية
+            </div>
+            {hasActual ? (
+              <div
+                style={{
+                  display: "flex",
+                  gap: "8px",
+                  alignItems: "center",
+                  fontFamily: "Cairo, sans-serif",
+                  fontWeight: 700,
+                  fontSize: "16px",
+                  color: theme.text,
+                }}
+              >
+                <span
+                  style={{
+                    width: "40px",
+                    height: "44px",
+                    borderRadius: "8px",
+                    border: "2.5px solid #000000",
+                    background: theme.bg,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    lineHeight: "1",
+                    paddingTop: "1px",
+                  }}
+                >
+                  {match.actualHome}
+                </span>
+                <span style={{ color: theme.muted, fontWeight: 700 }}>-</span>
+                <span
+                  style={{
+                    width: "40px",
+                    height: "44px",
+                    borderRadius: "8px",
+                    border: "2.5px solid #000000",
+                    background: theme.bg,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    lineHeight: "1",
+                    paddingTop: "1px",
+                  }}
+                >
+                  {match.actualAway}
+                </span>
+              </div>
+            ) : (
+              <div
+                style={{
+                  fontSize: "12px",
+                  color: theme.muted,
+                  height: "40px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                لم تنتهِ المباراة
+              </div>
+            )}
+          </div>
           </>
           )}
 
