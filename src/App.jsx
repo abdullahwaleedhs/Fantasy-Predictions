@@ -2151,7 +2151,9 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
               disabled={isLocked}
             />
             <button
-              onClick={onRemove}
+              onClick={() => {
+                if (window.confirm("حذف هذي المباراة نهائيًا؟")) onRemove();
+              }}
               aria-label="حذف المباراة"
               style={{
                 background: "transparent",
