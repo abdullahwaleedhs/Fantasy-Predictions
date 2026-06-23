@@ -492,7 +492,7 @@ function ThemeSwitcher({ theme, setTheme }) {
           cursor: "pointer",
         }}
       >
-        <Palette size={14} color={theme.accent} />
+        <Palette size={11} color={theme.accent} />
         {theme.name}
         <ChevronDown size={12} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
       </button>
@@ -541,7 +541,7 @@ function ThemeSwitcher({ theme, setTheme }) {
                 <span style={{ width: "14px", height: "14px", borderRadius: "50%", background: t.primary, marginRight: "-4px" }} />
                 <span style={{ width: "14px", height: "14px", borderRadius: "50%", background: t.accent, marginRight: "-4px" }} />
               </div>
-              <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "13px", fontWeight: 600, color: theme.text }}>
+              <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "10px", fontWeight: 600, color: theme.text }}>
                 {t.name}
               </span>
             </div>
@@ -634,7 +634,7 @@ function TournamentPicker({ value, onChange, tournaments, onAddTournament, tourn
           {value && <TournamentIcon name={value} logo={tournamentLogos?.[value]} theme={theme} color={theme.bg === theme.surface ? theme.accentSoft : (theme.highlight || theme.accent)} />}
           {value || (tournaments.length === 0 ? "+ أضف بطولة" : "اختر البطولة")}
         </span>
-        <ChevronDown size={14} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
+        <ChevronDown size={11} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
       </button>
 
       {open && (
@@ -670,7 +670,7 @@ function TournamentPicker({ value, onChange, tournaments, onAddTournament, tourn
             }}
           >
             <div style={{ padding: "10px", borderBottom: `1px solid ${theme.border}`, display: "flex", alignItems: "center", gap: "6px" }}>
-              <Search size={14} color={theme.muted} />
+              <Search size={11} color={theme.muted} />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -708,7 +708,7 @@ function TournamentPicker({ value, onChange, tournaments, onAddTournament, tourn
                   }}
                   style={{
                     padding: "12px 14px",
-                    fontSize: "13px",
+                    fontSize: "10px",
                     fontFamily: "Cairo, sans-serif",
                     color: t === value ? theme.primary : theme.text,
                     fontWeight: t === value ? 700 : 400,
@@ -736,7 +736,7 @@ function TournamentPicker({ value, onChange, tournaments, onAddTournament, tourn
                   }}
                   style={{
                     padding: "12px 14px",
-                    fontSize: "13px",
+                    fontSize: "10px",
                     fontFamily: "Cairo, sans-serif",
                     color: theme.accent,
                     fontWeight: 700,
@@ -747,7 +747,7 @@ function TournamentPicker({ value, onChange, tournaments, onAddTournament, tourn
                     gap: "6px",
                   }}
                 >
-                  <Plus size={14} />
+                  <Plus size={11} />
                   إضافة "{query.trim()}"
                 </div>
               )}
@@ -779,7 +779,7 @@ function TeamField({ value, onChange, placeholder, theme, disabled }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: "13px",
+          fontSize: "10px",
           fontWeight: 700,
           color: theme.muted,
           flexShrink: 0,
@@ -1028,16 +1028,16 @@ function CountdownBadge({ kickoffISO, theme }) {
       }}
     >
       {locked ? (
-        <Lock size={14} color={stateColor} style={{ flexShrink: 0 }} />
+        <Lock size={11} color={stateColor} style={{ flexShrink: 0 }} />
       ) : (
-        <Unlock size={14} color={stateColor} style={{ flexShrink: 0 }} />
+        <Unlock size={11} color={stateColor} style={{ flexShrink: 0 }} />
       )}
       {locked ? (
         <span
           dir="rtl"
           style={{
             fontFamily: "Cairo, sans-serif",
-            fontSize: "13px",
+            fontSize: "10px",
             fontWeight: 700,
             color: stateColor,
             whiteSpace: "nowrap",
@@ -1054,7 +1054,7 @@ function CountdownBadge({ kickoffISO, theme }) {
                   <span
                     style={{
                       fontFamily: "monospace",
-                      fontSize: "13px",
+                      fontSize: "10px",
                       fontWeight: 700,
                       color: stateColor,
                       fontVariantNumeric: "tabular-nums",
@@ -1066,7 +1066,7 @@ function CountdownBadge({ kickoffISO, theme }) {
                   <span
                     style={{
                       fontFamily: "monospace",
-                      fontSize: "7px",
+                      fontSize: "5.5px",
                       fontWeight: 600,
                       color: stateColor,
                       letterSpacing: "0.2px",
@@ -1077,7 +1077,7 @@ function CountdownBadge({ kickoffISO, theme }) {
                   </span>
                 </div>
                 {i < segments.length - 1 && (
-                  <span style={{ fontSize: "13px", fontWeight: 700, color: stateColor, margin: "0 1px" }}>:</span>
+                  <span style={{ fontSize: "10px", fontWeight: 700, color: stateColor, margin: "0 1px" }}>:</span>
                 )}
               </div>
             ))}
@@ -1792,7 +1792,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
             padding: "10px 12px",
             fontFamily: "Cairo, sans-serif",
             fontWeight: 700,
-            fontSize: "13px",
+            fontSize: "10px",
             color: theme.primary,
             textAlign: "center",
             display: "flex",
@@ -2181,7 +2181,7 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
               color: dirty ? "#FFFFFF" : theme.muted,
               fontFamily: "Cairo, sans-serif",
               fontWeight: 700,
-              fontSize: "13px",
+              fontSize: "10px",
               cursor: dirty ? "pointer" : "not-allowed",
             }}
           >
@@ -2310,7 +2310,7 @@ function TournamentFilterPicker({ value, onChange, tournaments, tournamentLogos,
           padding: "10px 14px",
           fontFamily: "Cairo, sans-serif",
           fontWeight: 700,
-          fontSize: "13px",
+          fontSize: "10px",
           cursor: "pointer",
           width: "100%",
           justifyContent: "space-between",
@@ -2320,7 +2320,7 @@ function TournamentFilterPicker({ value, onChange, tournaments, tournamentLogos,
           {value !== "الكل" && <TournamentIcon name={value} logo={tournamentLogos?.[value]} theme={theme} color={theme.muted} />}
           {value}
         </span>
-        <ChevronDown size={14} color={theme.muted} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
+        <ChevronDown size={11} color={theme.muted} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
       </button>
 
       {open && (
@@ -2341,7 +2341,7 @@ function TournamentFilterPicker({ value, onChange, tournaments, tournamentLogos,
           }}
         >
           <div style={{ padding: "8px", borderBottom: `1px solid ${theme.border}`, display: "flex", alignItems: "center", gap: "6px" }}>
-            <Search size={14} color={theme.muted} />
+            <Search size={11} color={theme.muted} />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -2368,7 +2368,7 @@ function TournamentFilterPicker({ value, onChange, tournaments, tournamentLogos,
               }}
               style={{
                 padding: "10px 12px",
-                fontSize: "13px",
+                fontSize: "10px",
                 fontFamily: "Cairo, sans-serif",
                 color: t === value ? theme.violet : theme.text,
                 fontWeight: t === value ? 700 : 400,
@@ -2512,7 +2512,7 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
                 whiteSpace: "nowrap",
               }}
             >
-              <Plus size={14} />
+              <Plus size={11} />
               إضافة
             </button>
           </div>
@@ -2655,7 +2655,7 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
                   }}
                 >
                   <ClubLogo logo={club.logo} name={club.name} theme={theme} />
-                  <span style={{ flex: 1, fontFamily: "Cairo, sans-serif", fontSize: "13px", fontWeight: 600, color: theme.text }}>
+                  <span style={{ flex: 1, fontFamily: "Cairo, sans-serif", fontSize: "10px", fontWeight: 600, color: theme.text }}>
                     {club.name}
                   </span>
                   <button
@@ -2692,7 +2692,7 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
                   cursor: "pointer",
                 }}
               >
-                <Upload size={14} />
+                <Upload size={11} />
                 استيراد أندية من بطولة أخرى
               </button>
 
@@ -2812,7 +2812,7 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
                           cursor: importSelected.length > 0 ? "pointer" : "not-allowed",
                         }}
                       >
-                        <Plus size={14} />
+                        <Plus size={11} />
                         استيراد المحدد ({importSelected.length})
                       </button>
                     </>
@@ -2869,7 +2869,7 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
                   cursor: "pointer",
                 }}
               >
-                <Upload size={14} />
+                <Upload size={11} />
                 {newClubLogo ? "تغيير الشعار" : "رفع شعار"}
               </label>
               <button
@@ -2892,7 +2892,7 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
                   cursor: newClubName.trim() ? "pointer" : "not-allowed",
                 }}
               >
-                <Plus size={14} />
+                <Plus size={11} />
                 إضافة النادي
               </button>
             </div>
@@ -2971,7 +2971,7 @@ function LeaderboardRow({ rank, name, username, avatar, points, isYou, theme }) 
           style={{
             fontFamily: "Cairo, sans-serif",
             fontWeight: isYou ? 700 : 600,
-            fontSize: "13px",
+            fontSize: "10px",
             color: theme.text,
           }}
         >
@@ -3423,7 +3423,7 @@ function UsersAdminPage({ theme }) {
         <h2 style={{ fontSize: "16px", fontWeight: 800, color: theme.primary, marginBottom: "6px", textAlign: "center" }}>
           المستخدمون المسجّلون
         </h2>
-        <p style={{ fontSize: "13px", color: theme.muted, textAlign: "center", marginBottom: "18px" }}>
+        <p style={{ fontSize: "10px", color: theme.muted, textAlign: "center", marginBottom: "18px" }}>
           العدد الكلي: {loading ? "..." : profiles.length}
         </p>
 
@@ -3437,11 +3437,11 @@ function UsersAdminPage({ theme }) {
           }}
         >
           {loading ? (
-            <div style={{ padding: "24px", textAlign: "center", fontSize: "13px", color: theme.muted }}>
+            <div style={{ padding: "24px", textAlign: "center", fontSize: "10px", color: theme.muted }}>
               جاري التحميل...
             </div>
           ) : profiles.length === 0 ? (
-            <div style={{ padding: "24px", textAlign: "center", fontSize: "13px", color: theme.muted }}>
+            <div style={{ padding: "24px", textAlign: "center", fontSize: "10px", color: theme.muted }}>
               لا يوجد مستخدمون بعد
             </div>
           ) : (
@@ -3457,7 +3457,7 @@ function UsersAdminPage({ theme }) {
                 }}
               >
                 <div>
-                  <div style={{ fontSize: "13px", fontWeight: 700, color: theme.text }}>
+                  <div style={{ fontSize: "10px", fontWeight: 700, color: theme.text }}>
                     {p.name} {p.is_admin && <span style={{ color: theme.primary }}>(منظّم)</span>}
                   </div>
                   <div dir="ltr" style={{ fontSize: "12px", color: theme.muted, textAlign: "right" }}>
@@ -3495,7 +3495,7 @@ function LoginGate({ onNavigateToAuth, theme }) {
   return (
     <div style={{ padding: "60px 20px", textAlign: "center" }}>
       <Lock size={40} color={theme.muted} style={{ marginBottom: "14px" }} />
-      <p style={{ fontSize: "13px", color: theme.muted, marginBottom: "16px" }}>
+      <p style={{ fontSize: "10px", color: theme.muted, marginBottom: "16px" }}>
         سجّل دخولك عشان تقدر تشوف هذي الصفحة
       </p>
       <button
@@ -3508,7 +3508,7 @@ function LoginGate({ onNavigateToAuth, theme }) {
           color: theme.surface,
           fontFamily: "Cairo, sans-serif",
           fontWeight: 700,
-          fontSize: "13px",
+          fontSize: "10px",
           cursor: "pointer",
         }}
       >
@@ -3541,7 +3541,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
     return (
       <div style={{ padding: "60px 20px", textAlign: "center" }}>
         <User size={40} color={theme.muted} style={{ marginBottom: "14px" }} />
-        <p style={{ fontSize: "13px", color: theme.muted, marginBottom: "16px" }}>
+        <p style={{ fontSize: "10px", color: theme.muted, marginBottom: "16px" }}>
           سجّل دخولك عشان تقدر تعدّل ملفك الشخصي
         </p>
         <button
@@ -3554,7 +3554,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
             color: theme.surface,
             fontFamily: "Cairo, sans-serif",
             fontWeight: 700,
-            fontSize: "13px",
+            fontSize: "10px",
             cursor: "pointer",
           }}
         >
@@ -3642,7 +3642,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
                 border: `2px solid ${theme.surface}`,
               }}
             >
-              <Camera size={14} color="#FFFFFF" />
+              <Camera size={11} color="#FFFFFF" />
             </label>
           </div>
         </div>
@@ -3737,7 +3737,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
               color: theme.danger,
               fontFamily: "Cairo, sans-serif",
               fontWeight: 700,
-              fontSize: "13px",
+              fontSize: "10px",
               cursor: "pointer",
             }}
           >
@@ -3789,7 +3789,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
                     color: theme.text,
                     fontFamily: "Cairo, sans-serif",
                     fontWeight: 700,
-                    fontSize: "13px",
+                    fontSize: "10px",
                     cursor: deleting ? "not-allowed" : "pointer",
                   }}
                 >
@@ -3807,7 +3807,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
                     color: "#FFFFFF",
                     fontFamily: "Cairo, sans-serif",
                     fontWeight: 700,
-                    fontSize: "13px",
+                    fontSize: "10px",
                     cursor: deleting ? "not-allowed" : "pointer",
                     opacity: deleting ? 0.6 : 1,
                   }}
@@ -4084,7 +4084,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
             aria-label="نسخ الكود"
             style={{ background: "transparent", border: "none", color: theme.primary, cursor: "pointer", display: "flex" }}
           >
-            {codeCopied ? <Check size={14} /> : <Copy size={14} />}
+            {codeCopied ? <Check size={11} /> : <Copy size={11} />}
           </button>
         </div>
 
@@ -4252,7 +4252,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                       >
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                            <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "13px", color: theme.primary }}>
+                            <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "10px", color: theme.primary }}>
                               {match.home || "؟"} ضد {match.away || "؟"}
                             </span>
                             {match.doublePoints && (
@@ -4283,7 +4283,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                               style={{
                                 fontFamily: "monospace",
                                 fontWeight: 800,
-                                fontSize: "13px",
+                                fontSize: "10px",
                                 lineHeight: "1",
                                 color: theme.text,
                                 background: theme.surface,
@@ -4394,7 +4394,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                                     style={{
                                       fontFamily: "monospace",
                                       fontWeight: 700,
-                                      fontSize: "13px",
+                                      fontSize: "10px",
                                       lineHeight: "1",
                                       color: theme.text,
                                       display: "inline-flex",
@@ -4530,7 +4530,7 @@ function PrivateLeaguesPage({ leagues, matches, allPredictionRows, onCreateLeagu
                 whiteSpace: "nowrap",
               }}
             >
-              <Plus size={14} />
+              <Plus size={11} />
               إنشاء
             </button>
           </div>
@@ -4624,7 +4624,7 @@ function PrivateLeaguesPage({ leagues, matches, allPredictionRows, onCreateLeagu
                   }}
                 >
                   <Users size={16} color={theme.primary} />
-                  <span style={{ flex: 1, fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "13px", color: theme.text }}>
+                  <span style={{ flex: 1, fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "10px", color: theme.text }}>
                     {league.name}
                   </span>
                   <span style={{ fontSize: "11px", color: theme.muted }}>
@@ -4745,7 +4745,7 @@ function ExampleTable({ example, theme }) {
     border: `1px solid ${theme.border}`,
     padding: "8px 10px",
     textAlign: "center",
-    fontSize: "13px",
+    fontSize: "10px",
   };
   const labelCellStyle = {
     ...cellStyle,
@@ -4864,7 +4864,7 @@ function PointsSystemPage({ theme }) {
                   >
                     <span
                       style={{
-                        fontSize: "13px",
+                        fontSize: "10px",
                         lineHeight: "1",
                         fontWeight: 800,
                         display: "inline-block",
@@ -4874,7 +4874,7 @@ function PointsSystemPage({ theme }) {
                       {t.points}
                     </span>
                   </div>
-                  <span style={{ flex: 1, fontSize: "13px", color: theme.text, fontWeight: 600, fontFamily: "Cairo, sans-serif" }}>{t.label}</span>
+                  <span style={{ flex: 1, fontSize: "10px", color: theme.text, fontWeight: 600, fontFamily: "Cairo, sans-serif" }}>{t.label}</span>
                   <ChevronDown
                     size={16}
                     color={theme.muted}
@@ -5070,7 +5070,7 @@ function StatsPage({ matches, tournaments, tournamentLogos, theme }) {
                 >
                   <span
                     style={{
-                      fontSize: "13px",
+                      fontSize: "10px",
                       lineHeight: "13px",
                       fontWeight: 800,
                       display: "inline-block",
@@ -5080,7 +5080,7 @@ function StatsPage({ matches, tournaments, tournamentLogos, theme }) {
                     {t.points === "none" ? "—" : t.points}
                   </span>
                 </div>
-                <span style={{ flex: 1, fontSize: "13px", color: theme.text, fontWeight: 600 }}>{t.label}</span>
+                <span style={{ flex: 1, fontSize: "10px", color: theme.text, fontWeight: 600 }}>{t.label}</span>
                 <div
                   style={{
                     fontFamily: "Cairo, sans-serif",
@@ -5187,7 +5187,7 @@ function NavDrawer({ open, onClose, activePage, onNavigate, viewMode, setViewMod
                 color: theme.violet,
                 fontFamily: "Cairo, sans-serif",
                 fontWeight: 700,
-                fontSize: "13px",
+                fontSize: "10px",
                 cursor: "pointer",
                 width: "100%",
               }}
@@ -5223,7 +5223,7 @@ function NavDrawer({ open, onClose, activePage, onNavigate, viewMode, setViewMod
                         color: isActive ? theme.primary : theme.text,
                         fontFamily: "Cairo, sans-serif",
                         fontWeight: isActive ? 700 : 500,
-                        fontSize: "13px",
+                        fontSize: "10px",
                         cursor: "pointer",
                         textAlign: "right",
                         width: "100%",
@@ -5374,7 +5374,7 @@ function NavDrawer({ open, onClose, activePage, onNavigate, viewMode, setViewMod
               color: currentUser ? theme.danger : theme.primary,
               fontFamily: "Cairo, sans-serif",
               fontWeight: 700,
-              fontSize: "13px",
+              fontSize: "10px",
               cursor: "pointer",
             }}
           >
