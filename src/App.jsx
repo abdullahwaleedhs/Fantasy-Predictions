@@ -5783,8 +5783,8 @@ export default function App() {
                 >
                   <div
                     style={{
-                      width: "22px",
-                      height: "22px",
+                      width: "24px",
+                      height: "24px",
                       borderRadius: "50%",
                       background: t.bg,
                       border: `1.5px solid ${t.ring}`,
@@ -5798,10 +5798,10 @@ export default function App() {
                     <span
                       style={{
                         fontSize: "10px",
-                        lineHeight: "10px",
+                        lineHeight: "1",
                         fontWeight: 800,
                         display: "inline-block",
-                        transform: "translateY(0.5px)",
+                        paddingTop: "1px",
                       }}
                     >
                       {t.points}
