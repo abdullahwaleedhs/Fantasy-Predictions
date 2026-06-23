@@ -5964,6 +5964,14 @@ export default function App() {
                 tabMatches = tabMatches.filter((m) => m.date && m.time);
               }
 
+              if (dataLoading) {
+                return (
+                  <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "30px 0" }}>
+                    جاري التحميل...
+                  </p>
+                );
+              }
+
               if (tabMatches.length === 0) {
                 return (
                   <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "30px 0" }}>
