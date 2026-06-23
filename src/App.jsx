@@ -5801,7 +5801,6 @@ export default function App() {
                         lineHeight: "1",
                         fontWeight: 800,
                         display: "inline-block",
-                        paddingTop: "1px",
                       }}
                     >
                       {t.points}
