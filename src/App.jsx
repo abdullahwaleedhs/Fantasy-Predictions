@@ -6000,9 +6000,8 @@ export default function App() {
                   <div
                     style={{
                       display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      gap: "8px",
+                      flexDirection: "column",
+                      gap: "10px",
                       background: theme.surface,
                       border: `1px solid ${theme.border}`,
                       borderRadius: "10px",
@@ -6014,19 +6013,42 @@ export default function App() {
                       color: theme.muted,
                     }}
                   >
-                    <span>عدد المباريات المتاحة للتوقع</span>
-                    <span
-                      style={{
-                        background: theme.bg,
-                        border: `1px solid ${theme.border}`,
-                        borderRadius: "6px",
-                        padding: "2px 10px",
-                        color: theme.primary,
-                        fontWeight: 800,
-                      }}
-                    >
-                      {tabMatches.filter((m) => !isLocked(m)).length}
-                    </span>
+                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}>
+                      <span>عدد المباريات المتاحة للتوقع</span>
+                      <span
+                        style={{
+                          background: theme.bg,
+                          border: `1px solid ${theme.border}`,
+                          borderRadius: "6px",
+                          padding: "2px 10px",
+                          color: theme.primary,
+                          fontWeight: 800,
+                        }}
+                      >
+                        {tabMatches.filter((m) => !isLocked(m)).length}
+                      </span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}>
+                      <span>عدد المباريات المتاحة التي لم يتم توقعها</span>
+                      <span
+                        style={{
+                          background: theme.bg,
+                          border: `1px solid ${theme.border}`,
+                          borderRadius: "6px",
+                          padding: "2px 10px",
+                          color: theme.primary,
+                          fontWeight: 800,
+                        }}
+                      >
+                        {
+                          tabMatches.filter(
+                            (m) =>
+                              !isLocked(m) &&
+                              (m.predHome === "" || m.predHome == null || m.predAway === "" || m.predAway == null)
+                          ).length
+                        }
+                      </span>
+                    </div>
                   </div>
                 ) : null;
 
