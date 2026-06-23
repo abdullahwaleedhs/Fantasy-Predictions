@@ -916,8 +916,10 @@ function ScoreInput({ value, onChange, actual, theme, disabled, small }) {
         appearance: "none",
         WebkitAppearance: "none",
         cursor: disabled ? "not-allowed" : "pointer",
-        padding: "0",
+        padding: 0,
+        paddingTop: small ? "2px" : "3px",
         margin: "0",
+        boxSizing: "border-box",
         opacity: disabled ? 0.55 : 1,
       }}
     >
