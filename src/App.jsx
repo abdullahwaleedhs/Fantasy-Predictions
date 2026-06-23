@@ -1917,6 +1917,12 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
             </div>
           </div>
 
+          {isLocked && (match.predHome === "" || match.predHome == null || match.predAway === "" || match.predAway == null) && (
+            <div style={{ textAlign: "center", marginBottom: "14px" }}>
+              <span style={{ color: theme.danger, fontWeight: 700, fontSize: "12px" }}>لم تتوقع المباراة</span>
+            </div>
+          )}
+
           {/* Actual result: shared centered row beneath both columns */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             <div style={{ fontSize: "11px", color: theme.muted, fontWeight: 600, marginBottom: "8px" }}>
