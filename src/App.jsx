@@ -1047,7 +1047,7 @@ function CountdownBadge({ kickoffISO, theme }) {
         </span>
       ) : (
         segments && (
-          <div style={{ display: "flex", alignItems: "flex-start", gap: "3px" }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: "3px", marginTop: "2px" }}>
             {segments.map((seg, i) => (
               <div key={seg.label} style={{ display: "flex", alignItems: "flex-start" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
