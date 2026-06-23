@@ -5621,6 +5621,7 @@ export default function App() {
   const [activePage, setActivePage] = useState(() => sessionStorage.getItem("activePage") || "home");
   const [viewMode, setViewMode] = usePersistedState("viewMode", "user"); // "admin" | "user" - only admins may switch to "admin"
   const [predictionsTabView, setPredictionsTabView] = usePersistedState("predictionsTabView", "current"); // "current" | "archived" - for the توقع! page's match list
+  const [archivedVisibleCount, setArchivedVisibleCount] = useState(10); // المنتهية loads 10 at a time so the page doesn't slow down as old matches pile up
   const [currentUser, setCurrentUser] = useState(null); // null when logged out, { id, name, username, email, avatar } when logged in
   const [authLoading, setAuthLoading] = useState(true);
 
@@ -5997,7 +5998,10 @@ export default function App() {
                 القادمة
               </button>
               <button
-                onClick={() => setPredictionsTabView("archived")}
+                onClick={() => {
+                  setPredictionsTabView("archived");
+                  setArchivedVisibleCount(10);
+                }}
                 style={{
                   flex: 1,
                   padding: "8px 12px",
@@ -6126,11 +6130,16 @@ export default function App() {
                 return predictionsTabView === "archived" ? bTime - aTime : aTime - bTime;
               };
 
+              const sortedTabMatches = [...tabMatches].sort(sortByKickoff);
+              const visibleTabMatches =
+                predictionsTabView === "archived" ? sortedTabMatches.slice(0, archivedVisibleCount) : sortedTabMatches;
+              const hasMoreArchived = predictionsTabView === "archived" && sortedTabMatches.length > archivedVisibleCount;
+
               return (
                 <>
                   {countBox}
                   {viewMode === "admin"
-                    ? [...tabMatches].sort(sortByKickoff).map((match) => (
+                    ? visibleTabMatches.map((match) => (
                         <Scoreboard
                           key={match.id}
                           match={match}
@@ -6143,7 +6152,7 @@ export default function App() {
                           theme={theme}
                         />
                       ))
-                    : [...tabMatches].sort(sortByKickoff).map((match) => (
+                    : visibleTabMatches.map((match) => (
                         <UserMatchCard
                           key={match.id}
                           match={match}
@@ -6155,6 +6164,26 @@ export default function App() {
                           tournamentLogos={tournamentLogos}
                         />
                       ))}
+                  {hasMoreArchived && (
+                    <button
+                      onClick={() => setArchivedVisibleCount((c) => c + 10)}
+                      style={{
+                        width: "100%",
+                        padding: "12px",
+                        borderRadius: "12px",
+                        border: `1.5px dashed ${theme.inputBorder}`,
+                        background: "transparent",
+                        color: theme.text,
+                        fontFamily: "Cairo, sans-serif",
+                        fontWeight: 600,
+                        fontSize: "13px",
+                        cursor: "pointer",
+                        marginTop: "4px",
+                      }}
+                    >
+                      عرض المزيد
+                    </button>
+                  )}
                 </>
               );
             })()}
