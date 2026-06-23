@@ -2343,7 +2343,6 @@ function TournamentFilterPicker({ value, onChange, tournaments, tournamentLogos,
           <div style={{ padding: "8px", borderBottom: `1px solid ${theme.border}`, display: "flex", alignItems: "center", gap: "6px" }}>
             <Search size={14} color={theme.muted} />
             <input
-              autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="بحث عن بطولة..."
