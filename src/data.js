@@ -1,16 +1,18 @@
 import { supabase } from "./supabaseClient";
 
-// Reads the "Date" response header from Supabase's REST endpoint to get the
-// server's clock, independent of the device's (possibly tampered-with) clock.
-// Returns the offset in ms to add to Date.now() to approximate server time.
+// Gets the server's clock via the server_now() RPC function (see
+// supabase/migration_8_server_now_function.sql) and returns the offset in ms
+// to add to Date.now() to approximate server time. We use an RPC call (whose
+// response body carries the timestamp) rather than reading the HTTP "Date"
+// response header, because browsers only expose a small safelist of
+// response headers to cross-origin fetches and "Date" isn't one of them -
+// reading it silently returns null, which made the previous approach a
+// no-op and let device-clock tampering bypass the lock undetected.
 export async function fetchServerTimeOffset() {
   try {
-    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/`, {
-      headers: { apikey: import.meta.env.VITE_SUPABASE_ANON_KEY },
-    });
-    const serverDate = res.headers.get("date");
-    if (!serverDate) return 0;
-    return new Date(serverDate).getTime() - Date.now();
+    const { data, error } = await supabase.rpc("server_now");
+    if (error || !data) return 0;
+    return new Date(data).getTime() - Date.now();
   } catch {
     return 0;
   }
