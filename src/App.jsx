@@ -2388,6 +2388,7 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
     setNewTournamentName("");
   };
 
+  const clubs = clubsByTournament[selectedTournament] || [];
   const importCandidates = clubsByTournament[importSource] || [];
   const existingNames = new Set(clubs.map((c) => c.name));
 
@@ -2405,8 +2406,6 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
     setImportOpen(false);
     setImportSource("");
   };
-
-  const clubs = clubsByTournament[selectedTournament] || [];
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
