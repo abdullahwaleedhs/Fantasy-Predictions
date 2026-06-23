@@ -22,7 +22,16 @@ import {
   joinLeagueDB,
   fetchAllProfiles,
   fetchAllPredictionsWithProfiles,
+  fetchServerTimeOffset,
 } from "./data";
+
+// Offset (ms) between the server's clock and this device's clock, used so
+// that match-lock timing can't be bypassed by changing the device's date/time.
+// Synced once on app load (and periodically) in App(); read via serverNow().
+let serverTimeOffsetMs = 0;
+function serverNow() {
+  return Date.now() + serverTimeOffsetMs;
+}
 
 // Persists a piece of UI state (active tab, sub-view, open filter, etc.) in
 // sessionStorage, so reloading the page keeps the user exactly where they
@@ -962,10 +971,10 @@ function ScoreInput({ value, onChange, actual, theme, disabled, small }) {
 }
 
 function useCountdown(kickoffISO) {
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState(() => serverNow());
 
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
+    const id = setInterval(() => setNow(serverNow()), 1000);
     return () => clearInterval(id);
   }, []);
 
@@ -1770,7 +1779,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
   const num = (v) => (v === "" ? "" : String(v).replace(/[^0-9]/g, "").slice(0, 2));
 
   const kickoffISO = match.date && match.time ? `${match.date}T${match.time}:00` : null;
-  const isLocked = kickoffISO ? new Date(kickoffISO).getTime() - Date.now() <= 0 : false;
+  const isLocked = kickoffISO ? new Date(kickoffISO).getTime() - serverNow() <= 0 : false;
 
   const hasActual = match.actualHome !== "" && match.actualAway !== "" && match.actualHome != null && match.actualAway != null;
 
@@ -2077,7 +2086,7 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
   };
 
   const kickoffISO = draft.date && draft.time ? `${draft.date}T${draft.time}:00` : null;
-  const isLocked = kickoffISO ? new Date(kickoffISO).getTime() - Date.now() <= 0 : false;
+  const isLocked = kickoffISO ? new Date(kickoffISO).getTime() - serverNow() <= 0 : false;
 
   const clubs = clubsByTournament?.[draft.tournament] || [];
 
@@ -5498,6 +5507,15 @@ export default function App() {
         setAllPredictionRows(p);
       })
       .finally(() => setDataLoading(false));
+  }, []);
+
+  // Keep the server-time offset fresh so match locking can't be tricked by
+  // changing the device's date/time; re-sync on load and every 2 minutes.
+  useEffect(() => {
+    const sync = () => fetchServerTimeOffset().then((offset) => { serverTimeOffsetMs = offset; });
+    sync();
+    const id = setInterval(sync, 2 * 60 * 1000);
+    return () => clearInterval(id);
   }, []);
 
   const tournaments = useMemo(() => tournamentRows.map((t) => t.name), [tournamentRows]);

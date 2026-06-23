@@ -1,5 +1,21 @@
 import { supabase } from "./supabaseClient";
 
+// Reads the "Date" response header from Supabase's REST endpoint to get the
+// server's clock, independent of the device's (possibly tampered-with) clock.
+// Returns the offset in ms to add to Date.now() to approximate server time.
+export async function fetchServerTimeOffset() {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/`, {
+      headers: { apikey: import.meta.env.VITE_SUPABASE_ANON_KEY },
+    });
+    const serverDate = res.headers.get("date");
+    if (!serverDate) return 0;
+    return new Date(serverDate).getTime() - Date.now();
+  } catch {
+    return 0;
+  }
+}
+
 // ============ PROFILES (admin user list) ============
 
 export async function fetchAllProfiles() {
