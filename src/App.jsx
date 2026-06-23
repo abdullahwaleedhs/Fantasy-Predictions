@@ -1020,11 +1020,11 @@ function CountdownBadge({ kickoffISO, theme }) {
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
-        gap: "5px",
+        gap: "4px",
         background: theme.surface,
         border: `1px solid ${stateColor}`,
         borderRadius: "6px",
-        padding: "5px 7px",
+        padding: "3px 5px",
       }}
     >
       {locked ? (
@@ -1047,7 +1047,7 @@ function CountdownBadge({ kickoffISO, theme }) {
         </span>
       ) : (
         segments && (
-          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
             {segments.map((seg, i) => (
               <div key={seg.label} style={{ display: "flex", alignItems: "center" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
