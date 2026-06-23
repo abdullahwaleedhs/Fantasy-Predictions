@@ -6000,8 +6000,9 @@ export default function App() {
                   <div
                     style={{
                       display: "flex",
-                      justifyContent: "space-between",
+                      justifyContent: "center",
                       alignItems: "center",
+                      gap: "8px",
                       background: theme.surface,
                       border: `1px solid ${theme.border}`,
                       borderRadius: "10px",
@@ -6013,11 +6014,18 @@ export default function App() {
                       color: theme.muted,
                     }}
                   >
-                    <span>
-                      عدد المباريات المتاحة للتوقع: <span style={{ color: theme.primary }}>{tabMatches.filter((m) => !isLocked(m)).length}</span>
-                    </span>
-                    <span>
-                      عدد المباريات المعروضة: <span style={{ color: theme.primary }}>{tabMatches.length}</span>
+                    <span>عدد المباريات المتاحة للتوقع</span>
+                    <span
+                      style={{
+                        background: theme.bg,
+                        border: `1px solid ${theme.border}`,
+                        borderRadius: "6px",
+                        padding: "2px 10px",
+                        color: theme.primary,
+                        fontWeight: 800,
+                      }}
+                    >
+                      {tabMatches.filter((m) => !isLocked(m)).length}
                     </span>
                   </div>
                 ) : null;
