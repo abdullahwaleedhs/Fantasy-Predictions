@@ -1878,9 +1878,70 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "62px" }}>
                 <span style={{ color: theme.muted, fontSize: "12px", fontWeight: 700 }}>ضد</span>
               </div>
-            ) : isLocked && !match.userBoost ? (
+            ) : isLocked && !match.userBoost && !hideResult ? (
               // Match is over and the personal boost was never used on it -
-              // nothing meaningful to show once it can't be toggled anymore.
+              // show the points result here instead, filling the gap left by
+              // the now-hidden boost button.
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", paddingTop: "24px" }}>
+                {result ? (
+                  <div
+                    style={{
+                      width: "44px",
+                      height: "44px",
+                      borderRadius: "50%",
+                      background: colors.bg,
+                      border: `2px solid ${colors.ring}`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: colors.text,
+                    }}
+                  >
+                    <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: 800, fontSize: "15px", lineHeight: "1", display: "block", paddingTop: "1px" }}>
+                      {result.points}
+                    </span>
+                  </div>
+                ) : noPrediction ? (
+                  <span style={{ color: theme.danger, fontWeight: 700, fontSize: "10px", textAlign: "center" }}>لم تتوقع المباراة</span>
+                ) : (
+                  <div
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      border: `2px dashed ${theme.inputBorder}`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "10px",
+                      color: theme.muted,
+                    }}
+                  >
+                    —
+                  </div>
+                )}
+                {effectiveMultiplier > 1 && (
+                  <span
+                    style={{
+                      fontFamily: "Cairo, sans-serif",
+                      fontWeight: 800,
+                      fontSize: "10px",
+                      color: theme.yellow,
+                      background: theme.yellowSoft,
+                      borderRadius: "6px",
+                      padding: "2px 6px",
+                    }}
+                  >
+                    x{effectiveMultiplier}
+                  </span>
+                )}
+                {result && (
+                  <div style={{ fontSize: "9px", lineHeight: "12px", color: theme.muted, textAlign: "center", fontFamily: "Cairo, sans-serif", maxWidth: "70px" }}>
+                    {result.label}
+                  </div>
+                )}
+              </div>
+            ) : isLocked && !match.userBoost ? (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "62px" }} />
             ) : (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", paddingTop: "62px" }}>
@@ -2005,7 +2066,10 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
             )}
           </div>
 
-          {/* Points badge: only meaningful once both prediction and actual exist */}
+          {/* Points badge: only meaningful once both prediction and actual exist.
+              Skipped here when already shown in the middle slot above (locked,
+              boost unused) to avoid showing it twice. */}
+          {!(isLocked && !match.userBoost && !match.doublePoints) && (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", marginTop: "16px" }}>
             {result ? (
               <div
@@ -2069,10 +2133,11 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
               </span>
             )}
           </div>
+          )}
           </>
           )}
 
-          {result && (
+          {result && !(isLocked && !match.userBoost && !match.doublePoints) && (
             <div
               style={{
                 marginTop: "10px",
