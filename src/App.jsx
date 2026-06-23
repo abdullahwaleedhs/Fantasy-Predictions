@@ -640,97 +640,126 @@ function TournamentPicker({ value, onChange, tournaments, onAddTournament, tourn
       {open && (
         <div
           style={{
-            position: "absolute",
-            top: "100%",
-            right: 0,
-            left: 0,
-            zIndex: 20,
-            background: theme.surface,
-            border: `1px solid ${theme.border}`,
-            borderRadius: "0 0 10px 10px",
-            boxShadow: "0 8px 20px rgba(0,0,0,0.18)",
-            maxHeight: "260px",
-            overflowY: "auto",
+            position: "fixed",
+            inset: 0,
+            zIndex: 1000,
+            background: "rgba(0,0,0,0.45)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+          }}
+          onClick={() => {
+            setOpen(false);
+            setQuery("");
           }}
         >
-          <div style={{ padding: "8px", borderBottom: `1px solid ${theme.border}`, display: "flex", alignItems: "center", gap: "6px" }}>
-            <Search size={14} color={theme.muted} />
-            <input
-              autoFocus
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="بحث أو إضافة بطولة جديدة..."
-              style={{
-                border: "none",
-                outline: "none",
-                flex: 1,
-                fontFamily: "Cairo, sans-serif",
-                fontSize: "16px",
-                color: theme.text,
-                background: "transparent",
-              }}
-            />
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%",
+              maxWidth: "360px",
+              maxHeight: "70vh",
+              display: "flex",
+              flexDirection: "column",
+              background: theme.surface,
+              border: `1px solid ${theme.border}`,
+              borderRadius: "14px",
+              boxShadow: "0 12px 32px rgba(0,0,0,0.28)",
+              overflow: "hidden",
+            }}
+          >
+            <div style={{ padding: "10px", borderBottom: `1px solid ${theme.border}`, display: "flex", alignItems: "center", gap: "6px" }}>
+              <Search size={14} color={theme.muted} />
+              <input
+                autoFocus
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="بحث أو إضافة بطولة جديدة..."
+                style={{
+                  border: "none",
+                  outline: "none",
+                  flex: 1,
+                  fontFamily: "Cairo, sans-serif",
+                  fontSize: "16px",
+                  color: theme.text,
+                  background: "transparent",
+                }}
+              />
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  setQuery("");
+                }}
+                aria-label="إغلاق"
+                style={{ background: "transparent", border: "none", color: theme.muted, cursor: "pointer", display: "flex" }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div style={{ overflowY: "auto", flex: 1 }}>
+              {filtered.map((t) => (
+                <div
+                  key={t}
+                  onClick={() => {
+                    onChange(t);
+                    setOpen(false);
+                    setQuery("");
+                  }}
+                  style={{
+                    padding: "12px 14px",
+                    fontSize: "13px",
+                    fontFamily: "Cairo, sans-serif",
+                    color: t === value ? theme.primary : theme.text,
+                    fontWeight: t === value ? 700 : 400,
+                    background: t === value ? theme.primarySoft : "transparent",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = theme.bg)}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = t === value ? theme.primarySoft : "transparent")}
+                >
+                  <TournamentIcon name={t} logo={tournamentLogos?.[t]} theme={theme} color={t === value ? theme.primary : theme.muted} />
+                  {t}
+                </div>
+              ))}
+
+              {allowAdd && query.trim() && !exactExists && (
+                <div
+                  onClick={() => {
+                    onAddTournament(query.trim());
+                    onChange(query.trim());
+                    setOpen(false);
+                    setQuery("");
+                  }}
+                  style={{
+                    padding: "12px 14px",
+                    fontSize: "13px",
+                    fontFamily: "Cairo, sans-serif",
+                    color: theme.accent,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    borderTop: `1px solid ${theme.border}`,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <Plus size={14} />
+                  إضافة "{query.trim()}"
+                </div>
+              )}
+
+              {filtered.length === 0 && !query.trim() && (
+                <div style={{ padding: "14px", fontSize: "12px", color: theme.muted, textAlign: "center" }}>
+                  {allowAdd ? "لا توجد بطولات بعد — اكتب اسم البطولة بخانة البحث بالأعلى لإضافتها" : "لا توجد بطولات بعد"}
+                </div>
+              )}
+            </div>
           </div>
-
-          {filtered.map((t) => (
-            <div
-              key={t}
-              onClick={() => {
-                onChange(t);
-                setOpen(false);
-                setQuery("");
-              }}
-              style={{
-                padding: "10px 12px",
-                fontSize: "13px",
-                fontFamily: "Cairo, sans-serif",
-                color: t === value ? theme.primary : theme.text,
-                fontWeight: t === value ? 700 : 400,
-                background: t === value ? theme.primarySoft : "transparent",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = theme.bg)}
-              onMouseLeave={(e) => (e.currentTarget.style.background = t === value ? theme.primarySoft : "transparent")}
-            >
-              <TournamentIcon name={t} logo={tournamentLogos?.[t]} theme={theme} color={t === value ? theme.primary : theme.muted} />
-              {t}
-            </div>
-          ))}
-
-          {allowAdd && query.trim() && !exactExists && (
-            <div
-              onClick={() => {
-                onAddTournament(query.trim());
-                onChange(query.trim());
-                setOpen(false);
-                setQuery("");
-              }}
-              style={{
-                padding: "10px 12px",
-                fontSize: "13px",
-                fontFamily: "Cairo, sans-serif",
-                color: theme.accent,
-                fontWeight: 700,
-                cursor: "pointer",
-                borderTop: `1px solid ${theme.border}`,
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-              }}
-            >
-              <Plus size={14} />
-              إضافة "{query.trim()}"
-            </div>
-          )}
-
-          {filtered.length === 0 && !query.trim() && (
-            <div style={{ padding: "14px", fontSize: "12px", color: theme.muted, textAlign: "center" }}>
-              {allowAdd ? "لا توجد بطولات بعد — اكتب اسم البطولة بخانة البحث بالأعلى لإضافتها" : "لا توجد بطولات بعد"}
-            </div>
-          )}
         </div>
       )}
     </div>
