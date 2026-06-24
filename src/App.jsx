@@ -2069,7 +2069,7 @@ function MatchResultFooter({ match, theme, hasActual, result, colors, noPredicti
       </div>
       <div style={{ flex: 1, textAlign: "center", padding: "8px 4px", borderLeft: `1px solid ${theme.border}` }}>
         <div style={{ fontSize: "11px", color: theme.muted, marginBottom: "5px" }}>النتيجة الفعلية</div>
-        <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.text}>
+        <ResultPill theme={theme} border={theme.violet} bg={theme.bg} color={theme.violet} bold>
           {hasActual ? `${match.actualHome} - ${match.actualAway}` : "لم تنتهِ"}
         </ResultPill>
         <div style={{ height: "22px", display: "flex", alignItems: "center", justifyContent: "center", marginTop: "4px" }}>
