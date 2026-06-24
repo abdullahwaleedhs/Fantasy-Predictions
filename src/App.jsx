@@ -386,6 +386,17 @@ function calcPoints(predHome, predAway, actualHome, actualAway, multiplier = 1) 
   return withMultiplier(0, TIERS_META[5].label);
 }
 
+// A match only counts toward stats/leaderboard/tournament points once it has
+// an actual result AND its kickoff time has actually passed (i.e. it's truly
+// finished and locked) - entering a result early as admin must not award
+// points before the match is over.
+function isMatchFinished(m) {
+  const hasActual = m.actualHome !== "" && m.actualHome != null && m.actualAway !== "" && m.actualAway != null;
+  if (!hasActual) return false;
+  if (!m.date || !m.time) return true;
+  return new Date(`${m.date}T${m.time}:00`).getTime() - serverNow() <= 0;
+}
+
 // Computes all statistics shown on the stats page from the current matches.
 // Only matches that have an actual result (finished matches) are counted.
 // A finished match with an empty prediction counts as the "didn't predict"
@@ -399,8 +410,7 @@ function computeStats(matches) {
   let totalPoints = 0;
 
   matches.forEach((m) => {
-    const hasActual = m.actualHome !== "" && m.actualHome != null && m.actualAway !== "" && m.actualAway != null;
-    if (!hasActual) return; // match hasn't finished yet, exclude entirely
+    if (!isMatchFinished(m)) return; // match hasn't finished/locked yet, exclude entirely
 
     totalFinished += 1;
 
@@ -4019,8 +4029,7 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
   for (const row of allPredictionRows) {
     const match = matchById[row.match_id];
     if (!match) continue; // outside the current tournament filter, or unknown match
-    const hasActual = match.actualHome !== "" && match.actualHome != null && match.actualAway !== "" && match.actualAway != null;
-    if (!hasActual) continue; // match hasn't finished yet
+    if (!isMatchFinished(match)) continue; // match hasn't finished/locked yet
 
     if (!byUser[row.user_id]) {
       byUser[row.user_id] = {
@@ -4135,8 +4144,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
   for (const row of allPredictionRows) {
     const match = matchById[row.match_id];
     if (!match) continue;
-    const hasActual = match.actualHome !== "" && match.actualHome != null && match.actualAway !== "" && match.actualAway != null;
-    if (!hasActual) continue;
+    if (!isMatchFinished(match)) continue;
 
     if (!realPointsByUserId[row.user_id]) {
       realPointsByUserId[row.user_id] = { points: 0, tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 } };
@@ -4499,7 +4507,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                         {league.players.map((p, i) => {
                           const pred = playerPredictionsById[p.id]?.[match.id];
                           const isLast = i === league.players.length - 1;
-                          const hasActual = match.actualHome !== "" && match.actualHome != null;
+                          const hasActual = isMatchFinished(match);
                           const isRealPlayer = p.isYou || p.name === "عبدالله";
                           const playerHasTribl = isRealPlayer && match.userBoost && !match.doublePoints;
                           const effectiveMultiplier = match.doublePoints ? 2 : playerHasTribl ? 3 : 1;
