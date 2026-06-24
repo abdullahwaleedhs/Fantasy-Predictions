@@ -4474,21 +4474,9 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
             >
               <div style={{ display: "flex" }}>
                 <div style={{ flex: 1, textAlign: "center", padding: "8px 4px", borderLeft: `1px solid ${theme.border}` }}>
-                  {pred ? (
-                    <ResultPill theme={theme} border={theme.violet} bg={theme.bg} color={theme.violet} bold>
-                      <span style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-                        <span style={{ fontSize: "9px", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60px" }}>{p.name}</span>
-                        <span>{pred.predAway} - {pred.predHome}</span>
-                      </span>
-                    </ResultPill>
-                  ) : (
-                    <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} bold>
-                      <span style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-                        <span style={{ fontSize: "9px", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60px" }}>{p.name}</span>
-                        <span>لم يتوقع</span>
-                      </span>
-                    </ResultPill>
-                  )}
+                  <ResultPill theme={theme} border={theme.violet} bg={theme.bg} color={theme.violet} bold>
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60px" }}>{p.name}</span>
+                  </ResultPill>
                 </div>
                 <div style={{ flex: 1, textAlign: "center", padding: "8px 4px", borderLeft: `1px solid ${theme.border}` }}>
                   <ResultPill theme={theme} border={theme.violet} bg={theme.bg} color={theme.violet} bold>
