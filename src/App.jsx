@@ -872,8 +872,6 @@ function TeamPicker({ value, logo, onChange, clubs, placeholder, theme, disabled
             fontWeight: 700,
             fontSize: "10.5px",
             color: theme.primary,
-            borderBottom: `2px solid ${theme.primary}`,
-            paddingBottom: "2px",
             width: "100%",
             textAlign: "center",
             whiteSpace: "normal",
