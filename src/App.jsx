@@ -1887,7 +1887,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                     fontWeight: 800,
                     border: `1.5px solid ${theme.yellow}`,
                     background: match.userBoost ? theme.yellowSoft : "transparent",
-                    color: theme.yellow,
+                    color: match.userBoost ? theme.yellow : theme.text,
                     cursor: boostDisabled ? "not-allowed" : "pointer",
                     opacity: boostDisabled && !match.userBoost ? 0.5 : 1,
                     whiteSpace: "nowrap",
