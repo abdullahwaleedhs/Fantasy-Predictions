@@ -1774,7 +1774,7 @@ function MatchInfoBar({ match, theme, dark }) {
 }
 
 // Static (non-editable) team display for the restricted user view.
-function TeamDisplay({ name, logo, theme }) {
+function TeamDisplay({ name, logo, theme, noUnderline }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", flex: 1, minWidth: 0 }}>
       <ClubLogo logo={logo} name={name} theme={theme} size={48} />
@@ -1785,8 +1785,7 @@ function TeamDisplay({ name, logo, theme }) {
           fontSize: "10.5px",
           color: theme.primary,
           textAlign: "center",
-          borderBottom: `1px solid ${theme.primary}`,
-          paddingBottom: "2px",
+          ...(noUnderline ? {} : { borderBottom: `1px solid ${theme.primary}`, paddingBottom: "2px" }),
           width: "100%",
           whiteSpace: "nowrap",
           overflow: "hidden",
@@ -4436,14 +4435,14 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
       <div style={{ padding: "10px 12px 12px" }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "8px" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", flex: 1 }}>
-            <TeamDisplay name={match.home} logo={match.homeLogo} theme={theme} />
+            <TeamDisplay name={match.home} logo={match.homeLogo} theme={theme} noUnderline />
             <ScoreBoxStatic value={match.actualHome} theme={theme} />
           </div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", paddingTop: "30px" }}>
             <span style={{ color: theme.muted, fontSize: "11px", fontWeight: 700 }}>ضد</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", flex: 1 }}>
-            <TeamDisplay name={match.away} logo={match.awayLogo} theme={theme} />
+            <TeamDisplay name={match.away} logo={match.awayLogo} theme={theme} noUnderline />
             <ScoreBoxStatic value={match.actualAway} theme={theme} />
           </div>
         </div>
