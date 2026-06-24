@@ -4116,6 +4116,7 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
 
 function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBack, tournaments, tournamentLogos, currentUser, theme }) {
   const [codeCopied, setCodeCopied] = useState(false);
+  const [activeTab, setActiveTab] = usePersistedState("leagueDetail.activeTab", "ranking"); // "ranking" | "predictions"
   const [tournamentFilter, setTournamentFilter] = usePersistedState("leagueDetail.tournamentFilter", "الكل");
 
   const youPlayer = league.players.find((p) => p.isYou);
@@ -4175,6 +4176,24 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
       };
     })
     .sort((a, b) => b.points - a.points || compareTierCounts(a.tierCounts, b.tierCounts));
+
+  // التوقعات tab: every finished match, most recently finished first.
+  const predictionRowsByUserId = {};
+  for (const row of allPredictionRows) {
+    if (!predictionRowsByUserId[row.user_id]) predictionRowsByUserId[row.user_id] = {};
+    const hasPrediction = row.pred_home !== null && row.pred_home !== undefined && row.pred_away !== null && row.pred_away !== undefined;
+    if (hasPrediction) {
+      predictionRowsByUserId[row.user_id][row.match_id] = { predHome: row.pred_home, predAway: row.pred_away, userBoost: !!row.user_boost };
+    }
+  }
+  const playerPredictionsById = {};
+  league.players.forEach((p) => {
+    playerPredictionsById[p.id] = predictionRowsByUserId[p.userId] || {};
+  });
+
+  const finishedMatches = filteredMatches
+    .filter(isMatchFinished)
+    .sort((a, b) => new Date(`${b.date}T${b.time}:00`).getTime() - new Date(`${a.date}T${a.time}:00`).getTime());
 
   const copyCode = () => {
     if (navigator.clipboard) {
@@ -4266,15 +4285,216 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
           theme={theme}
         />
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-          {ranked.map((p, i) => (
-            <LeaderboardRow key={p.id} rank={i + 1} name={p.name} username={p.username} avatar={p.avatar} points={p.points} isYou={p.isYou} theme={theme} />
-          ))}
+        {/* Tabs: الترتيب / التوقعات */}
+        <div
+          style={{
+            display: "flex",
+            background: theme.bg,
+            border: `1px solid ${theme.border}`,
+            borderRadius: "10px",
+            padding: "3px",
+            marginBottom: "18px",
+          }}
+        >
+          <button
+            onClick={() => setActiveTab("ranking")}
+            style={{
+              flex: 1,
+              padding: "8px 12px",
+              borderRadius: "8px",
+              border: "none",
+              background: activeTab === "ranking" ? theme.primary : "transparent",
+              color: activeTab === "ranking" ? theme.surface : theme.muted,
+              fontFamily: "Cairo, sans-serif",
+              fontWeight: 700,
+              fontSize: "12px",
+              cursor: "pointer",
+            }}
+          >
+            الترتيب
+          </button>
+          <button
+            onClick={() => setActiveTab("predictions")}
+            style={{
+              flex: 1,
+              padding: "8px 12px",
+              borderRadius: "8px",
+              border: "none",
+              background: activeTab === "predictions" ? theme.primary : "transparent",
+              color: activeTab === "predictions" ? theme.surface : theme.muted,
+              fontFamily: "Cairo, sans-serif",
+              fontWeight: 700,
+              fontSize: "12px",
+              cursor: "pointer",
+            }}
+          >
+            التوقعات
+          </button>
         </div>
 
-        <p style={{ fontSize: "11px", color: theme.muted, textAlign: "center", marginTop: "14px" }}>
-          النقاط محسوبة من توقعات تجريبية على مباريات صفحة "توقع!" الحالية
-        </p>
+        {activeTab === "ranking" ? (
+          <>
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              {ranked.map((p, i) => (
+                <LeaderboardRow key={p.id} rank={i + 1} name={p.name} username={p.username} avatar={p.avatar} points={p.points} isYou={p.isYou} theme={theme} />
+              ))}
+            </div>
+
+            <p style={{ fontSize: "11px", color: theme.muted, textAlign: "center", marginTop: "14px" }}>
+              النقاط محسوبة من توقعات تجريبية على مباريات صفحة "توقع!" الحالية
+            </p>
+          </>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            {finishedMatches.length === 0 ? (
+              <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "20px 0" }}>
+                ما فيه مباريات منتهية بعد
+              </p>
+            ) : (
+              finishedMatches.map((match) => (
+                <LeaguePredictionCard key={match.id} match={match} league={league} playerPredictionsById={playerPredictionsById} tournamentLogos={tournamentLogos} theme={theme} />
+              ))
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function LeaguePredictionCard({ match, league, playerPredictionsById, tournamentLogos, theme }) {
+  const dateLabel = match.date
+    ? (() => {
+        const [y, m, d] = match.date.split("-");
+        return `${d}-${m}-${y}`;
+      })()
+    : "—";
+  const timeLabel = match.time
+    ? (() => {
+        const [hh, mm] = match.time.split(":");
+        const h12 = Number(hh) % 12 === 0 ? 12 : Number(hh) % 12;
+        const ampm = Number(hh) >= 12 ? "PM" : "AM";
+        return `${String(h12).padStart(2, "0")}:${mm} ${ampm}`;
+      })()
+    : "—";
+
+  return (
+    <div
+      style={{
+        background: theme.surface,
+        border: `1.5px solid ${theme.violet}`,
+        borderRadius: "12px",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          padding: "8px 10px",
+          fontFamily: "Cairo, sans-serif",
+          fontWeight: 700,
+          fontSize: "9px",
+          color: theme.primary,
+          textAlign: "center",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "5px",
+          borderBottom: `1px solid ${theme.border}`,
+        }}
+      >
+        {match.tournament && <TournamentIcon name={match.tournament} logo={tournamentLogos?.[match.tournament]} theme={theme} color={theme.primary} />}
+        {match.tournament || "بطولة غير محددة"}
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
+          padding: "7px 10px",
+          background: theme.bg,
+          borderBottom: `1px solid ${theme.border}`,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
+          <Clock size={11} color={theme.muted} />
+          <span dir="ltr" style={{ fontFamily: "Cairo, sans-serif", fontSize: "10px", fontWeight: 600, color: theme.text }}>
+            {timeLabel}
+          </span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
+          <span dir="ltr" style={{ fontFamily: "Cairo, sans-serif", fontSize: "10px", fontWeight: 600, color: theme.text }}>
+            {dateLabel}
+          </span>
+          <Calendar size={11} color={theme.muted} />
+        </div>
+      </div>
+
+      <div style={{ padding: "10px 12px 12px" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "8px" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", flex: 1 }}>
+            <TeamDisplay name={match.home} logo={match.homeLogo} theme={theme} />
+            <ScoreBoxStatic value={match.actualHome} theme={theme} />
+          </div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", paddingTop: "30px" }}>
+            <span style={{ color: theme.muted, fontSize: "11px", fontWeight: 700 }}>ضد</span>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", flex: 1 }}>
+            <TeamDisplay name={match.away} logo={match.awayLogo} theme={theme} />
+            <ScoreBoxStatic value={match.actualAway} theme={theme} />
+          </div>
+        </div>
+      </div>
+
+      {/* Per-player predictions for this match: name - prediction - points,
+          scrollable horizontally so the card height stays fixed regardless
+          of how many league members are in it. */}
+      <div style={{ borderTop: `1px solid ${theme.border}`, padding: "10px 12px", display: "flex", gap: "10px", overflowX: "auto" }}>
+        {league.players.map((p) => {
+          const pred = playerPredictionsById[p.id]?.[match.id];
+          const multiplier = match.doublePoints ? 2 : pred?.userBoost ? 3 : 1;
+          const result = pred ? calcPoints(pred.predHome, pred.predAway, match.actualHome, match.actualAway, multiplier) : null;
+          const colors = result ? tierStyleFor(theme, result.basePoints) : null;
+          return (
+            <div
+              key={p.id}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "4px",
+                flexShrink: 0,
+                minWidth: "56px",
+              }}
+            >
+              <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: p.isYou ? 700 : 600, fontSize: "10px", color: theme.text, whiteSpace: "nowrap" }}>
+                {p.name}
+              </span>
+              <span dir="ltr" style={{ fontFamily: "monospace", fontWeight: 700, fontSize: "10px", color: theme.muted }}>
+                {pred ? `${pred.predAway} - ${pred.predHome}` : "لم يتوقع"}
+              </span>
+              {result ? (
+                <span
+                  style={{
+                    fontFamily: "Cairo, sans-serif",
+                    fontWeight: 800,
+                    fontSize: "10px",
+                    color: colors.text,
+                    background: colors.bg,
+                    border: `1px solid ${colors.ring}`,
+                    borderRadius: "6px",
+                    padding: "1px 7px",
+                  }}
+                >
+                  {result.points}
+                </span>
+              ) : (
+                <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "10px", color: theme.muted }}>—</span>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
