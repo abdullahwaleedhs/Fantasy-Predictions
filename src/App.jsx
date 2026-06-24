@@ -1764,7 +1764,7 @@ function TeamDisplay({ name, logo, theme }) {
       <span
         style={{
           fontFamily: "Cairo, sans-serif",
-          fontWeight: 700,
+          fontWeight: 800,
           fontSize: "10.5px",
           color: theme.primary,
           textAlign: "center",
