@@ -4436,14 +4436,16 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "8px" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", flex: 1 }}>
             <TeamDisplay name={match.home} logo={match.homeLogo} theme={theme} noUnderline logoSize={36} />
-            <ScoreBoxStatic value={match.actualHome} theme={theme} />
           </div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", paddingTop: "24px" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", paddingTop: "24px" }}>
             <span style={{ color: theme.muted, fontSize: "11px", fontWeight: 700 }}>ضد</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <ScoreBoxStatic value={match.actualHome} theme={theme} />
+              <ScoreBoxStatic value={match.actualAway} theme={theme} />
+            </div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", flex: 1 }}>
             <TeamDisplay name={match.away} logo={match.awayLogo} theme={theme} noUnderline logoSize={36} />
-            <ScoreBoxStatic value={match.actualAway} theme={theme} />
           </div>
         </div>
       </div>
@@ -4485,8 +4487,8 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
                 borderRadius: "8px",
               }}
             >
-              <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: p.isYou ? 700 : 600, fontSize: "11px", color: theme.text, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {p.name}
+              <span dir="ltr" style={{ fontFamily: "monospace", fontWeight: 700, fontSize: "11px", color: theme.muted, flexShrink: 0 }}>
+                {pred ? `${pred.predAway} - ${pred.predHome}` : "لم يتوقع"}
               </span>
               <span
                 style={{
@@ -4508,8 +4510,8 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
               >
                 {result ? result.points : "—"}
               </span>
-              <span dir="ltr" style={{ fontFamily: "monospace", fontWeight: 700, fontSize: "11px", color: theme.muted, flexShrink: 0 }}>
-                {pred ? `${pred.predAway} - ${pred.predHome}` : "لم يتوقع"}
+              <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: p.isYou ? 700 : 600, fontSize: "11px", color: theme.text, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {p.name}
               </span>
               <div style={{ width: "18px", height: "18px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 {predWinnerLogo !== null || predWinnerName ? <ClubLogo logo={predWinnerLogo} name={predWinnerName} theme={theme} size={18} /> : null}
