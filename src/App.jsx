@@ -6136,7 +6136,8 @@ export default function App() {
                 if (!m.date || !m.time) return false;
                 return new Date(`${m.date}T${m.time}:00`).getTime() - serverNow() <= 0;
               };
-              const isPredicted = (m) => !!confirmedPredictions[m.id];
+              const isPredicted = (m) =>
+                m.predHome !== "" && m.predHome != null && m.predAway !== "" && m.predAway != null;
 
               let tabMatches = matches.filter((m) => {
                 if (predictionsTabView === "archived") return isLocked(m);
