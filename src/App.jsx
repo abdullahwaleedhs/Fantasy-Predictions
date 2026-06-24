@@ -1643,7 +1643,7 @@ function DateTimeRow({ match, onChange, theme }) {
 // Admin setting: mark this match as double points for everyone. Lives
 // inside the violet-framed white box (below the date/time row), not the
 // schedule bar above it.
-function DoublePointsToggle({ match, onChange, theme }) {
+function DoublePointsToggle({ match, onChange, theme, disabled }) {
   return (
     <div
       style={{
@@ -1654,6 +1654,7 @@ function DoublePointsToggle({ match, onChange, theme }) {
         padding: "8px 12px",
         background: match.doublePoints ? theme.yellowSoft : theme.surface,
         borderBottom: `1px solid ${theme.border}`,
+        opacity: disabled ? 0.6 : 1,
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -1670,7 +1671,8 @@ function DoublePointsToggle({ match, onChange, theme }) {
         </span>
       </div>
       <button
-        onClick={() => onChange({ ...match, doublePoints: !match.doublePoints })}
+        onClick={() => !disabled && onChange({ ...match, doublePoints: !match.doublePoints })}
+        disabled={disabled}
         style={{
           width: "38px",
           height: "20px",
@@ -1678,7 +1680,7 @@ function DoublePointsToggle({ match, onChange, theme }) {
           border: "none",
           background: match.doublePoints ? theme.yellow : theme.inputBorder,
           position: "relative",
-          cursor: "pointer",
+          cursor: disabled ? "not-allowed" : "pointer",
           flexShrink: 0,
           padding: 0,
         }}
@@ -2210,7 +2212,7 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
         <div style={{ background: theme.bg }}>
           <DateTimeRow match={draft} onChange={updateDraft} theme={theme} />
         </div>
-        <DoublePointsToggle match={draft} onChange={updateDraft} theme={theme} />
+        <DoublePointsToggle match={draft} onChange={updateDraft} theme={theme} disabled={isLocked} />
         <div style={{ padding: "16px 18px 18px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "16px" }}>
             {/* Invisible spacer matching the delete button's width, so the
@@ -5717,6 +5719,12 @@ export default function App() {
     if (viewMode === "admin" && !currentUser?.is_admin) setViewMode("user");
   }, [currentUser, viewMode]);
 
+  // The organizer doesn't have a تم توقعها tab - bounce back to متاحة if
+  // it was left selected before switching into admin mode.
+  useEffect(() => {
+    setPredictionsTabView((prev) => (viewMode === "admin" && prev === "predicted" ? "available" : prev));
+  }, [viewMode]);
+
   // Remember the current page across reloads, so refreshing doesn't
   // bounce the user back to the home page.
   useEffect(() => {
@@ -6124,23 +6132,25 @@ export default function App() {
                 >
                   متاحة
                 </button>
-                <button
-                  onClick={() => setPredictionsTabView("predicted")}
-                  style={{
-                    flex: 1,
-                    padding: "8px 10px",
-                    borderRadius: "8px",
-                    border: "none",
-                    background: predictionsTabView === "predicted" ? theme.primary : "transparent",
-                    color: predictionsTabView === "predicted" ? theme.surface : theme.muted,
-                    fontFamily: "Cairo, sans-serif",
-                    fontWeight: 700,
-                    fontSize: "11px",
-                    cursor: "pointer",
-                  }}
-                >
-                  تم توقعها
-                </button>
+                {viewMode !== "admin" && (
+                  <button
+                    onClick={() => setPredictionsTabView("predicted")}
+                    style={{
+                      flex: 1,
+                      padding: "8px 10px",
+                      borderRadius: "8px",
+                      border: "none",
+                      background: predictionsTabView === "predicted" ? theme.primary : "transparent",
+                      color: predictionsTabView === "predicted" ? theme.surface : theme.muted,
+                      fontFamily: "Cairo, sans-serif",
+                      fontWeight: 700,
+                      fontSize: "11px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    تم توقعها
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     setPredictionsTabView("archived");
@@ -6184,9 +6194,11 @@ export default function App() {
                     <div style={{ flex: 1, textAlign: "center", fontFamily: "Cairo, sans-serif", fontWeight: 800, fontSize: "11px", color: theme.muted }}>
                       {availableCount}
                     </div>
-                    <div style={{ flex: 1, textAlign: "center", fontFamily: "Cairo, sans-serif", fontWeight: 800, fontSize: "11px", color: theme.muted }}>
-                      {predictedCount}
-                    </div>
+                    {viewMode !== "admin" && (
+                      <div style={{ flex: 1, textAlign: "center", fontFamily: "Cairo, sans-serif", fontWeight: 800, fontSize: "11px", color: theme.muted }}>
+                        {predictedCount}
+                      </div>
+                    )}
                     <div style={{ flex: 1, textAlign: "center", fontFamily: "Cairo, sans-serif", fontWeight: 800, fontSize: "11px", color: theme.muted }}>
                       {archivedCount}
                     </div>
