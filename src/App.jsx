@@ -4491,9 +4491,15 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
               </div>
               <div style={{ flex: 1, textAlign: "center", padding: "8px 4px" }}>
                 {result ? (
-                  <ResultPill theme={theme} border={colors.ring} bg={colors.bg} color={colors.text} bold>
-                    {result.points}
-                  </ResultPill>
+                  pred?.userBoost ? (
+                    <ResultPill theme={theme} border={theme.yellow} bg={theme.yellowSoft} color={theme.yellow} bold>
+                      {result.points}
+                    </ResultPill>
+                  ) : (
+                    <ResultPill theme={theme} border={colors.ring} bg={colors.bg} color={colors.text} bold>
+                      {result.points}
+                    </ResultPill>
+                  )
                 ) : (
                   <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} bold>
                     لم يتوقع
