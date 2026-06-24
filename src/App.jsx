@@ -4450,8 +4450,17 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
 
       {/* Per-player breakdown - same three-box footer style as the
           participant's منتهية card (المزايا المستخدمة / النتيجة الفعلية / النقاط). */}
-      <div style={{ borderTop: `1px solid ${theme.border}`, padding: "10px 12px", display: "flex", flexDirection: "column", gap: "10px" }}>
-        {league.players.map((p) => {
+      <div
+        style={{
+          borderTop: `1px solid ${theme.border}`,
+          margin: "10px 12px",
+          background: theme.bg,
+          border: `1px solid ${theme.border}`,
+          borderRadius: "10px",
+          overflow: "hidden",
+        }}
+      >
+        {league.players.map((p, idx) => {
           const pred = playerPredictionsById[p.id]?.[match.id];
           const multiplier = match.doublePoints ? 2 : pred?.userBoost ? 3 : 1;
           const result = pred ? calcPoints(pred.predHome, pred.predAway, match.actualHome, match.actualAway, multiplier) : null;
@@ -4460,40 +4469,36 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
             <div
               key={p.id}
               style={{
-                background: theme.bg,
-                border: `1px solid ${theme.border}`,
-                borderRadius: "10px",
-                overflow: "hidden",
+                display: "flex",
+                borderTop: idx === 0 ? "none" : `1px solid ${theme.border}`,
               }}
             >
-              <div style={{ display: "flex" }}>
-                <div style={{ flex: 1, textAlign: "center", padding: "8px 4px", borderLeft: `1px solid ${theme.border}` }}>
+              <div style={{ flex: 1, textAlign: "center", padding: "8px 4px", borderLeft: `1px solid ${theme.border}` }}>
+                <ResultPill theme={theme} border={theme.text} bg={theme.bg} color={theme.text} bold>
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60px" }}>{p.name}</span>
+                </ResultPill>
+              </div>
+              <div style={{ flex: 1, textAlign: "center", padding: "8px 4px", borderLeft: `1px solid ${theme.border}` }}>
+                {pred ? (
                   <ResultPill theme={theme} border={theme.text} bg={theme.bg} color={theme.text} bold>
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60px" }}>{p.name}</span>
+                    {pred.predHome} - {pred.predAway}
                   </ResultPill>
-                </div>
-                <div style={{ flex: 1, textAlign: "center", padding: "8px 4px", borderLeft: `1px solid ${theme.border}` }}>
-                  {pred ? (
-                    <ResultPill theme={theme} border={theme.text} bg={theme.bg} color={theme.text} bold>
-                      {pred.predHome} - {pred.predAway}
-                    </ResultPill>
-                  ) : (
-                    <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} bold>
-                      لم يتوقع
-                    </ResultPill>
-                  )}
-                </div>
-                <div style={{ flex: 1, textAlign: "center", padding: "8px 4px" }}>
-                  {result ? (
-                    <ResultPill theme={theme} border={colors.ring} bg={colors.bg} color={colors.text} bold>
-                      {result.points}
-                    </ResultPill>
-                  ) : (
-                    <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} bold>
-                      لم يتوقع
-                    </ResultPill>
-                  )}
-                </div>
+                ) : (
+                  <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} bold>
+                    لم يتوقع
+                  </ResultPill>
+                )}
+              </div>
+              <div style={{ flex: 1, textAlign: "center", padding: "8px 4px" }}>
+                {result ? (
+                  <ResultPill theme={theme} border={colors.ring} bg={colors.bg} color={colors.text} bold>
+                    {result.points}
+                  </ResultPill>
+                ) : (
+                  <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} bold>
+                    لم يتوقع
+                  </ResultPill>
+                )}
               </div>
             </div>
           );
