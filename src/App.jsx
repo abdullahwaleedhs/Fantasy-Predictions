@@ -1933,9 +1933,9 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                 }}
                 disabled={noPrediction}
                 style={{
-                  border: `1.5px solid ${theme.violet}`,
-                  background: justSaved ? theme.violet : "transparent",
-                  color: justSaved ? theme.surface : theme.violet,
+                  border: `1.5px solid ${theme.text}`,
+                  background: justSaved ? theme.text : "transparent",
+                  color: justSaved ? theme.surface : theme.text,
                   borderRadius: "8px",
                   padding: "7px 18px",
                   fontFamily: "Cairo, sans-serif",
@@ -6023,7 +6023,7 @@ export default function App() {
             <div
               style={{
                 background: theme.surface,
-                border: `1px solid ${theme.border}`,
+                border: `1.5px solid ${theme.violet}`,
                 borderRadius: "10px",
                 marginBottom: "16px",
                 overflow: "hidden",
