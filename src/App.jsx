@@ -1598,9 +1598,9 @@ function TimeFlexPicker({ value, onChange, theme, disabled }) {
   );
 }
 
-function DateTimeRow({ match, onChange, theme }) {
+function DateTimeRow({ match, onChange, theme, disabled }) {
   const kickoffISO = match.date && match.time ? `${match.date}T${match.time}:00` : null;
-  const isLocked = kickoffISO ? new Date(kickoffISO).getTime() - serverNow() <= 0 : false;
+  const isLocked = disabled;
 
   return (
     <div
@@ -2221,7 +2221,7 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
         }}
       >
         <div style={{ background: theme.bg }}>
-          <DateTimeRow match={draft} onChange={updateDraft} theme={theme} />
+          <DateTimeRow match={draft} onChange={updateDraft} theme={theme} disabled={isLocked} />
         </div>
         <DoublePointsToggle match={draft} onChange={updateDraft} theme={theme} disabled={isLocked} />
         <div style={{ padding: "16px 18px 18px" }}>
@@ -2237,7 +2237,7 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
               clubs={clubs}
               placeholder="الفريق الأول"
               theme={theme}
-              disabled={isLocked}
+              disabled={naturallyLocked}
             />
             <span style={{ color: theme.muted, fontSize: "12px", fontWeight: 600, flexShrink: 0 }}>ضد</span>
             <TeamPicker
@@ -2247,7 +2247,7 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
               clubs={clubs}
               placeholder="الفريق الثاني"
               theme={theme}
-              disabled={isLocked}
+              disabled={naturallyLocked}
             />
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", flexShrink: 0 }}>
               <button
