@@ -4474,17 +4474,17 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
               }}
             >
               <div style={{ flex: 1, textAlign: "center", padding: "5px 4px", borderLeft: `1px solid ${theme.border}` }}>
-                <ResultPill theme={theme} border={theme.text} bg={theme.bg} color={theme.text} bold compact>
+                <ResultPill theme={theme} border={theme.text} bg={theme.bg} color={theme.text} compact>
                   <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60px" }}>{p.name}</span>
                 </ResultPill>
               </div>
               <div style={{ flex: 1, textAlign: "center", padding: "5px 4px", borderLeft: `1px solid ${theme.border}` }}>
                 {pred ? (
-                  <ResultPill theme={theme} border={theme.text} bg={theme.bg} color={theme.text} bold compact>
+                  <ResultPill theme={theme} border={theme.text} bg={theme.bg} color={theme.text} compact>
                     {pred.predHome} - {pred.predAway}
                   </ResultPill>
                 ) : (
-                  <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} bold compact>
+                  <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} compact>
                     لم يتوقع
                   </ResultPill>
                 )}
@@ -4492,16 +4492,16 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
               <div style={{ flex: 1, textAlign: "center", padding: "5px 4px" }}>
                 {result ? (
                   pred?.userBoost ? (
-                    <ResultPill theme={theme} border={theme.yellow} bg={theme.yellowSoft} color={theme.yellow} bold compact>
+                    <ResultPill theme={theme} border={theme.yellow} bg={theme.yellowSoft} color={theme.yellow} compact>
                       {result.points}
                     </ResultPill>
                   ) : (
-                    <ResultPill theme={theme} border={colors.ring} bg={colors.bg} color={colors.text} bold compact>
+                    <ResultPill theme={theme} border={colors.ring} bg={colors.bg} color={colors.text} compact>
                       {result.points}
                     </ResultPill>
                   )
                 ) : (
-                  <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} bold compact>
+                  <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} compact>
                     لم يتوقع
                   </ResultPill>
                 )}
