@@ -1785,7 +1785,7 @@ function TeamDisplay({ name, logo, theme }) {
 // Restricted match card for regular participants: everything is read-only
 // (tournament, teams, schedule, actual result) except the prediction inputs.
 // Also supports the personal "double points" boost (limited uses per season).
-function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogos, hideResult, confirmed, onConfirm }) {
+function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogos, hideResult, confirmed, onConfirm, predictedTab }) {
   // Score edits stay local (draft) until "حفظ التوقع" is pressed - nothing
   // is written to the DB on keystroke, so an unsaved edit doesn't survive
   // a page refresh.
@@ -1966,9 +1966,9 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
                 onClick={saveDraft}
                 disabled={saveDisabled}
                 style={{
-                  border: `1.5px solid ${theme.text}`,
-                  background: showSaved ? theme.text : "transparent",
-                  color: showSaved ? theme.surface : theme.text,
+                  border: `1.5px solid ${predictedTab ? (showSaved ? "#16A34A" : "#DC2626") : theme.text}`,
+                  background: predictedTab ? (showSaved ? "#16A34A" : "transparent") : showSaved ? theme.text : "transparent",
+                  color: predictedTab ? (showSaved ? "#FFFFFF" : "#DC2626") : showSaved ? theme.surface : theme.text,
                   borderRadius: "8px",
                   padding: "7px 18px",
                   fontFamily: "Cairo, sans-serif",
@@ -6311,6 +6311,7 @@ export default function App() {
                           hideResult={predictionsTabView !== "archived"}
                           confirmed={!!confirmedPredictions[match.id]}
                           onConfirm={() => confirmPrediction(match.id)}
+                          predictedTab={predictionsTabView === "predicted"}
                         />
                       ))}
                   {hasMoreArchived && (
