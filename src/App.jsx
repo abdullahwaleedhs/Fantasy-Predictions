@@ -4117,7 +4117,6 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
 function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBack, tournaments, tournamentLogos, currentUser, theme }) {
   const [codeCopied, setCodeCopied] = useState(false);
   const [activeTab, setActiveTab] = usePersistedState("leagueDetail.activeTab", "ranking"); // "ranking" | "predictions"
-  const [predictionsView, setPredictionsView] = usePersistedState("leagueDetail.predictionsView", "recent"); // "recent" | "archived"
   const [tournamentFilter, setTournamentFilter] = usePersistedState("leagueDetail.tournamentFilter", "الكل");
 
   const youPlayer = league.players.find((p) => p.isYou);
@@ -4180,24 +4179,13 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
 
   // For the التوقعات tab: a match only appears here once its kickoff
   // deadline has passed (regardless of whether the actual result has been
-  // entered yet). Within the first 24 hours after the deadline it shows in
-  // the main list; after that it moves to "المباريات المنتهية".
+  // entered yet).
   const now = Date.now();
-  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
   const pastDeadlineMatches = filteredMatches.filter((m) => {
     if (!m.date || !m.time) return false;
     const kickoff = new Date(`${m.date}T${m.time}:00`).getTime();
     return kickoff <= now;
-  });
-
-  const recentMatches = pastDeadlineMatches.filter((m) => {
-    const kickoff = new Date(`${m.date}T${m.time}:00`).getTime();
-    return now - kickoff < ONE_DAY_MS;
-  });
-  const archivedMatches = pastDeadlineMatches.filter((m) => {
-    const kickoff = new Date(`${m.date}T${m.time}:00`).getTime();
-    return now - kickoff >= ONE_DAY_MS;
   });
 
   const predictionRowsByUserId = {};
@@ -4365,59 +4353,13 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
           </>
         ) : (
           <div>
-            {/* Sub-toggle: المباريات الحالية (آخر 24 ساعة) / المباريات المنتهية */}
-            <div
-              style={{
-                display: "flex",
-                gap: "6px",
-                marginBottom: "14px",
-              }}
-            >
-              <button
-                onClick={() => setPredictionsView("recent")}
-                style={{
-                  flex: 1,
-                  padding: "8px 10px",
-                  borderRadius: "8px",
-                  border: `1px solid ${predictionsView === "recent" ? theme.primary : theme.border}`,
-                  background: predictionsView === "recent" ? theme.primarySoft : theme.surface,
-                  color: predictionsView === "recent" ? theme.primary : theme.muted,
-                  fontFamily: "Cairo, sans-serif",
-                  fontWeight: 700,
-                  fontSize: "11px",
-                  cursor: "pointer",
-                }}
-              >
-                الحالية
-              </button>
-              <button
-                onClick={() => setPredictionsView("archived")}
-                style={{
-                  flex: 1,
-                  padding: "8px 10px",
-                  borderRadius: "8px",
-                  border: `1px solid ${predictionsView === "archived" ? theme.primary : theme.border}`,
-                  background: predictionsView === "archived" ? theme.primarySoft : theme.surface,
-                  color: predictionsView === "archived" ? theme.primary : theme.muted,
-                  fontFamily: "Cairo, sans-serif",
-                  fontWeight: 700,
-                  fontSize: "11px",
-                  cursor: "pointer",
-                }}
-              >
-                المباريات المنتهية
-              </button>
-            </div>
-
             <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-              {(predictionsView === "recent" ? recentMatches : archivedMatches).length === 0 ? (
+              {pastDeadlineMatches.length === 0 ? (
                 <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "20px 0" }}>
-                  {predictionsView === "recent"
-                    ? "ما فيه مباريات قفلت بآخر 24 ساعة"
-                    : "ما فيه مباريات منتهية بعد"}
+                  ما فيه مباريات منتهية بعد
                 </p>
               ) : (
-                (predictionsView === "recent" ? recentMatches : archivedMatches).map((match) => {
+                pastDeadlineMatches.map((match) => {
                   const dateParts = match.date.split("-"); // YYYY-MM-DD
                   const dateLabel = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
                   return (
