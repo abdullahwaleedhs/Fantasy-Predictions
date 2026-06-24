@@ -5645,7 +5645,7 @@ export default function App() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activePage, setActivePage] = useState(() => sessionStorage.getItem("activePage") || "home");
   const [viewMode, setViewMode] = usePersistedState("viewMode", "user"); // "admin" | "user" - only admins may switch to "admin"
-  const [predictionsTabView, setPredictionsTabView] = usePersistedState("predictionsTabView", "current"); // "current" | "archived" - for the توقع! page's match list
+  const [predictionsTabView, setPredictionsTabView] = usePersistedState("predictionsTabView", "available"); // "available" | "predicted" | "archived" - for the توقع! page's match list
   const [archivedVisibleCount, setArchivedVisibleCount] = useState(10); // المنتهية loads 10 at a time so the page doesn't slow down as old matches pile up
   const [currentUser, setCurrentUser] = useState(null); // null when logged out, { id, name, username, email, avatar } when logged in
   const [authLoading, setAuthLoading] = useState(true);
@@ -5991,10 +5991,29 @@ export default function App() {
               </p>
             )}
 
-            {/* Tabs: القادمة والحالية / المنتهية - a match moves to المنتهية
-                once 24 hours have passed since its kickoff deadline. Admin
-                keeps full edit rights in both tabs; participants can only
-                predict on matches that haven't locked yet either way. */}
+            {/* Title rectangle */}
+            <div
+              style={{
+                background: theme.surface,
+                border: `1px solid ${theme.border}`,
+                borderRadius: "10px",
+                padding: "10px 14px",
+                marginBottom: "10px",
+                textAlign: "center",
+                fontFamily: "Cairo, sans-serif",
+                fontWeight: 800,
+                fontSize: "13px",
+                color: theme.primary,
+              }}
+            >
+              التوقعات
+            </div>
+
+            {/* Tabs: متاحة / تم توقعها / المنتهية - a match stays in متاحة
+                until the user predicts it, moves to تم توقعها once predicted
+                (as long as the deadline hasn't locked yet), and moves to
+                المنتهية the moment the deadline locks. Admin keeps full edit
+                rights across tabs. */}
             <div
               style={{
                 display: "flex",
@@ -6006,21 +6025,38 @@ export default function App() {
               }}
             >
               <button
-                onClick={() => setPredictionsTabView("current")}
+                onClick={() => setPredictionsTabView("available")}
                 style={{
                   flex: 1,
-                  padding: "8px 12px",
+                  padding: "8px 10px",
                   borderRadius: "8px",
                   border: "none",
-                  background: predictionsTabView === "current" ? theme.primary : "transparent",
-                  color: predictionsTabView === "current" ? theme.surface : theme.muted,
+                  background: predictionsTabView === "available" ? theme.primary : "transparent",
+                  color: predictionsTabView === "available" ? theme.surface : theme.muted,
                   fontFamily: "Cairo, sans-serif",
                   fontWeight: 700,
-                  fontSize: "12px",
+                  fontSize: "11px",
                   cursor: "pointer",
                 }}
               >
-                القادمة
+                متاحة
+              </button>
+              <button
+                onClick={() => setPredictionsTabView("predicted")}
+                style={{
+                  flex: 1,
+                  padding: "8px 10px",
+                  borderRadius: "8px",
+                  border: "none",
+                  background: predictionsTabView === "predicted" ? theme.primary : "transparent",
+                  color: predictionsTabView === "predicted" ? theme.surface : theme.muted,
+                  fontFamily: "Cairo, sans-serif",
+                  fontWeight: 700,
+                  fontSize: "11px",
+                  cursor: "pointer",
+                }}
+              >
+                تم توقعها
               </button>
               <button
                 onClick={() => {
@@ -6029,14 +6065,14 @@ export default function App() {
                 }}
                 style={{
                   flex: 1,
-                  padding: "8px 12px",
+                  padding: "8px 10px",
                   borderRadius: "8px",
                   border: "none",
                   background: predictionsTabView === "archived" ? theme.primary : "transparent",
                   color: predictionsTabView === "archived" ? theme.surface : theme.muted,
                   fontFamily: "Cairo, sans-serif",
                   fontWeight: 700,
-                  fontSize: "12px",
+                  fontSize: "11px",
                   cursor: "pointer",
                 }}
               >
@@ -6046,28 +6082,28 @@ export default function App() {
 
             {/* Matches */}
             {(() => {
-              const nowTs = serverNow();
-              const isArchived = (m) => {
-                if (!m.date || !m.time) return false; // no deadline yet => never archived
-                const kickoff = new Date(`${m.date}T${m.time}:00`).getTime();
-                return nowTs - kickoff >= 0; // moves to المنتهية the moment it locks
-              };
-              let tabMatches = matches.filter((m) => (predictionsTabView === "archived" ? isArchived(m) : !isArchived(m)));
-
-              // Participants shouldn't see matches the admin hasn't scheduled
-              // yet (no date/time set) - admin still sees them so they can
-              // set the schedule.
-              if (viewMode === "user" && predictionsTabView === "current") {
-                tabMatches = tabMatches.filter((m) => m.date && m.time);
-              }
-
               const isLocked = (m) => {
                 if (!m.date || !m.time) return false;
                 return new Date(`${m.date}T${m.time}:00`).getTime() - serverNow() <= 0;
               };
+              const isPredicted = (m) =>
+                m.predHome !== "" && m.predHome != null && m.predAway !== "" && m.predAway != null;
+
+              let tabMatches = matches.filter((m) => {
+                if (predictionsTabView === "archived") return isLocked(m);
+                if (predictionsTabView === "predicted") return !isLocked(m) && isPredicted(m);
+                return !isLocked(m) && !isPredicted(m);
+              });
+
+              // Participants shouldn't see matches the admin hasn't scheduled
+              // yet (no date/time set) - admin still sees them so they can
+              // set the schedule.
+              if (viewMode === "user" && predictionsTabView !== "archived") {
+                tabMatches = tabMatches.filter((m) => m.date && m.time);
+              }
 
               const countBox =
-                viewMode === "user" && predictionsTabView === "current" ? (
+                viewMode === "user" && predictionsTabView === "available" ? (
                   <div
                     style={{
                       display: "flex",
@@ -6139,7 +6175,11 @@ export default function App() {
                   <>
                     {countBox}
                     <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "30px 0" }}>
-                      {predictionsTabView === "archived" ? "ما فيه مباريات منتهية بعد" : "ما فيه مباريات قادمة"}
+                      {predictionsTabView === "archived"
+                        ? "ما فيه مباريات منتهية بعد"
+                        : predictionsTabView === "predicted"
+                        ? "ما فيه مباريات توقعتها بعد"
+                        : "ما فيه مباريات متاحة للتوقع"}
                     </p>
                   </>
                 );
@@ -6187,7 +6227,7 @@ export default function App() {
                           onUseBoost={() => useBoostOnMatch(match.id)}
                           onCancelBoost={() => cancelBoostOnMatch(match.id)}
                           tournamentLogos={tournamentLogos}
-                          hideResult={predictionsTabView === "current"}
+                          hideResult={predictionsTabView !== "archived"}
                         />
                       ))}
                   {hasMoreArchived && (
@@ -6214,8 +6254,8 @@ export default function App() {
               );
             })()}
 
-            {/* Add button - admin only, and only in القادمة (no point adding a new match directly into المنتهية) */}
-            {viewMode === "admin" && predictionsTabView !== "archived" && (
+            {/* Add button - admin only, and only in متاحة (new matches have no prediction yet) */}
+            {viewMode === "admin" && predictionsTabView === "available" && (
               <button
                 onClick={addMatch}
                 style={{
