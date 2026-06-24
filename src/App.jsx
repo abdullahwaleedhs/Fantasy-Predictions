@@ -4436,16 +4436,14 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "8px" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", flex: 1 }}>
             <TeamDisplay name={match.home} logo={match.homeLogo} theme={theme} noUnderline logoSize={36} />
+            <ScoreBoxStatic value={match.actualHome} theme={theme} />
           </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", paddingTop: "24px" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "24px" }}>
             <span style={{ color: theme.muted, fontSize: "11px", fontWeight: 700 }}>ضد</span>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <ScoreBoxStatic value={match.actualHome} theme={theme} />
-              <ScoreBoxStatic value={match.actualAway} theme={theme} />
-            </div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", flex: 1 }}>
             <TeamDisplay name={match.away} logo={match.awayLogo} theme={theme} noUnderline logoSize={36} />
+            <ScoreBoxStatic value={match.actualAway} theme={theme} />
           </div>
         </div>
       </div>
