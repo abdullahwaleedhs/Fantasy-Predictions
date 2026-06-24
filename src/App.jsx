@@ -1878,63 +1878,9 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "62px" }}>
                 <span style={{ color: theme.muted, fontSize: "12px", fontWeight: 700 }}>ضد</span>
               </div>
-            ) : isLocked && !match.userBoost && !hideResult ? (
-              // Match is over and the personal boost was never used on it -
-              // show the actual result here instead, filling the gap left by
-              // the now-hidden boost button. The points badge stays below.
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", paddingTop: "30px" }}>
-                <span style={{ fontSize: "9px", color: theme.muted, fontWeight: 600 }}>النتيجة الفعلية</span>
-                {hasActual ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "5px",
-                      alignItems: "center",
-                      fontFamily: "Cairo, sans-serif",
-                      fontWeight: 700,
-                      fontSize: "14px",
-                      color: theme.text,
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: "32px",
-                        height: "36px",
-                        borderRadius: "7px",
-                        border: "2px solid #000000",
-                        background: theme.bg,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        lineHeight: "1",
-                      }}
-                    >
-                      {match.actualHome}
-                    </span>
-                    <span style={{ color: theme.muted, fontWeight: 700 }}>-</span>
-                    <span
-                      style={{
-                        width: "32px",
-                        height: "36px",
-                        borderRadius: "7px",
-                        border: "2px solid #000000",
-                        background: theme.bg,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        lineHeight: "1",
-                      }}
-                    >
-                      {match.actualAway}
-                    </span>
-                  </div>
-                ) : (
-                  <div style={{ fontSize: "10px", color: theme.muted, height: "36px", display: "flex", alignItems: "center" }}>
-                    لم تنتهِ المباراة
-                  </div>
-                )}
-              </div>
             ) : isLocked && !match.userBoost ? (
+              // Match is over and the personal boost was never used on it -
+              // nothing meaningful to show once it can't be toggled anymore.
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "62px" }} />
             ) : (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", paddingTop: "62px" }}>
@@ -1994,9 +1940,6 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
               participant view skips it there entirely to keep the card short. */}
           {!hideResult && (
           <>
-          {/* Shown here unless already displayed in the middle slot above
-              (locked, boost unused) to avoid showing it twice. */}
-          {!(isLocked && !match.userBoost && !match.doublePoints) && (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             <div style={{ fontSize: "11px", color: theme.muted, fontWeight: 600, marginBottom: "8px" }}>
               النتيجة الفعلية
@@ -2061,7 +2004,6 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
               </div>
             )}
           </div>
-          )}
 
           {/* Points badge: only meaningful once both prediction and actual exist */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", marginTop: "16px" }}>
