@@ -1818,7 +1818,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
 
   const saveDraft = () => {
     onChange({ ...match, predHome: draftHome, predAway: draftAway });
-    onConfirm();
+    if (!noPredictionDraft) onConfirm();
   };
 
   return (
