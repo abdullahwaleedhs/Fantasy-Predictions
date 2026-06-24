@@ -32,7 +32,9 @@ export async function registerUser({ name, username, email, password }) {
 export async function loginUser({ identifier, password }) {
   let email = identifier;
   if (!identifier.includes("@")) {
-    const { data, error } = await supabase.rpc("get_email_for_username", { p_username: identifier });
+    // Usernames are stored lowercase, so normalize here too - login by
+    // username shouldn't be case-sensitive.
+    const { data, error } = await supabase.rpc("get_email_for_username", { p_username: identifier.trim().toLowerCase() });
     if (error) throw error;
     if (!data) throw new Error("بيانات الدخول غير صحيحة");
     email = data;
@@ -60,7 +62,7 @@ export async function deleteAccount() {
 export async function requestPasswordReset(identifier) {
   let email = identifier;
   if (!identifier.includes("@")) {
-    const { data, error } = await supabase.rpc("get_email_for_username", { p_username: identifier });
+    const { data, error } = await supabase.rpc("get_email_for_username", { p_username: identifier.trim().toLowerCase() });
     if (error) throw error;
     if (!data) throw new Error("لم يتم العثور على حساب بهذا الاسم");
     email = data;
