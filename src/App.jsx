@@ -5711,10 +5711,13 @@ export default function App() {
     }
     fetchPredictionsForUser(currentUser.id).then((rows) => {
       const byMatch = {};
+      const confirmed = {};
       for (const row of rows) {
         byMatch[row.match_id] = { predHome: row.pred_home, predAway: row.pred_away, userBoost: row.user_boost };
+        if (row.pred_home != null && row.pred_away != null) confirmed[row.match_id] = true;
       }
       setPredictionsByMatch(byMatch);
+      setConfirmedPredictions(confirmed);
     });
   }, [currentUser?.id]);
 
