@@ -1865,23 +1865,27 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
               boost control sitting in the middle gap between the two
               prediction boxes - hidden entirely if admin already doubled
               this match. */}
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px", marginBottom: "16px" }}>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px", marginBottom: isLocked ? "0" : "16px" }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", flex: 1 }}>
               <TeamDisplay name={match.home} logo={match.homeLogo} theme={theme} />
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", marginTop: "4px" }}>
                 <span style={{ fontSize: "10px", color: theme.muted, fontWeight: 600 }}>توقعك</span>
-                <ScoreInput value={match.predHome} onChange={(v) => onChange({ ...match, predHome: num(v) })} theme={theme} disabled={isLocked} />
+                {isLocked ? (
+                  <ScoreBoxStatic value={match.predHome} theme={theme} />
+                ) : (
+                  <ScoreInput value={match.predHome} onChange={(v) => onChange({ ...match, predHome: num(v) })} theme={theme} disabled={isLocked} />
+                )}
               </div>
             </div>
 
-            {match.doublePoints ? (
+            {isLocked ? (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minWidth: "64px", paddingTop: "62px" }}>
+                <span style={{ color: match.doublePoints ? theme.yellow : theme.muted, fontSize: "13px", fontWeight: 700 }}>ضد</span>
+              </div>
+            ) : match.doublePoints ? (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "62px" }}>
                 <span style={{ color: theme.muted, fontSize: "12px", fontWeight: 700 }}>ضد</span>
               </div>
-            ) : isLocked && !match.userBoost ? (
-              // Match is over and the personal boost was never used on it -
-              // nothing meaningful to show once it can't be toggled anymore.
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "62px" }} />
             ) : (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", paddingTop: "62px" }}>
                 <button
@@ -1906,23 +1910,21 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                     width: "100%",
                   }}
                 >
-                  {isLocked ? "تربل (x3)" : match.userBoost ? "إلغاء (x3)" : "التربل (x3)"}
+                  {match.userBoost ? "إلغاء (x3)" : "التربل (x3)"}
                   <Zap size={12} color={match.userBoost ? theme.yellow : theme.muted} />
                 </button>
-                {!isLocked && (
-                  <span
-                    style={{
-                      fontSize: "9px",
-                      color: theme.muted,
-                      fontWeight: 600,
-                      whiteSpace: "nowrap",
-                      width: "100%",
-                      textAlign: "center",
-                    }}
-                  >
-                    ({boostsRemaining} متبقية)
-                  </span>
-                )}
+                <span
+                  style={{
+                    fontSize: "9px",
+                    color: theme.muted,
+                    fontWeight: 600,
+                    whiteSpace: "nowrap",
+                    width: "100%",
+                    textAlign: "center",
+                  }}
+                >
+                  ({boostsRemaining} متبقية)
+                </span>
               </div>
             )}
 
@@ -1930,111 +1932,38 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
               <TeamDisplay name={match.away} logo={match.awayLogo} theme={theme} />
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", marginTop: "4px" }}>
                 <span style={{ fontSize: "10px", color: theme.muted, fontWeight: 600 }}>توقعك</span>
-                <ScoreInput value={match.predAway} onChange={(v) => onChange({ ...match, predAway: num(v) })} theme={theme} disabled={isLocked} />
+                {isLocked ? (
+                  <ScoreBoxStatic value={match.predAway} theme={theme} />
+                ) : (
+                  <ScoreInput value={match.predAway} onChange={(v) => onChange({ ...match, predAway: num(v) })} theme={theme} disabled={isLocked} />
+                )}
               </div>
             </div>
           </div>
 
-          {/* Actual result: shared centered row beneath both columns - not
-              meaningful in القادمة (match hasn't happened yet), so the
-              participant view skips it there entirely to keep the card short. */}
-          {!hideResult && (
+          {/* القادمة (match hasn't happened yet) skips the result/points section
+              entirely - hasn't started, so a result has no meaning there. */}
+          {!hideResult && !isLocked && (
           <>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             <div style={{ fontSize: "11px", color: theme.muted, fontWeight: 600, marginBottom: "8px" }}>
               النتيجة الفعلية
             </div>
-            {hasActual ? (
-              <div
-                style={{
-                  display: "flex",
-                  gap: "8px",
-                  alignItems: "center",
-                  fontFamily: "Cairo, sans-serif",
-                  fontWeight: 700,
-                  fontSize: "16px",
-                  color: theme.text,
-                }}
-              >
-                <span
-                  style={{
-                    width: "40px",
-                    height: "44px",
-                    borderRadius: "8px",
-                    border: "2.5px solid #000000",
-                    background: theme.bg,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    lineHeight: "1",
-                    paddingTop: "1px",
-                  }}
-                >
-                  {match.actualHome}
-                </span>
-                <span style={{ color: theme.muted, fontWeight: 700 }}>-</span>
-                <span
-                  style={{
-                    width: "40px",
-                    height: "44px",
-                    borderRadius: "8px",
-                    border: "2.5px solid #000000",
-                    background: theme.bg,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    lineHeight: "1",
-                    paddingTop: "1px",
-                  }}
-                >
-                  {match.actualAway}
-                </span>
-              </div>
-            ) : (
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: theme.muted,
-                  height: "40px",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                لم تنتهِ المباراة
-              </div>
-            )}
+            <div
+              style={{
+                fontSize: "12px",
+                color: theme.muted,
+                height: "40px",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              لم تنتهِ المباراة
+            </div>
           </div>
 
-          {/* Points badge: only meaningful once both prediction and actual exist */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", marginTop: "16px" }}>
-            {result ? (
-              <div
-                style={{
-                  width: "48px",
-                  height: "48px",
-                  borderRadius: "50%",
-                  background: colors.bg,
-                  border: `2px solid ${colors.ring}`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: colors.text,
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "Cairo, sans-serif",
-                    fontWeight: 800,
-                    fontSize: "16px",
-                    lineHeight: "1",
-                    display: "block",
-                    paddingTop: "1px",
-                  }}
-                >
-                  {result.points}
-                </span>
-              </div>
-            ) : noPrediction ? (
+            {noPrediction ? (
               <span style={{ color: theme.danger, fontWeight: 700, fontSize: "12px" }}>لم تتوقع المباراة</span>
             ) : (
               <div
@@ -2053,40 +1982,132 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                 —
               </div>
             )}
-            {effectiveMultiplier > 1 && (
-              <span
-                style={{
-                  fontFamily: "Cairo, sans-serif",
-                  fontWeight: 800,
-                  fontSize: "12px",
-                  color: theme.yellow,
-                  background: theme.yellowSoft,
-                  borderRadius: "6px",
-                  padding: "3px 7px",
-                }}
-              >
-                x{effectiveMultiplier}
-              </span>
-            )}
           </div>
           </>
           )}
-
-          {result && (
-            <div
-              style={{
-                marginTop: "10px",
-                fontSize: "11px",
-                lineHeight: "15px",
-                color: theme.muted,
-                textAlign: "center",
-                fontFamily: "Cairo, sans-serif",
-              }}
-            >
-              {result.label}
-            </div>
-          )}
         </div>
+
+        {/* Finished/locked match: read-only footer with three equal cells -
+            boost used, actual result (+ winner logo), and points earned. */}
+        {isLocked && !hideResult && (
+          <MatchResultFooter
+            match={match}
+            theme={theme}
+            hasActual={hasActual}
+            result={result}
+            colors={colors}
+            noPrediction={noPrediction}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ScoreBoxStatic({ value, theme }) {
+  return (
+    <div
+      style={{
+        width: "38px",
+        height: "38px",
+        borderRadius: "8px",
+        border: "2px solid #000000",
+        background: theme.bg,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "Cairo, sans-serif",
+        fontWeight: 800,
+        fontSize: "15px",
+        lineHeight: "1",
+        paddingTop: "1px",
+        color: theme.text,
+      }}
+    >
+      {value === "" || value == null ? "-" : value}
+    </div>
+  );
+}
+
+function ResultPill({ theme, border, bg, color, bold, children }) {
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "64px",
+        boxSizing: "border-box",
+        borderRadius: "7px",
+        padding: "5px 6px",
+        fontSize: "11px",
+        marginTop: "11px",
+        fontFamily: "Cairo, sans-serif",
+        fontWeight: bold ? 800 : 600,
+        border: `1.5px solid ${border}`,
+        background: bg,
+        color,
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function MatchResultFooter({ match, theme, hasActual, result, colors, noPrediction }) {
+  const winnerLogo = hasActual
+    ? match.actualHome > match.actualAway
+      ? match.homeLogo
+      : match.actualAway > match.actualHome
+      ? match.awayLogo
+      : null
+    : null;
+  const winnerName = hasActual
+    ? match.actualHome > match.actualAway
+      ? match.home
+      : match.actualAway > match.actualHome
+      ? match.away
+      : null
+    : null;
+
+  return (
+    <div style={{ display: "flex", borderTop: `1px solid ${theme.border}` }}>
+      <div style={{ flex: 1, textAlign: "center", padding: "8px 4px", borderLeft: `1px solid ${theme.border}` }}>
+        <div style={{ fontSize: "11px", color: theme.muted, marginBottom: "5px" }}>المزايا المستخدمة</div>
+        {match.userBoost ? (
+          <ResultPill theme={theme} border={theme.yellow} bg={theme.yellowSoft} color={theme.yellow} bold>
+            تربل
+          </ResultPill>
+        ) : (
+          <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} bold>
+            لا يوجد
+          </ResultPill>
+        )}
+      </div>
+      <div style={{ flex: 1, textAlign: "center", padding: "8px 4px", borderLeft: `1px solid ${theme.border}` }}>
+        <div style={{ fontSize: "11px", color: theme.muted, marginBottom: "5px" }}>النتيجة الفعلية</div>
+        <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.text}>
+          {hasActual ? `${match.actualHome} - ${match.actualAway}` : "لم تنتهِ"}
+        </ResultPill>
+        <div style={{ height: "22px", display: "flex", alignItems: "center", justifyContent: "center", marginTop: "4px" }}>
+          {winnerLogo !== null || winnerName ? <ClubLogo logo={winnerLogo} name={winnerName} theme={theme} size={16} /> : null}
+        </div>
+      </div>
+      <div style={{ flex: 1, textAlign: "center", padding: "8px 4px" }}>
+        <div style={{ fontSize: "11px", color: theme.muted, marginBottom: "5px" }}>نقاطك</div>
+        {result ? (
+          <ResultPill theme={theme} border={colors.ring} bg={colors.bg} color={colors.text} bold>
+            {result.points}
+          </ResultPill>
+        ) : noPrediction ? (
+          <ResultPill theme={theme} border={theme.danger} bg={theme.dangerSoft} color={theme.danger} bold>
+            لم تتوقع
+          </ResultPill>
+        ) : (
+          <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} bold>
+            —
+          </ResultPill>
+        )}
       </div>
     </div>
   );
