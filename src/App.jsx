@@ -2088,7 +2088,7 @@ function ScoreBoxStatic({ value, theme }) {
   );
 }
 
-function ResultPill({ theme, border, bg, color, bold, children }) {
+function ResultPill({ theme, border, bg, color, bold, compact, children }) {
   return (
     <span
       style={{
@@ -2098,9 +2098,9 @@ function ResultPill({ theme, border, bg, color, bold, children }) {
         width: "64px",
         boxSizing: "border-box",
         borderRadius: "7px",
-        padding: "5px 6px",
-        fontSize: "11px",
-        marginTop: "11px",
+        padding: compact ? "3px 6px" : "5px 6px",
+        fontSize: compact ? "10px" : "11px",
+        marginTop: compact ? "0" : "11px",
         fontFamily: "Cairo, sans-serif",
         fontWeight: bold ? 800 : 600,
         border: `1.5px solid ${border}`,
@@ -4473,35 +4473,35 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
                 borderTop: idx === 0 ? "none" : `1px solid ${theme.border}`,
               }}
             >
-              <div style={{ flex: 1, textAlign: "center", padding: "8px 4px", borderLeft: `1px solid ${theme.border}` }}>
-                <ResultPill theme={theme} border={theme.text} bg={theme.bg} color={theme.text} bold>
+              <div style={{ flex: 1, textAlign: "center", padding: "5px 4px", borderLeft: `1px solid ${theme.border}` }}>
+                <ResultPill theme={theme} border={theme.text} bg={theme.bg} color={theme.text} bold compact>
                   <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60px" }}>{p.name}</span>
                 </ResultPill>
               </div>
-              <div style={{ flex: 1, textAlign: "center", padding: "8px 4px", borderLeft: `1px solid ${theme.border}` }}>
+              <div style={{ flex: 1, textAlign: "center", padding: "5px 4px", borderLeft: `1px solid ${theme.border}` }}>
                 {pred ? (
-                  <ResultPill theme={theme} border={theme.text} bg={theme.bg} color={theme.text} bold>
+                  <ResultPill theme={theme} border={theme.text} bg={theme.bg} color={theme.text} bold compact>
                     {pred.predHome} - {pred.predAway}
                   </ResultPill>
                 ) : (
-                  <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} bold>
+                  <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} bold compact>
                     لم يتوقع
                   </ResultPill>
                 )}
               </div>
-              <div style={{ flex: 1, textAlign: "center", padding: "8px 4px" }}>
+              <div style={{ flex: 1, textAlign: "center", padding: "5px 4px" }}>
                 {result ? (
                   pred?.userBoost ? (
-                    <ResultPill theme={theme} border={theme.yellow} bg={theme.yellowSoft} color={theme.yellow} bold>
+                    <ResultPill theme={theme} border={theme.yellow} bg={theme.yellowSoft} color={theme.yellow} bold compact>
                       {result.points}
                     </ResultPill>
                   ) : (
-                    <ResultPill theme={theme} border={colors.ring} bg={colors.bg} color={colors.text} bold>
+                    <ResultPill theme={theme} border={colors.ring} bg={colors.bg} color={colors.text} bold compact>
                       {result.points}
                     </ResultPill>
                   )
                 ) : (
-                  <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} bold>
+                  <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} bold compact>
                     لم يتوقع
                   </ResultPill>
                 )}
