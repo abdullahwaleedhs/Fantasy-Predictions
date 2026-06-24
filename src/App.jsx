@@ -4482,10 +4482,6 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
                       لم يتوقع
                     </ResultPill>
                   )}
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginTop: "4px" }}>
-                    <ClubLogo logo={match.homeLogo} name={match.home} theme={theme} size={16} />
-                    <ClubLogo logo={match.awayLogo} name={match.away} theme={theme} size={16} />
-                  </div>
                 </div>
                 <div style={{ flex: 1, textAlign: "center", padding: "8px 4px" }}>
                   {result ? (
