@@ -4472,12 +4472,11 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
                 overflow: "hidden",
               }}
             >
-              <div style={{ padding: "8px 10px 0", fontFamily: "Cairo, sans-serif", fontWeight: p.isYou ? 700 : 600, fontSize: "11px", color: theme.text }}>
-                {p.name} {p.isYou && <span style={{ fontSize: "9px", color: theme.primary }}>(أنت)</span>}
-              </div>
               <div style={{ display: "flex" }}>
                 <div style={{ flex: 1, textAlign: "center", padding: "8px 4px", borderLeft: `1px solid ${theme.border}` }}>
-                  <div style={{ fontSize: "10px", color: theme.muted, marginBottom: "5px" }}>المزايا المستخدمة</div>
+                  <div style={{ fontSize: "10px", color: theme.muted, marginBottom: "5px", fontWeight: p.isYou ? 700 : 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {p.name}
+                  </div>
                   {pred?.userBoost ? (
                     <ResultPill theme={theme} border={theme.yellow} bg={theme.yellowSoft} color={theme.yellow} bold>
                       تربل
