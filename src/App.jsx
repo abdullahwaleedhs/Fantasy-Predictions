@@ -6185,62 +6185,7 @@ export default function App() {
                 tabMatches = tabMatches.filter((m) => m.date && m.time);
               }
 
-              const countBox =
-                viewMode === "user" && predictionsTabView === "available" ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "10px",
-                      background: theme.surface,
-                      border: `1px solid ${theme.border}`,
-                      borderRadius: "10px",
-                      padding: "10px 14px",
-                      marginBottom: "16px",
-                      fontFamily: "Cairo, sans-serif",
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      color: theme.muted,
-                    }}
-                  >
-                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}>
-                      <span>عدد المباريات المتاحة للتوقع</span>
-                      <span
-                        style={{
-                          background: theme.bg,
-                          border: `1px solid ${theme.border}`,
-                          borderRadius: "6px",
-                          padding: "2px 10px",
-                          color: theme.primary,
-                          fontWeight: 800,
-                        }}
-                      >
-                        {tabMatches.filter((m) => !isLocked(m)).length}
-                      </span>
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}>
-                      <span>عدد المباريات المتاحة التي لم يتم توقعها</span>
-                      <span
-                        style={{
-                          background: theme.bg,
-                          border: `1px solid ${theme.border}`,
-                          borderRadius: "6px",
-                          padding: "2px 10px",
-                          color: theme.primary,
-                          fontWeight: 800,
-                        }}
-                      >
-                        {
-                          tabMatches.filter(
-                            (m) =>
-                              !isLocked(m) &&
-                              (m.predHome === "" || m.predHome == null || m.predAway === "" || m.predAway == null)
-                          ).length
-                        }
-                      </span>
-                    </div>
-                  </div>
-                ) : null;
+              const countBox = null;
 
               if (dataLoading) {
                 return (
