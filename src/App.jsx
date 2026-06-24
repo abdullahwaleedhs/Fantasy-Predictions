@@ -606,7 +606,7 @@ function TournamentIcon({ name, logo, size = 14, color, theme }) {
   return <Icon size={size} color={color} style={{ flexShrink: 0 }} />;
 }
 
-function TournamentPicker({ value, onChange, tournaments, onAddTournament, tournamentLogos, theme, allowAdd = true }) {
+function TournamentPicker({ value, onChange, tournaments, onAddTournament, tournamentLogos, theme, allowAdd = true, noMargin, topRadius = "8px 8px 0 0" }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const ref = useRef(null);
@@ -626,7 +626,7 @@ function TournamentPicker({ value, onChange, tournaments, onAddTournament, tourn
   const exactExists = tournaments.some((t) => t === query.trim());
 
   return (
-    <div ref={ref} style={{ position: "relative", marginBottom: "8px" }}>
+    <div ref={ref} style={{ position: "relative", marginBottom: noMargin ? 0 : "8px" }}>
       <button
         onClick={() => setOpen((o) => !o)}
         style={{
@@ -636,7 +636,7 @@ function TournamentPicker({ value, onChange, tournaments, onAddTournament, tourn
           background: theme.primary,
           color: theme.bg === theme.surface ? theme.accentSoft : (theme.highlight || theme.accent),
           border: "none",
-          borderRadius: "8px 8px 0 0",
+          borderRadius: topRadius,
           padding: "6px 12px",
           fontFamily: "Cairo, sans-serif",
           fontWeight: 700,
@@ -2202,24 +2202,24 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
 
   return (
     <div style={{ marginBottom: "14px" }}>
-      <TournamentPicker
-        value={draft.tournament}
-        onChange={(t) => updateDraft({ ...draft, tournament: t, home: "", away: "", homeLogo: null, awayLogo: null })}
-        tournaments={tournaments}
-        onAddTournament={onAddTournament}
-        tournamentLogos={tournamentLogos}
-        theme={theme}
-      />
-
       <div
         style={{
           background: theme.surface,
-          border: `1px solid ${dirty ? theme.violet : theme.border}`,
-          borderTop: "none",
-          borderRadius: "0 0 14px 14px",
+          border: `1.5px solid ${theme.violet}`,
+          borderRadius: "14px",
           overflow: "hidden",
         }}
       >
+        <TournamentPicker
+          value={draft.tournament}
+          onChange={(t) => updateDraft({ ...draft, tournament: t, home: "", away: "", homeLogo: null, awayLogo: null })}
+          tournaments={tournaments}
+          onAddTournament={onAddTournament}
+          tournamentLogos={tournamentLogos}
+          theme={theme}
+          noMargin
+          topRadius="0"
+        />
         <div style={{ background: theme.bg }}>
           <DateTimeRow match={draft} onChange={updateDraft} theme={theme} disabled={isLocked} />
         </div>
