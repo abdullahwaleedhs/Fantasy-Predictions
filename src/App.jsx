@@ -1875,21 +1875,22 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                   onClick={() => (match.userBoost ? onCancelBoost() : onUseBoost())}
                   disabled={boostDisabled}
                   style={{
-                    display: "flex",
+                    display: "inline-flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    border: `1.5px solid ${theme.yellow}`,
-                    background: match.userBoost ? theme.yellow : "transparent",
-                    color: match.userBoost ? theme.bg : theme.yellow,
-                    borderRadius: "8px",
-                    padding: "7px 16px",
+                    width: "64px",
+                    boxSizing: "border-box",
+                    borderRadius: "7px",
+                    padding: "5px 6px",
+                    fontSize: "11px",
                     fontFamily: "Cairo, sans-serif",
                     fontWeight: 800,
-                    fontSize: "11px",
+                    border: `1.5px solid ${theme.yellow}`,
+                    background: match.userBoost ? theme.yellowSoft : "transparent",
+                    color: theme.yellow,
                     cursor: boostDisabled ? "not-allowed" : "pointer",
                     opacity: boostDisabled && !match.userBoost ? 0.5 : 1,
                     whiteSpace: "nowrap",
-                    width: "100%",
                   }}
                 >
                   تربل
