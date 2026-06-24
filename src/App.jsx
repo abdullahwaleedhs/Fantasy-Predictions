@@ -6162,6 +6162,37 @@ export default function App() {
                   انتهت
                 </button>
               </div>
+
+              {(() => {
+                const isLockedCount = (m) => {
+                  if (!m.date || !m.time) return false;
+                  return new Date(`${m.date}T${m.time}:00`).getTime() - serverNow() <= 0;
+                };
+                const isPredictedCount = (m) => !!savedPredictions[m.id];
+                const scheduled = viewMode === "user" ? matches.filter((m) => m.date && m.time) : matches;
+                const availableCount = scheduled.filter((m) => !isLockedCount(m) && !isPredictedCount(m)).length;
+                const predictedCount = scheduled.filter((m) => !isLockedCount(m) && isPredictedCount(m)).length;
+                const archivedCount = matches.filter((m) => isLockedCount(m)).length;
+                return (
+                  <div
+                    style={{
+                      display: "flex",
+                      borderTop: `1px solid ${theme.border}`,
+                      padding: "6px 3px",
+                    }}
+                  >
+                    <div style={{ flex: 1, textAlign: "center", fontFamily: "Cairo, sans-serif", fontWeight: 800, fontSize: "11px", color: theme.muted }}>
+                      {availableCount}
+                    </div>
+                    <div style={{ flex: 1, textAlign: "center", fontFamily: "Cairo, sans-serif", fontWeight: 800, fontSize: "11px", color: theme.muted }}>
+                      {predictedCount}
+                    </div>
+                    <div style={{ flex: 1, textAlign: "center", fontFamily: "Cairo, sans-serif", fontWeight: 800, fontSize: "11px", color: theme.muted }}>
+                      {archivedCount}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Matches */}
