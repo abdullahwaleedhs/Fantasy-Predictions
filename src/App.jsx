@@ -4481,6 +4481,9 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
                   </ResultPill>
                 </div>
                 <div style={{ flex: 1, textAlign: "center", padding: "8px 4px", borderLeft: `1px solid ${theme.border}` }}>
+                  <div style={{ height: "22px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "4px" }}>
+                    {predWinnerName ? <ClubLogo logo={predWinnerLogo} name={predWinnerName} theme={theme} size={16} /> : null}
+                  </div>
                   {pred ? (
                     <ResultPill theme={theme} border={theme.text} bg={theme.bg} color={theme.text} bold>
                       {pred.predAway} - {pred.predHome}
@@ -4490,9 +4493,6 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
                       لم يتوقع
                     </ResultPill>
                   )}
-                  <div style={{ height: "22px", display: "flex", alignItems: "center", justifyContent: "center", marginTop: "4px" }}>
-                    {predWinnerName ? <ClubLogo logo={predWinnerLogo} name={predWinnerName} theme={theme} size={16} /> : null}
-                  </div>
                 </div>
                 <div style={{ flex: 1, textAlign: "center", padding: "8px 4px" }}>
                   {result ? (
