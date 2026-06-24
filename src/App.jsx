@@ -1786,6 +1786,7 @@ function TeamDisplay({ name, logo, theme }) {
 // (tournament, teams, schedule, actual result) except the prediction inputs.
 // Also supports the personal "double points" boost (limited uses per season).
 function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, onCancelBoost, tournamentLogos, hideResult }) {
+  const [justSaved, setJustSaved] = useState(false);
   const userMultiplier = match.userBoost ? 3 : 1;
   const adminMultiplier = match.doublePoints ? 2 : 1;
   const effectiveMultiplier = match.doublePoints ? adminMultiplier : userMultiplier;
@@ -1922,6 +1923,33 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
               </div>
             </div>
           </div>
+
+          {!isLocked && (
+            <div style={{ display: "flex", justifyContent: "center", marginTop: "14px" }}>
+              <button
+                onClick={() => {
+                  setJustSaved(true);
+                  setTimeout(() => setJustSaved(false), 1500);
+                }}
+                disabled={noPrediction}
+                style={{
+                  border: `1.5px solid ${theme.violet}`,
+                  background: justSaved ? theme.violet : "transparent",
+                  color: justSaved ? theme.surface : theme.violet,
+                  borderRadius: "8px",
+                  padding: "7px 18px",
+                  fontFamily: "Cairo, sans-serif",
+                  fontWeight: 800,
+                  fontSize: "11px",
+                  cursor: noPrediction ? "not-allowed" : "pointer",
+                  opacity: noPrediction ? 0.5 : 1,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {justSaved ? "تم الحفظ" : "حفظ التوقع"}
+              </button>
+            </div>
+          )}
 
           {/* القادمة (match hasn't happened yet) skips the result/points section
               entirely - hasn't started, so a result has no meaning there. */}
@@ -6012,7 +6040,7 @@ export default function App() {
                   borderBottom: `1px solid ${theme.border}`,
                 }}
               >
-                التوقعات
+                توقعات
               </div>
 
               {/* Tabs: متاحة / تم توقعها / المنتهية - a match stays in متاحة
@@ -6079,7 +6107,7 @@ export default function App() {
                     cursor: "pointer",
                   }}
                 >
-                  المنتهية
+                  انتهت
                 </button>
               </div>
             </div>
