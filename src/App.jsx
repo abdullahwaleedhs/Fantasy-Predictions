@@ -1814,29 +1814,8 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
           border: isGold ? `2px solid ${theme.yellow}` : `1.5px solid ${theme.violet}`,
           borderRadius: "14px",
           overflow: "hidden",
-          position: "relative",
         }}
       >
-        {isGold && (
-          <span
-            style={{
-              position: "absolute",
-              top: "8px",
-              insetInlineStart: "10px",
-              background: theme.yellow,
-              color: theme.bg,
-              fontFamily: "Cairo, sans-serif",
-              fontSize: "10px",
-              fontWeight: 800,
-              padding: "2px 8px",
-              borderRadius: "6px",
-              zIndex: 2,
-            }}
-          >
-            x{effectiveMultiplier}
-          </span>
-        )}
-
         {/* Tournament name */}
         <div
           style={{
@@ -1864,25 +1843,6 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
           <MatchInfoBar match={match} theme={theme} />
         </div>
 
-        {match.doublePoints && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "6px",
-              padding: "6px 12px",
-              background: theme.yellowSoft,
-              borderBottom: `1px solid ${theme.border}`,
-            }}
-          >
-            <Zap size={13} color={theme.yellow} />
-            <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.text }}>
-              مباراة الدبل (x2)
-            </span>
-          </div>
-        )}
-
         <div style={{ padding: "16px 18px 18px" }}>
           {/* Team + your prediction, grouped per column, with the personal
               boost control sitting in the middle gap between the two
@@ -1903,7 +1863,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
 
             {isLocked ? (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minWidth: "64px", paddingTop: "62px" }}>
-                <span style={{ color: match.doublePoints ? theme.yellow : theme.muted, fontSize: "13px", fontWeight: 700 }}>ضد</span>
+                <span style={{ color: theme.muted, fontSize: "13px", fontWeight: 700 }}>ضد</span>
               </div>
             ) : match.doublePoints ? (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "62px" }}>
