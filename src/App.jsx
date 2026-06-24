@@ -1878,14 +1878,13 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    gap: "5px",
-                    border: "2.5px solid #000000",
-                    background: match.userBoost ? theme.yellowSoft : "transparent",
-                    color: match.userBoost ? theme.text : theme.muted,
-                    borderRadius: "20px",
+                    border: `1.5px solid ${theme.yellow}`,
+                    background: match.userBoost ? theme.yellow : "transparent",
+                    color: match.userBoost ? theme.bg : theme.yellow,
+                    borderRadius: "8px",
                     padding: "7px 16px",
                     fontFamily: "Cairo, sans-serif",
-                    fontWeight: 700,
+                    fontWeight: 800,
                     fontSize: "11px",
                     cursor: boostDisabled ? "not-allowed" : "pointer",
                     opacity: boostDisabled && !match.userBoost ? 0.5 : 1,
@@ -1893,8 +1892,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                     width: "100%",
                   }}
                 >
-                  {match.userBoost ? "إلغاء (x3)" : "التربل (x3)"}
-                  <Zap size={12} color={match.userBoost ? theme.yellow : theme.muted} />
+                  تربل
                 </button>
                 <span
                   style={{
