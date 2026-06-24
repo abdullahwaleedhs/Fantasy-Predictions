@@ -1810,6 +1810,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
   const noPredictionDraft = draftHome === "" || draftHome == null || draftAway === "" || draftAway == null;
   const isDirty = String(draftHome ?? "") !== String(match.predHome ?? "") || String(draftAway ?? "") !== String(match.predAway ?? "");
   const showSaved = confirmed && !isDirty && !noPredictionDraft;
+  const saveDisabled = !isDirty;
 
   const boostDisabled = match.doublePoints || isLocked || noPredictionDraft || (!match.userBoost && boostsRemaining <= 0);
 
@@ -1959,7 +1960,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
             <div style={{ display: "flex", justifyContent: "center", marginTop: "14px" }}>
               <button
                 onClick={saveDraft}
-                disabled={noPredictionDraft || showSaved}
+                disabled={saveDisabled}
                 style={{
                   border: `1.5px solid ${theme.text}`,
                   background: showSaved ? theme.text : "transparent",
@@ -1969,8 +1970,8 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                   fontFamily: "Cairo, sans-serif",
                   fontWeight: 800,
                   fontSize: "11px",
-                  cursor: noPredictionDraft || showSaved ? "not-allowed" : "pointer",
-                  opacity: noPredictionDraft ? 0.5 : 1,
+                  cursor: saveDisabled ? "not-allowed" : "pointer",
+                  opacity: saveDisabled && !showSaved ? 0.5 : 1,
                   whiteSpace: "nowrap",
                 }}
               >
