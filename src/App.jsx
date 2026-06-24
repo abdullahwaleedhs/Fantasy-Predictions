@@ -2192,7 +2192,11 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
   };
 
   const kickoffISO = draft.date && draft.time ? `${draft.date}T${draft.time}:00` : null;
-  const isLocked = kickoffISO ? new Date(kickoffISO).getTime() - serverNow() <= 0 : false;
+  const naturallyLocked = kickoffISO ? new Date(kickoffISO).getTime() - serverNow() <= 0 : false;
+
+  // المنظم يقدر يفتح مباراة منتهية للتعديل بعد تأكيد، بدل ما تبقى مقفلة للأبد.
+  const [forceUnlocked, setForceUnlocked] = useState(false);
+  const isLocked = naturallyLocked && !forceUnlocked;
 
   const clubs = clubsByTournament?.[draft.tournament] || [];
 
@@ -2245,26 +2249,52 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
               theme={theme}
               disabled={isLocked}
             />
-            <button
-              onClick={() => {
-                if (window.confirm("حذف هذي المباراة نهائيًا؟")) onRemove();
-              }}
-              aria-label="حذف المباراة"
-              style={{
-                background: "transparent",
-                border: "none",
-                color: theme.muted,
-                cursor: "pointer",
-                padding: "4px",
-                width: "24px",
-                flexShrink: 0,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Trash2 size={16} />
-            </button>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", flexShrink: 0 }}>
+              <button
+                onClick={() => {
+                  if (window.confirm("حذف هذي المباراة نهائيًا؟")) onRemove();
+                }}
+                aria-label="حذف المباراة"
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: theme.muted,
+                  cursor: "pointer",
+                  padding: "4px",
+                  width: "24px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Trash2 size={16} />
+              </button>
+              {naturallyLocked && (
+                <button
+                  onClick={() => {
+                    if (forceUnlocked) {
+                      setForceUnlocked(false);
+                    } else if (window.confirm("تبي تعدل هذي المباراة المنتهية؟")) {
+                      setForceUnlocked(true);
+                    }
+                  }}
+                  aria-label="تعديل المباراة"
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    color: forceUnlocked ? theme.primary : theme.muted,
+                    cursor: "pointer",
+                    padding: "4px",
+                    width: "24px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Pencil size={16} />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Admin only enters the actual result - no predictions, no points */}
