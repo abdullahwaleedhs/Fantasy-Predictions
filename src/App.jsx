@@ -5960,6 +5960,12 @@ export default function App() {
     if (!currentUser) return;
     const match = matches.find((m) => m.id === id);
     const predictionFields = { predHome: match?.predHome || "", predAway: match?.predAway || "", userBoost };
+    setConfirmedPredictions((prev) => {
+      if (!prev[id]) return prev;
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
     upsertPredictionDB(currentUser.id, id, predictionFields);
     setPredictionsByMatch((prev) => ({ ...prev, [id]: predictionFields }));
     const newBoostsRemaining = boostsRemaining + (userBoost ? -1 : 1);
