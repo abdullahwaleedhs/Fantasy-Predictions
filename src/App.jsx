@@ -1785,12 +1785,13 @@ function TeamDisplay({ name, logo, theme }) {
 // Restricted match card for regular participants: everything is read-only
 // (tournament, teams, schedule, actual result) except the prediction inputs.
 // Also supports the personal "double points" boost (limited uses per season).
-function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, onCancelBoost, tournamentLogos, hideResult, confirmed, onConfirm }) {
+function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogos, hideResult, confirmed, onConfirm }) {
   // Score edits stay local (draft) until "حفظ التوقع" is pressed - nothing
   // is written to the DB on keystroke, so an unsaved edit doesn't survive
   // a page refresh.
   const [draftHome, setDraftHome] = useState(match.predHome);
   const [draftAway, setDraftAway] = useState(match.predAway);
+  const [draftBoost, setDraftBoost] = useState(!!match.userBoost);
 
   const userMultiplier = match.userBoost ? 3 : 1;
   const adminMultiplier = match.doublePoints ? 2 : 1;
@@ -1808,16 +1809,19 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
 
   const noPrediction = match.predHome === "" || match.predHome == null || match.predAway === "" || match.predAway == null;
   const noPredictionDraft = draftHome === "" || draftHome == null || draftAway === "" || draftAway == null;
-  const isDirty = String(draftHome ?? "") !== String(match.predHome ?? "") || String(draftAway ?? "") !== String(match.predAway ?? "");
+  const isDirty =
+    String(draftHome ?? "") !== String(match.predHome ?? "") ||
+    String(draftAway ?? "") !== String(match.predAway ?? "") ||
+    draftBoost !== !!match.userBoost;
   const showSaved = confirmed && !isDirty && !noPredictionDraft;
   const saveDisabled = !isDirty;
 
-  const boostDisabled = match.doublePoints || isLocked || noPredictionDraft || (!match.userBoost && boostsRemaining <= 0);
+  const boostDisabled = match.doublePoints || isLocked || noPredictionDraft || (!draftBoost && boostsRemaining <= 0);
 
-  const isGold = match.doublePoints || match.userBoost;
+  const isGold = match.doublePoints || draftBoost;
 
   const saveDraft = () => {
-    onChange({ ...match, predHome: draftHome, predAway: draftAway });
+    onChange({ ...match, predHome: draftHome, predAway: draftAway, userBoost: draftBoost });
     if (!noPredictionDraft) onConfirm();
   };
 
@@ -1875,7 +1879,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                     value={draftHome}
                     onChange={(v) => {
                       const newHome = num(v);
-                      if (newHome === "" && match.userBoost) onCancelBoost();
+                      if (newHome === "" && draftBoost) setDraftBoost(false);
                       setDraftHome(newHome);
                     }}
                     theme={theme}
@@ -1896,7 +1900,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
             ) : (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", paddingTop: "62px" }}>
                 <button
-                  onClick={() => (match.userBoost ? onCancelBoost() : onUseBoost())}
+                  onClick={() => setDraftBoost((b) => !b)}
                   disabled={boostDisabled}
                   style={{
                     display: "inline-flex",
@@ -1910,10 +1914,10 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                     fontFamily: "Cairo, sans-serif",
                     fontWeight: 800,
                     border: `1.5px solid ${theme.yellow}`,
-                    background: match.userBoost ? theme.yellowSoft : "transparent",
-                    color: match.userBoost ? theme.yellow : theme.text,
+                    background: draftBoost ? theme.yellowSoft : "transparent",
+                    color: draftBoost ? theme.yellow : theme.text,
                     cursor: boostDisabled ? "not-allowed" : "pointer",
-                    opacity: boostDisabled && !match.userBoost ? 0.5 : 1,
+                    opacity: boostDisabled && !draftBoost ? 0.5 : 1,
                     whiteSpace: "nowrap",
                   }}
                 >
@@ -1945,7 +1949,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                     value={draftAway}
                     onChange={(v) => {
                       const newAway = num(v);
-                      if (newAway === "" && match.userBoost) onCancelBoost();
+                      if (newAway === "" && draftBoost) setDraftBoost(false);
                       setDraftAway(newAway);
                     }}
                     theme={theme}
@@ -5973,6 +5977,14 @@ export default function App() {
           });
         }
       }
+      const prevBoost = !!prevPred?.userBoost;
+      const nextBoost = !!predictionFields.userBoost;
+      if (prevBoost !== nextBoost) {
+        const newBoostsRemaining = boostsRemaining + (nextBoost ? -1 : 1);
+        setBoostsRemainingDB(currentUser.id, newBoostsRemaining);
+        setCurrentUser((u) => ({ ...u, boosts_remaining: newBoostsRemaining }));
+      }
+
       upsertPredictionDB(currentUser.id, id, predictionFields);
       setPredictionsByMatch((prev) => ({ ...prev, [id]: predictionFields }));
       setAllPredictionRows((prev) => {
@@ -6002,32 +6014,6 @@ export default function App() {
       const { [id]: _removed, ...rest } = prev;
       return rest;
     });
-  };
-
-  const setBoost = (id, userBoost) => {
-    if (!currentUser) return;
-    const match = matches.find((m) => m.id === id);
-    const predictionFields = { predHome: match?.predHome || "", predAway: match?.predAway || "", userBoost };
-    setConfirmedPredictions((prev) => {
-      if (!prev[id]) return prev;
-      const next = { ...prev };
-      delete next[id];
-      return next;
-    });
-    upsertPredictionDB(currentUser.id, id, predictionFields);
-    setPredictionsByMatch((prev) => ({ ...prev, [id]: predictionFields }));
-    const newBoostsRemaining = boostsRemaining + (userBoost ? -1 : 1);
-    setBoostsRemainingDB(currentUser.id, newBoostsRemaining);
-    setCurrentUser((u) => ({ ...u, boosts_remaining: newBoostsRemaining }));
-  };
-
-  const useBoostOnMatch = (id) => {
-    if (boostsRemaining <= 0) return;
-    setBoost(id, true);
-  };
-
-  const cancelBoostOnMatch = (id) => {
-    setBoost(id, false);
   };
 
   const tiers = getTiers(theme);
@@ -6321,8 +6307,6 @@ export default function App() {
                           onChange={(updated) => updateMatch(match.id, updated)}
                           theme={theme}
                           boostsRemaining={boostsRemaining}
-                          onUseBoost={() => useBoostOnMatch(match.id)}
-                          onCancelBoost={() => cancelBoostOnMatch(match.id)}
                           tournamentLogos={tournamentLogos}
                           hideResult={predictionsTabView !== "archived"}
                           confirmed={!!confirmedPredictions[match.id]}
