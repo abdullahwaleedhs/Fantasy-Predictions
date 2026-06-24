@@ -4378,12 +4378,13 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
         return `${String(h12).padStart(2, "0")}:${mm} ${ampm}`;
       })()
     : "—";
+  const isGold = !!match.doublePoints;
 
   return (
     <div
       style={{
         background: theme.surface,
-        border: `1.5px solid ${theme.violet}`,
+        border: isGold ? `2px solid ${theme.yellow}` : `1.5px solid ${theme.violet}`,
         borderRadius: "12px",
         overflow: "hidden",
       }}
@@ -4394,7 +4395,7 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
           fontFamily: "Cairo, sans-serif",
           fontWeight: 700,
           fontSize: "9px",
-          color: theme.primary,
+          color: isGold ? theme.yellow : theme.primary,
           textAlign: "center",
           display: "flex",
           alignItems: "center",
@@ -4403,7 +4404,7 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
           borderBottom: `1px solid ${theme.border}`,
         }}
       >
-        {match.tournament && <TournamentIcon name={match.tournament} logo={tournamentLogos?.[match.tournament]} theme={theme} color={theme.primary} />}
+        {match.tournament && <TournamentIcon name={match.tournament} logo={tournamentLogos?.[match.tournament]} theme={theme} color={isGold ? theme.yellow : theme.primary} />}
         {match.tournament || "بطولة غير محددة"}
       </div>
 
