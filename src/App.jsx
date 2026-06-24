@@ -1786,6 +1786,12 @@ function TeamDisplay({ name, logo, theme }) {
 // (tournament, teams, schedule, actual result) except the prediction inputs.
 // Also supports the personal "double points" boost (limited uses per season).
 function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, onCancelBoost, tournamentLogos, hideResult, confirmed, onConfirm }) {
+  // Score edits stay local (draft) until "حفظ التوقع" is pressed - nothing
+  // is written to the DB on keystroke, so an unsaved edit doesn't survive
+  // a page refresh.
+  const [draftHome, setDraftHome] = useState(match.predHome);
+  const [draftAway, setDraftAway] = useState(match.predAway);
+
   const userMultiplier = match.userBoost ? 3 : 1;
   const adminMultiplier = match.doublePoints ? 2 : 1;
   const effectiveMultiplier = match.doublePoints ? adminMultiplier : userMultiplier;
@@ -1801,10 +1807,18 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
   const hasActual = match.actualHome !== "" && match.actualAway !== "" && match.actualHome != null && match.actualAway != null;
 
   const noPrediction = match.predHome === "" || match.predHome == null || match.predAway === "" || match.predAway == null;
+  const noPredictionDraft = draftHome === "" || draftHome == null || draftAway === "" || draftAway == null;
+  const isDirty = String(draftHome ?? "") !== String(match.predHome ?? "") || String(draftAway ?? "") !== String(match.predAway ?? "");
+  const showSaved = confirmed && !isDirty && !noPredictionDraft;
 
-  const boostDisabled = match.doublePoints || isLocked || noPrediction || (!match.userBoost && boostsRemaining <= 0);
+  const boostDisabled = match.doublePoints || isLocked || noPredictionDraft || (!match.userBoost && boostsRemaining <= 0);
 
   const isGold = match.doublePoints || match.userBoost;
+
+  const saveDraft = () => {
+    onChange({ ...match, predHome: draftHome, predAway: draftAway });
+    onConfirm();
+  };
 
   return (
     <div style={{ marginBottom: "14px" }}>
@@ -1857,11 +1871,11 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                   <ScoreBoxStatic value={match.predHome} theme={theme} />
                 ) : (
                   <ScoreInput
-                    value={match.predHome}
+                    value={draftHome}
                     onChange={(v) => {
                       const newHome = num(v);
                       if (newHome === "" && match.userBoost) onCancelBoost();
-                      onChange({ ...match, predHome: newHome });
+                      setDraftHome(newHome);
                     }}
                     theme={theme}
                     disabled={isLocked}
@@ -1927,11 +1941,11 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                   <ScoreBoxStatic value={match.predAway} theme={theme} />
                 ) : (
                   <ScoreInput
-                    value={match.predAway}
+                    value={draftAway}
                     onChange={(v) => {
                       const newAway = num(v);
                       if (newAway === "" && match.userBoost) onCancelBoost();
-                      onChange({ ...match, predAway: newAway });
+                      setDraftAway(newAway);
                     }}
                     theme={theme}
                     disabled={isLocked}
@@ -1944,23 +1958,23 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
           {!isLocked && (
             <div style={{ display: "flex", justifyContent: "center", marginTop: "14px" }}>
               <button
-                onClick={onConfirm}
-                disabled={noPrediction || confirmed}
+                onClick={saveDraft}
+                disabled={noPredictionDraft || showSaved}
                 style={{
                   border: `1.5px solid ${theme.text}`,
-                  background: confirmed ? theme.text : "transparent",
-                  color: confirmed ? theme.surface : theme.text,
+                  background: showSaved ? theme.text : "transparent",
+                  color: showSaved ? theme.surface : theme.text,
                   borderRadius: "8px",
                   padding: "7px 18px",
                   fontFamily: "Cairo, sans-serif",
                   fontWeight: 800,
                   fontSize: "11px",
-                  cursor: noPrediction || confirmed ? "not-allowed" : "pointer",
-                  opacity: noPrediction ? 0.5 : 1,
+                  cursor: noPredictionDraft || showSaved ? "not-allowed" : "pointer",
+                  opacity: noPredictionDraft ? 0.5 : 1,
                   whiteSpace: "nowrap",
                 }}
               >
-                {confirmed ? "تم الحفظ" : "حفظ التوقع"}
+                {showSaved ? "تم الحفظ" : "حفظ التوقع"}
               </button>
             </div>
           )}
