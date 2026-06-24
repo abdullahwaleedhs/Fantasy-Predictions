@@ -4448,14 +4448,14 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
       </div>
 
       {/* Per-player predictions for this match: name - prediction - points,
-          stacked as rows so it's easy to scan down the list. */}
-      <div style={{ borderTop: `1px solid ${theme.border}`, padding: "4px 12px" }}>
-        {league.players.map((p, i) => {
+          each row in its own box, with the points badge always the same
+          fixed size regardless of the result. */}
+      <div style={{ borderTop: `1px solid ${theme.border}`, padding: "10px 12px", display: "flex", flexDirection: "column", gap: "6px" }}>
+        {league.players.map((p) => {
           const pred = playerPredictionsById[p.id]?.[match.id];
           const multiplier = match.doublePoints ? 2 : pred?.userBoost ? 3 : 1;
           const result = pred ? calcPoints(pred.predHome, pred.predAway, match.actualHome, match.actualAway, multiplier) : null;
           const colors = result ? tierStyleFor(theme, result.basePoints) : null;
-          const isLast = i === league.players.length - 1;
           return (
             <div
               key={p.id}
@@ -4464,37 +4464,38 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
                 alignItems: "center",
                 justifyContent: "space-between",
                 gap: "8px",
-                padding: "8px 0",
-                borderBottom: isLast ? "none" : `1px solid ${theme.border}`,
+                padding: "7px 10px",
+                background: theme.bg,
+                border: `1px solid ${theme.border}`,
+                borderRadius: "8px",
               }}
             >
-              <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: p.isYou ? 700 : 600, fontSize: "11px", color: theme.text, flex: 1, minWidth: 0 }}>
+              <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: p.isYou ? 700 : 600, fontSize: "11px", color: theme.text, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {p.name}
               </span>
               <span dir="ltr" style={{ fontFamily: "monospace", fontWeight: 700, fontSize: "11px", color: theme.muted, flexShrink: 0 }}>
                 {pred ? `${pred.predAway} - ${pred.predHome}` : "لم يتوقع"}
               </span>
-              {result ? (
-                <span
-                  style={{
-                    fontFamily: "Cairo, sans-serif",
-                    fontWeight: 800,
-                    fontSize: "10px",
-                    color: colors.text,
-                    background: colors.bg,
-                    border: `1px solid ${colors.ring}`,
-                    borderRadius: "6px",
-                    padding: "1px 7px",
-                    flexShrink: 0,
-                    minWidth: "24px",
-                    textAlign: "center",
-                  }}
-                >
-                  {result.points}
-                </span>
-              ) : (
-                <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "10px", color: theme.muted, flexShrink: 0 }}>—</span>
-              )}
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "28px",
+                  height: "22px",
+                  boxSizing: "border-box",
+                  flexShrink: 0,
+                  fontFamily: "Cairo, sans-serif",
+                  fontWeight: 800,
+                  fontSize: "10px",
+                  borderRadius: "6px",
+                  border: `1px solid ${result ? colors.ring : theme.inputBorder}`,
+                  background: result ? colors.bg : theme.surface,
+                  color: result ? colors.text : theme.muted,
+                }}
+              >
+                {result ? result.points : "—"}
+              </span>
             </div>
           );
         })}
