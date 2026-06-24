@@ -1800,9 +1800,9 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
 
   const hasActual = match.actualHome !== "" && match.actualAway !== "" && match.actualHome != null && match.actualAway != null;
 
-  const boostDisabled = match.doublePoints || isLocked || (!match.userBoost && boostsRemaining <= 0);
-
   const noPrediction = match.predHome === "" || match.predHome == null || match.predAway === "" || match.predAway == null;
+
+  const boostDisabled = match.doublePoints || isLocked || noPrediction || (!match.userBoost && boostsRemaining <= 0);
 
   const isGold = match.doublePoints || match.userBoost;
 
@@ -1856,7 +1856,16 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                 {isLocked ? (
                   <ScoreBoxStatic value={match.predHome} theme={theme} />
                 ) : (
-                  <ScoreInput value={match.predHome} onChange={(v) => onChange({ ...match, predHome: num(v) })} theme={theme} disabled={isLocked} />
+                  <ScoreInput
+                    value={match.predHome}
+                    onChange={(v) => {
+                      const newHome = num(v);
+                      if (newHome === "" && match.userBoost) onCancelBoost();
+                      onChange({ ...match, predHome: newHome });
+                    }}
+                    theme={theme}
+                    disabled={isLocked}
+                  />
                 )}
               </div>
             </div>
@@ -1917,7 +1926,16 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
                 {isLocked ? (
                   <ScoreBoxStatic value={match.predAway} theme={theme} />
                 ) : (
-                  <ScoreInput value={match.predAway} onChange={(v) => onChange({ ...match, predAway: num(v) })} theme={theme} disabled={isLocked} />
+                  <ScoreInput
+                    value={match.predAway}
+                    onChange={(v) => {
+                      const newAway = num(v);
+                      if (newAway === "" && match.userBoost) onCancelBoost();
+                      onChange({ ...match, predAway: newAway });
+                    }}
+                    theme={theme}
+                    disabled={isLocked}
+                  />
                 )}
               </div>
             </div>
