@@ -4448,30 +4448,30 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
       </div>
 
       {/* Per-player predictions for this match: name - prediction - points,
-          scrollable horizontally so the card height stays fixed regardless
-          of how many league members are in it. */}
-      <div style={{ borderTop: `1px solid ${theme.border}`, padding: "10px 12px", display: "flex", gap: "10px", overflowX: "auto" }}>
-        {league.players.map((p) => {
+          stacked as rows so it's easy to scan down the list. */}
+      <div style={{ borderTop: `1px solid ${theme.border}`, padding: "4px 12px" }}>
+        {league.players.map((p, i) => {
           const pred = playerPredictionsById[p.id]?.[match.id];
           const multiplier = match.doublePoints ? 2 : pred?.userBoost ? 3 : 1;
           const result = pred ? calcPoints(pred.predHome, pred.predAway, match.actualHome, match.actualAway, multiplier) : null;
           const colors = result ? tierStyleFor(theme, result.basePoints) : null;
+          const isLast = i === league.players.length - 1;
           return (
             <div
               key={p.id}
               style={{
                 display: "flex",
-                flexDirection: "column",
                 alignItems: "center",
-                gap: "4px",
-                flexShrink: 0,
-                minWidth: "56px",
+                justifyContent: "space-between",
+                gap: "8px",
+                padding: "8px 0",
+                borderBottom: isLast ? "none" : `1px solid ${theme.border}`,
               }}
             >
-              <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: p.isYou ? 700 : 600, fontSize: "10px", color: theme.text, whiteSpace: "nowrap" }}>
+              <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: p.isYou ? 700 : 600, fontSize: "11px", color: theme.text, flex: 1, minWidth: 0 }}>
                 {p.name}
               </span>
-              <span dir="ltr" style={{ fontFamily: "monospace", fontWeight: 700, fontSize: "10px", color: theme.muted }}>
+              <span dir="ltr" style={{ fontFamily: "monospace", fontWeight: 700, fontSize: "11px", color: theme.muted, flexShrink: 0 }}>
                 {pred ? `${pred.predAway} - ${pred.predHome}` : "لم يتوقع"}
               </span>
               {result ? (
@@ -4485,12 +4485,15 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
                     border: `1px solid ${colors.ring}`,
                     borderRadius: "6px",
                     padding: "1px 7px",
+                    flexShrink: 0,
+                    minWidth: "24px",
+                    textAlign: "center",
                   }}
                 >
                   {result.points}
                 </span>
               ) : (
-                <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "10px", color: theme.muted }}>—</span>
+                <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "10px", color: theme.muted, flexShrink: 0 }}>—</span>
               )}
             </div>
           );
