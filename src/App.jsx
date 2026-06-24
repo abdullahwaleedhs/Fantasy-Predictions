@@ -5991,93 +5991,97 @@ export default function App() {
               </p>
             )}
 
-            {/* Title rectangle */}
+            {/* Title + tabs in one merged box */}
             <div
               style={{
                 background: theme.surface,
                 border: `1px solid ${theme.border}`,
                 borderRadius: "10px",
-                padding: "10px 14px",
-                marginBottom: "10px",
-                textAlign: "center",
-                fontFamily: "Cairo, sans-serif",
-                fontWeight: 800,
-                fontSize: "13px",
-                color: theme.primary,
-              }}
-            >
-              التوقعات
-            </div>
-
-            {/* Tabs: متاحة / تم توقعها / المنتهية - a match stays in متاحة
-                until the user predicts it, moves to تم توقعها once predicted
-                (as long as the deadline hasn't locked yet), and moves to
-                المنتهية the moment the deadline locks. Admin keeps full edit
-                rights across tabs. */}
-            <div
-              style={{
-                display: "flex",
-                background: theme.bg,
-                border: `1px solid ${theme.border}`,
-                borderRadius: "10px",
-                padding: "3px",
                 marginBottom: "16px",
+                overflow: "hidden",
               }}
             >
-              <button
-                onClick={() => setPredictionsTabView("available")}
+              <div
                 style={{
-                  flex: 1,
-                  padding: "8px 10px",
-                  borderRadius: "8px",
-                  border: "none",
-                  background: predictionsTabView === "available" ? theme.primary : "transparent",
-                  color: predictionsTabView === "available" ? theme.surface : theme.muted,
+                  padding: "10px 14px",
+                  textAlign: "center",
                   fontFamily: "Cairo, sans-serif",
-                  fontWeight: 700,
-                  fontSize: "11px",
-                  cursor: "pointer",
+                  fontWeight: 800,
+                  fontSize: "13px",
+                  color: theme.primary,
+                  borderBottom: `1px solid ${theme.border}`,
                 }}
               >
-                متاحة
-              </button>
-              <button
-                onClick={() => setPredictionsTabView("predicted")}
+                التوقعات
+              </div>
+
+              {/* Tabs: متاحة / تم توقعها / المنتهية - a match stays in متاحة
+                  until the user predicts it, moves to تم توقعها once predicted
+                  (as long as the deadline hasn't locked yet), and moves to
+                  المنتهية the moment the deadline locks. Admin keeps full edit
+                  rights across tabs. */}
+              <div
                 style={{
-                  flex: 1,
-                  padding: "8px 10px",
-                  borderRadius: "8px",
-                  border: "none",
-                  background: predictionsTabView === "predicted" ? theme.primary : "transparent",
-                  color: predictionsTabView === "predicted" ? theme.surface : theme.muted,
-                  fontFamily: "Cairo, sans-serif",
-                  fontWeight: 700,
-                  fontSize: "11px",
-                  cursor: "pointer",
+                  display: "flex",
+                  background: theme.bg,
+                  padding: "3px",
                 }}
               >
-                تم توقعها
-              </button>
-              <button
-                onClick={() => {
-                  setPredictionsTabView("archived");
-                  setArchivedVisibleCount(10);
-                }}
-                style={{
-                  flex: 1,
-                  padding: "8px 10px",
-                  borderRadius: "8px",
-                  border: "none",
-                  background: predictionsTabView === "archived" ? theme.primary : "transparent",
-                  color: predictionsTabView === "archived" ? theme.surface : theme.muted,
-                  fontFamily: "Cairo, sans-serif",
-                  fontWeight: 700,
-                  fontSize: "11px",
-                  cursor: "pointer",
-                }}
-              >
-                المنتهية
-              </button>
+                <button
+                  onClick={() => setPredictionsTabView("available")}
+                  style={{
+                    flex: 1,
+                    padding: "8px 10px",
+                    borderRadius: "8px",
+                    border: "none",
+                    background: predictionsTabView === "available" ? theme.primary : "transparent",
+                    color: predictionsTabView === "available" ? theme.surface : theme.muted,
+                    fontFamily: "Cairo, sans-serif",
+                    fontWeight: 700,
+                    fontSize: "11px",
+                    cursor: "pointer",
+                  }}
+                >
+                  متاحة
+                </button>
+                <button
+                  onClick={() => setPredictionsTabView("predicted")}
+                  style={{
+                    flex: 1,
+                    padding: "8px 10px",
+                    borderRadius: "8px",
+                    border: "none",
+                    background: predictionsTabView === "predicted" ? theme.primary : "transparent",
+                    color: predictionsTabView === "predicted" ? theme.surface : theme.muted,
+                    fontFamily: "Cairo, sans-serif",
+                    fontWeight: 700,
+                    fontSize: "11px",
+                    cursor: "pointer",
+                  }}
+                >
+                  تم توقعها
+                </button>
+                <button
+                  onClick={() => {
+                    setPredictionsTabView("archived");
+                    setArchivedVisibleCount(10);
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: "8px 10px",
+                    borderRadius: "8px",
+                    border: "none",
+                    background: predictionsTabView === "archived" ? theme.primary : "transparent",
+                    color: predictionsTabView === "archived" ? theme.surface : theme.muted,
+                    fontFamily: "Cairo, sans-serif",
+                    fontWeight: 700,
+                    fontSize: "11px",
+                    cursor: "pointer",
+                  }}
+                >
+                  المنتهية
+                </button>
+              </div>
             </div>
 
             {/* Matches */}
