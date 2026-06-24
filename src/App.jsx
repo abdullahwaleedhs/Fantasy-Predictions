@@ -1157,7 +1157,7 @@ const MONTH_NAMES_AR = [
 // A button + popup calendar: month and year tabs on top, a 7-column day
 // grid below. Restricted to the same 60-day forward range as DATE_OPTIONS
 // (today through +59 days), so admins can only schedule within that window.
-function DateCalendarPicker({ value, onChange, theme }) {
+function DateCalendarPicker({ value, onChange, theme, disabled }) {
   const [open, setOpen] = useState(false);
 
   const today = new Date();
@@ -1208,7 +1208,8 @@ function DateCalendarPicker({ value, onChange, theme }) {
     <div style={{ position: "relative" }}>
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => !disabled && setOpen((o) => !o)}
+        disabled={disabled}
         style={{
           border: `1px solid ${theme.inputBorder}`,
           borderRadius: "6px",
@@ -1219,7 +1220,8 @@ function DateCalendarPicker({ value, onChange, theme }) {
           fontWeight: 600,
           padding: "4px 6px",
           outline: "none",
-          cursor: "pointer",
+          cursor: disabled ? "not-allowed" : "pointer",
+          opacity: disabled ? 0.6 : 1,
           minWidth: "90px",
           textAlign: "center",
         }}
@@ -1227,7 +1229,7 @@ function DateCalendarPicker({ value, onChange, theme }) {
         {label}
       </button>
 
-      {open && (
+      {!disabled && open && (
         <>
           <div
             onClick={() => setOpen(false)}
@@ -1413,7 +1415,7 @@ function TimePicker({ value, onChange, theme }) {
 // to 15-minute steps like TIME_OPTIONS). Opens a fixed-position modal with
 // two independently scrollable columns, same modal pattern as
 // DateCalendarPicker so it isn't clipped by any ancestor's overflow:hidden.
-function TimeFlexPicker({ value, onChange, theme }) {
+function TimeFlexPicker({ value, onChange, theme, disabled }) {
   const [open, setOpen] = useState(false);
 
   const [hh, mm] = value ? value.split(":") : ["", ""];
@@ -1439,7 +1441,8 @@ function TimeFlexPicker({ value, onChange, theme }) {
       <button
         type="button"
         dir="ltr"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => !disabled && setOpen((o) => !o)}
+        disabled={disabled}
         style={{
           border: `1px solid ${theme.inputBorder}`,
           borderRadius: "6px",
@@ -1450,7 +1453,8 @@ function TimeFlexPicker({ value, onChange, theme }) {
           fontWeight: 600,
           padding: "4px 6px",
           outline: "none",
-          cursor: "pointer",
+          cursor: disabled ? "not-allowed" : "pointer",
+          opacity: disabled ? 0.6 : 1,
           minWidth: "90px",
           textAlign: "center",
         }}
@@ -1458,7 +1462,7 @@ function TimeFlexPicker({ value, onChange, theme }) {
         {label}
       </button>
 
-      {open && (
+      {!disabled && open && (
         <>
           <div
             onClick={() => setOpen(false)}
@@ -1596,6 +1600,7 @@ function TimeFlexPicker({ value, onChange, theme }) {
 
 function DateTimeRow({ match, onChange, theme }) {
   const kickoffISO = match.date && match.time ? `${match.date}T${match.time}:00` : null;
+  const isLocked = kickoffISO ? new Date(kickoffISO).getTime() - serverNow() <= 0 : false;
 
   return (
     <div
@@ -1619,6 +1624,7 @@ function DateTimeRow({ match, onChange, theme }) {
             value={match.date || ""}
             onChange={(iso) => onChange({ ...match, date: iso })}
             theme={theme}
+            disabled={isLocked}
           />
         </div>
 
@@ -1628,6 +1634,7 @@ function DateTimeRow({ match, onChange, theme }) {
             value={match.time || ""}
             onChange={(v) => onChange({ ...match, time: v })}
             theme={theme}
+            disabled={isLocked}
           />
         </div>
       </div>
