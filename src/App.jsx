@@ -4456,12 +4456,6 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
           const multiplier = match.doublePoints ? 2 : pred?.userBoost ? 3 : 1;
           const result = pred ? calcPoints(pred.predHome, pred.predAway, match.actualHome, match.actualAway, multiplier) : null;
           const colors = result ? tierStyleFor(theme, result.basePoints) : null;
-          const predWinnerLogo = pred
-            ? pred.predHome > pred.predAway ? match.homeLogo : pred.predAway > pred.predHome ? match.awayLogo : null
-            : null;
-          const predWinnerName = pred
-            ? pred.predHome > pred.predAway ? match.home : pred.predAway > pred.predHome ? match.away : null
-            : null;
           return (
             <div
               key={p.id}
@@ -4481,15 +4475,16 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
                 <div style={{ flex: 1, textAlign: "center", padding: "8px 4px", borderLeft: `1px solid ${theme.border}` }}>
                   {pred ? (
                     <ResultPill theme={theme} border={theme.text} bg={theme.bg} color={theme.text} bold>
-                      {pred.predAway} - {pred.predHome}
+                      {pred.predHome} - {pred.predAway}
                     </ResultPill>
                   ) : (
                     <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} bold>
                       لم يتوقع
                     </ResultPill>
                   )}
-                  <div style={{ height: "22px", display: "flex", alignItems: "center", justifyContent: "center", marginTop: "4px" }}>
-                    {predWinnerName ? <ClubLogo logo={predWinnerLogo} name={predWinnerName} theme={theme} size={16} /> : null}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginTop: "4px" }}>
+                    <ClubLogo logo={match.homeLogo} name={match.home} theme={theme} size={16} />
+                    <ClubLogo logo={match.awayLogo} name={match.away} theme={theme} size={16} />
                   </div>
                 </div>
                 <div style={{ flex: 1, textAlign: "center", padding: "8px 4px" }}>
