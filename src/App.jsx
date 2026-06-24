@@ -4345,14 +4345,16 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
             </p>
           </>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
             {finishedMatches.length === 0 ? (
               <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "20px 0" }}>
                 ما فيه مباريات منتهية بعد
               </p>
             ) : (
               finishedMatches.map((match) => (
-                <LeaguePredictionCard key={match.id} match={match} league={league} playerPredictionsById={playerPredictionsById} tournamentLogos={tournamentLogos} theme={theme} />
+                <div key={match.id} style={{ width: "280px" }}>
+                  <LeaguePredictionCard match={match} league={league} playerPredictionsById={playerPredictionsById} tournamentLogos={tournamentLogos} theme={theme} />
+                </div>
               ))
             )}
           </div>
