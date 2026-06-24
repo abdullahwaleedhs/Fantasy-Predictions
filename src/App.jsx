@@ -4476,13 +4476,13 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
             >
               <div style={{ display: "flex" }}>
                 <div style={{ flex: 1, textAlign: "center", padding: "8px 4px", borderLeft: `1px solid ${theme.border}` }}>
-                  <ResultPill theme={theme} border={theme.violet} bg={theme.bg} color={theme.violet} bold>
+                  <ResultPill theme={theme} border={theme.text} bg={theme.bg} color={theme.text} bold>
                     <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60px" }}>{p.name}</span>
                   </ResultPill>
                 </div>
                 <div style={{ flex: 1, textAlign: "center", padding: "8px 4px", borderLeft: `1px solid ${theme.border}` }}>
                   {pred ? (
-                    <ResultPill theme={theme} border={theme.violet} bg={theme.bg} color={theme.violet} bold>
+                    <ResultPill theme={theme} border={theme.text} bg={theme.bg} color={theme.text} bold>
                       {pred.predAway} - {pred.predHome}
                     </ResultPill>
                   ) : (
