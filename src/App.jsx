@@ -1804,16 +1804,39 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
 
   const noPrediction = match.predHome === "" || match.predHome == null || match.predAway === "" || match.predAway == null;
 
+  const isGold = match.doublePoints || match.userBoost;
+
   return (
     <div style={{ marginBottom: "14px" }}>
       <div
         style={{
           background: theme.surface,
-          border: `1.5px solid ${theme.violet}`,
+          border: isGold ? `2px solid ${theme.yellow}` : `1.5px solid ${theme.violet}`,
           borderRadius: "14px",
           overflow: "hidden",
+          position: "relative",
         }}
       >
+        {isGold && (
+          <span
+            style={{
+              position: "absolute",
+              top: "8px",
+              insetInlineStart: "10px",
+              background: theme.yellow,
+              color: theme.bg,
+              fontFamily: "Cairo, sans-serif",
+              fontSize: "10px",
+              fontWeight: 800,
+              padding: "2px 8px",
+              borderRadius: "6px",
+              zIndex: 2,
+            }}
+          >
+            x{effectiveMultiplier}
+          </span>
+        )}
+
         {/* Tournament name */}
         <div
           style={{
@@ -1821,7 +1844,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
             fontFamily: "Cairo, sans-serif",
             fontWeight: 700,
             fontSize: "10px",
-            color: theme.primary,
+            color: isGold ? theme.yellow : theme.primary,
             textAlign: "center",
             display: "flex",
             alignItems: "center",
@@ -1831,7 +1854,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
           }}
         >
           {match.tournament && (
-            <TournamentIcon name={match.tournament} logo={tournamentLogos?.[match.tournament]} theme={theme} color={theme.primary} />
+            <TournamentIcon name={match.tournament} logo={tournamentLogos?.[match.tournament]} theme={theme} color={isGold ? theme.yellow : theme.primary} />
           )}
           {match.tournament || "بطولة غير محددة"}
         </div>
