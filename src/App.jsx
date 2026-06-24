@@ -1785,8 +1785,7 @@ function TeamDisplay({ name, logo, theme }) {
 // Restricted match card for regular participants: everything is read-only
 // (tournament, teams, schedule, actual result) except the prediction inputs.
 // Also supports the personal "double points" boost (limited uses per season).
-function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, onCancelBoost, tournamentLogos, hideResult }) {
-  const [justSaved, setJustSaved] = useState(false);
+function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, onCancelBoost, tournamentLogos, hideResult, confirmed, onConfirm }) {
   const userMultiplier = match.userBoost ? 3 : 1;
   const adminMultiplier = match.doublePoints ? 2 : 1;
   const effectiveMultiplier = match.doublePoints ? adminMultiplier : userMultiplier;
@@ -1927,26 +1926,23 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, onUseBoost, on
           {!isLocked && (
             <div style={{ display: "flex", justifyContent: "center", marginTop: "14px" }}>
               <button
-                onClick={() => {
-                  setJustSaved(true);
-                  setTimeout(() => setJustSaved(false), 1500);
-                }}
-                disabled={noPrediction}
+                onClick={onConfirm}
+                disabled={noPrediction || confirmed}
                 style={{
                   border: `1.5px solid ${theme.text}`,
-                  background: justSaved ? theme.text : "transparent",
-                  color: justSaved ? theme.surface : theme.text,
+                  background: confirmed ? theme.text : "transparent",
+                  color: confirmed ? theme.surface : theme.text,
                   borderRadius: "8px",
                   padding: "7px 18px",
                   fontFamily: "Cairo, sans-serif",
                   fontWeight: 800,
                   fontSize: "11px",
-                  cursor: noPrediction ? "not-allowed" : "pointer",
+                  cursor: noPrediction || confirmed ? "not-allowed" : "pointer",
                   opacity: noPrediction ? 0.5 : 1,
                   whiteSpace: "nowrap",
                 }}
               >
-                {justSaved ? "تم الحفظ" : "حفظ التوقع"}
+                {confirmed ? "تم الحفظ" : "حفظ التوقع"}
               </button>
             </div>
           )}
@@ -5598,6 +5594,7 @@ export default function App() {
   const [clubRows, setClubRows] = useState([]); // [{id, tournament_id, name, logo}]
   const [matchRows, setMatchRows] = useState([]); // raw matches (no per-user prediction fields)
   const [predictionsByMatch, setPredictionsByMatch] = useState({}); // matchId -> {predHome, predAway, userBoost}, for currentUser only
+  const [confirmedPredictions, setConfirmedPredictions] = usePersistedState("confirmedPredictions", {}); // matchId -> true once the user pressed "حفظ التوقع" - a match only moves to تم توقعها after that, and editing the score afterward unconfirms it
   const [allPredictionRows, setAllPredictionRows] = useState([]); // every user's predictions, for the global leaderboard
   const [dataLoading, setDataLoading] = useState(true);
 
@@ -5918,6 +5915,17 @@ export default function App() {
 
     if (currentUser) {
       const predictionFields = { predHome: updated.predHome, predAway: updated.predAway, userBoost: updated.userBoost };
+      const prevPred = predictionsByMatch[id];
+      const scoreChanged =
+        prevPred && (String(prevPred.predHome ?? "") !== String(predictionFields.predHome ?? "") || String(prevPred.predAway ?? "") !== String(predictionFields.predAway ?? ""));
+      if (scoreChanged) {
+        setConfirmedPredictions((prev) => {
+          if (!prev[id]) return prev;
+          const next = { ...prev };
+          delete next[id];
+          return next;
+        });
+      }
       upsertPredictionDB(currentUser.id, id, predictionFields);
       setPredictionsByMatch((prev) => ({ ...prev, [id]: predictionFields }));
       setAllPredictionRows((prev) => {
@@ -5933,6 +5941,10 @@ export default function App() {
         return exists ? prev.map((r) => (r.match_id === id && r.user_id === currentUser.id ? row : r)) : [...prev, row];
       });
     }
+  };
+
+  const confirmPrediction = (id) => {
+    setConfirmedPredictions((prev) => ({ ...prev, [id]: true }));
   };
 
   const removeMatch = (id) => {
@@ -6118,8 +6130,7 @@ export default function App() {
                 if (!m.date || !m.time) return false;
                 return new Date(`${m.date}T${m.time}:00`).getTime() - serverNow() <= 0;
               };
-              const isPredicted = (m) =>
-                m.predHome !== "" && m.predHome != null && m.predAway !== "" && m.predAway != null;
+              const isPredicted = (m) => !!confirmedPredictions[m.id];
 
               let tabMatches = matches.filter((m) => {
                 if (predictionsTabView === "archived") return isLocked(m);
@@ -6260,6 +6271,8 @@ export default function App() {
                           onCancelBoost={() => cancelBoostOnMatch(match.id)}
                           tournamentLogos={tournamentLogos}
                           hideResult={predictionsTabView !== "archived"}
+                          confirmed={!!confirmedPredictions[match.id]}
+                          onConfirm={() => confirmPrediction(match.id)}
                         />
                       ))}
                   {hasMoreArchived && (
