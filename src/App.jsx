@@ -5612,7 +5612,8 @@ export default function App() {
   const [clubRows, setClubRows] = useState([]); // [{id, tournament_id, name, logo}]
   const [matchRows, setMatchRows] = useState([]); // raw matches (no per-user prediction fields)
   const [predictionsByMatch, setPredictionsByMatch] = useState({}); // matchId -> {predHome, predAway, userBoost}, for currentUser only
-  const [confirmedPredictions, setConfirmedPredictions] = usePersistedState("confirmedPredictions", {}); // matchId -> true once the user pressed "حفظ التوقع" - a match only moves to تم توقعها after that, and editing the score afterward unconfirms it
+  const [confirmedPredictions, setConfirmedPredictions] = usePersistedState("confirmedPredictions", {}); // matchId -> true while the save button is in its "تم الحفظ" state; cleared by any edit (score or boost) so the button re-opens
+  const [savedPredictions, setSavedPredictions] = usePersistedState("savedPredictions", {}); // matchId -> true once a full prediction has been saved at least once; controls تم توقعها tab placement, only cleared when the prediction is fully cleared
   const [allPredictionRows, setAllPredictionRows] = useState([]); // every user's predictions, for the global leaderboard
   const [dataLoading, setDataLoading] = useState(true);
 
@@ -5736,6 +5737,7 @@ export default function App() {
       }
       setPredictionsByMatch(byMatch);
       setConfirmedPredictions(confirmed);
+      setSavedPredictions(confirmed);
     });
   }, [currentUser?.id]);
 
@@ -5946,6 +5948,15 @@ export default function App() {
           delete next[id];
           return next;
         });
+        const cleared = predictionFields.predHome === "" || predictionFields.predHome == null || predictionFields.predAway === "" || predictionFields.predAway == null;
+        if (cleared) {
+          setSavedPredictions((prev) => {
+            if (!prev[id]) return prev;
+            const next = { ...prev };
+            delete next[id];
+            return next;
+          });
+        }
       }
       upsertPredictionDB(currentUser.id, id, predictionFields);
       setPredictionsByMatch((prev) => ({ ...prev, [id]: predictionFields }));
@@ -5966,6 +5977,7 @@ export default function App() {
 
   const confirmPrediction = (id) => {
     setConfirmedPredictions((prev) => ({ ...prev, [id]: true }));
+    setSavedPredictions((prev) => ({ ...prev, [id]: true }));
   };
 
   const removeMatch = (id) => {
@@ -6157,8 +6169,7 @@ export default function App() {
                 if (!m.date || !m.time) return false;
                 return new Date(`${m.date}T${m.time}:00`).getTime() - serverNow() <= 0;
               };
-              const isPredicted = (m) =>
-                m.predHome !== "" && m.predHome != null && m.predAway !== "" && m.predAway != null;
+              const isPredicted = (m) => !!savedPredictions[m.id];
 
               let tabMatches = matches.filter((m) => {
                 if (predictionsTabView === "archived") return isLocked(m);
