@@ -4477,18 +4477,17 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
                   <div style={{ fontSize: "10px", color: theme.muted, marginBottom: "5px", fontWeight: p.isYou ? 700 : 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {p.name}
                   </div>
-                  {pred?.userBoost ? (
-                    <ResultPill theme={theme} border={theme.yellow} bg={theme.yellowSoft} color={theme.yellow} bold>
-                      تربل
+                  {pred ? (
+                    <ResultPill theme={theme} border={theme.violet} bg={theme.bg} color={theme.violet} bold>
+                      {pred.predAway} - {pred.predHome}
                     </ResultPill>
                   ) : (
                     <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} bold>
-                      لا يوجد
+                      لم يتوقع
                     </ResultPill>
                   )}
                 </div>
                 <div style={{ flex: 1, textAlign: "center", padding: "8px 4px", borderLeft: `1px solid ${theme.border}` }}>
-                  <div style={{ fontSize: "10px", color: theme.muted, marginBottom: "5px" }}>النتيجة الفعلية</div>
                   <ResultPill theme={theme} border={theme.violet} bg={theme.bg} color={theme.violet} bold>
                     {match.actualAway} - {match.actualHome}
                   </ResultPill>
@@ -4497,7 +4496,6 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
                   </div>
                 </div>
                 <div style={{ flex: 1, textAlign: "center", padding: "8px 4px" }}>
-                  <div style={{ fontSize: "10px", color: theme.muted, marginBottom: "5px" }}>النقاط</div>
                   {result ? (
                     <ResultPill theme={theme} border={colors.ring} bg={colors.bg} color={colors.text} bold>
                       {result.points}
