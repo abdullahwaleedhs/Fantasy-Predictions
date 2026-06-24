@@ -5753,8 +5753,11 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
-    if (viewMode === "admin" && !currentUser?.is_admin) setViewMode("user");
-  }, [currentUser, viewMode]);
+    // Skip this while auth is still loading on refresh - currentUser is
+    // briefly null then, which would otherwise kick an admin back to
+    // user mode before their session even finishes loading.
+    if (!authLoading && viewMode === "admin" && !currentUser?.is_admin) setViewMode("user");
+  }, [currentUser, viewMode, authLoading]);
 
   // The organizer doesn't have a تم توقعها tab - bounce back to متاحة if
   // it was left selected before switching into admin mode.
