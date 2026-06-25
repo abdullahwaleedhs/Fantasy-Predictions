@@ -1834,7 +1834,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
 
   const boostDisabled = match.doublePoints || isLocked || noPredictionDraft || (!draftBoost && boostsRemaining <= 0);
 
-  const isGold = match.doublePoints || draftBoost;
+  const isGold = match.doublePoints || draftBoost || match.userBoost;
 
   const saveDraft = () => {
     onChange({ ...match, predHome: draftHome, predAway: draftAway, userBoost: draftBoost });
