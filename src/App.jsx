@@ -6156,6 +6156,26 @@ export default function App() {
               })()}
             </div>
 
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "4px",
+                padding: "8px 12px",
+                fontFamily: "Cairo, sans-serif",
+                fontSize: "10px",
+                color: theme.muted,
+                borderBottom: `1px solid ${theme.border}`,
+              }}
+            >
+              <span>
+                <strong style={{ color: theme.text }}>• الدبل:</strong> يتم تفعيله من قبل الادمن مباراة واحدة لكل أسبوع
+              </span>
+              <span>
+                <strong style={{ color: theme.text }}>• التربل:</strong> يتم تفعيله من قبل اللاعبين ومتوفر ٣ مرات طوال الموسم ولا يمكن تفعيله على مباراة الدبل
+              </span>
+            </div>
+
             {/* Matches */}
             {(() => {
               const isLocked = (m) => {
