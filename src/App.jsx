@@ -2132,8 +2132,12 @@ function MatchResultFooter({ match, theme, hasActual, result, colors, noPredicti
   return (
     <div style={{ display: "flex", borderTop: `1px solid ${theme.border}` }}>
       <div style={{ flex: 1, textAlign: "center", padding: "8px 4px", borderLeft: `1px solid ${theme.border}` }}>
-        <div style={{ fontSize: "11px", color: theme.muted, marginBottom: "5px" }}>المزايا المستخدمة</div>
-        {match.userBoost ? (
+        <div style={{ fontSize: "11px", color: theme.muted, marginBottom: "5px" }}>مضاعفة النقاط</div>
+        {match.doublePoints ? (
+          <ResultPill theme={theme} border={theme.yellow} bg={theme.yellowSoft} color={theme.yellow} bold>
+            دبل
+          </ResultPill>
+        ) : match.userBoost ? (
           <ResultPill theme={theme} border={theme.yellow} bg={theme.yellowSoft} color={theme.yellow} bold>
             تربل
           </ResultPill>
