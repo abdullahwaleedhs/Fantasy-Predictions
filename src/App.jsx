@@ -1880,12 +1880,6 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
           <MatchInfoBar match={match} theme={theme} />
         </div>
 
-        {match.venueTeam && (
-          <div style={{ textAlign: "center", fontSize: "10px", color: theme.text, fontWeight: 700, padding: "17px 12px 4px" }}>
-            ملعب {match.venueTeam === "home" ? match.home : match.away}
-          </div>
-        )}
-
         <div style={{ padding: "16px 18px 18px" }}>
           {/* Team + your prediction, grouped per column, with the personal
               boost control sitting in the middle gap between the two
@@ -1914,15 +1908,30 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
             </div>
 
             {isLocked ? (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minWidth: "64px", paddingTop: "62px" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minWidth: "64px", paddingTop: "44px" }}>
+                {match.venueTeam && (
+                  <div style={{ fontSize: "9px", color: theme.text, fontWeight: 700, marginBottom: "6px", whiteSpace: "nowrap" }}>
+                    ملعب {match.venueTeam === "home" ? match.home : match.away}
+                  </div>
+                )}
                 <span style={{ color: theme.muted, fontSize: "13px", fontWeight: 700 }}>ضد</span>
               </div>
             ) : match.doublePoints ? (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "62px" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "44px" }}>
+                {match.venueTeam && (
+                  <div style={{ fontSize: "9px", color: theme.text, fontWeight: 700, marginBottom: "6px", whiteSpace: "nowrap" }}>
+                    ملعب {match.venueTeam === "home" ? match.home : match.away}
+                  </div>
+                )}
                 <span style={{ color: theme.muted, fontSize: "12px", fontWeight: 700 }}>ضد</span>
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", paddingTop: "62px" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", paddingTop: "44px" }}>
+                {match.venueTeam && (
+                  <div style={{ fontSize: "9px", color: theme.text, fontWeight: 700, marginBottom: "2px", whiteSpace: "nowrap" }}>
+                    ملعب {match.venueTeam === "home" ? match.home : match.away}
+                  </div>
+                )}
                 <button
                   onClick={() => setDraftBoost((b) => !b)}
                   disabled={boostDisabled}
@@ -4484,19 +4493,18 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
         </div>
       </div>
 
-      {match.venueTeam && (
-        <div style={{ textAlign: "center", fontSize: "10px", color: theme.text, fontWeight: 700, padding: "17px 12px 4px" }}>
-          ملعب {match.venueTeam === "home" ? match.home : match.away}
-        </div>
-      )}
-
       <div style={{ padding: "10px 12px 12px" }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "8px" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", flex: 1 }}>
             <TeamDisplay name={match.home} logo={match.homeLogo} theme={theme} noUnderline logoSize={36} />
             <ScoreBoxStatic value={match.actualHome} theme={theme} />
           </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "24px" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "16px" }}>
+            {match.venueTeam && (
+              <div style={{ fontSize: "8px", color: theme.text, fontWeight: 700, marginBottom: "4px", whiteSpace: "nowrap" }}>
+                ملعب {match.venueTeam === "home" ? match.home : match.away}
+              </div>
+            )}
             <span style={{ color: theme.muted, fontSize: "11px", fontWeight: 700 }}>ضد</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", flex: 1 }}>
