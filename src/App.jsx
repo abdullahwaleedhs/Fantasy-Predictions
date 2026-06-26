@@ -1774,7 +1774,7 @@ function MatchInfoBar({ match, theme, dark }) {
 }
 
 // Static (non-editable) team display for the restricted user view.
-function TeamDisplay({ name, logo, theme, noUnderline, logoSize = 48, venueLabel }) {
+function TeamDisplay({ name, logo, theme, logoSize = 48, venueLabel }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", flex: 1, minWidth: 0 }}>
       <div style={{ position: "relative" }}>
@@ -1787,7 +1787,6 @@ function TeamDisplay({ name, logo, theme, noUnderline, logoSize = 48, venueLabel
           fontSize: "10.5px",
           color: theme.primary,
           textAlign: "center",
-          ...(noUnderline ? {} : { borderBottom: `1px solid ${theme.primary}`, paddingBottom: "2px" }),
           width: "100%",
           whiteSpace: "nowrap",
           overflow: "hidden",
@@ -4487,14 +4486,14 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
       <div style={{ padding: "10px 12px 12px" }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "8px" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", flex: 1 }}>
-            <TeamDisplay name={match.home} logo={match.homeLogo} theme={theme} noUnderline logoSize={36} venueLabel={match.venueTeam === "home" ? "المستضيف" : match.venueTeam === "away" ? "الضيف" : null} />
+            <TeamDisplay name={match.home} logo={match.homeLogo} theme={theme} logoSize={36} venueLabel={match.venueTeam === "home" ? "المستضيف" : match.venueTeam === "away" ? "الضيف" : null} />
             <ScoreBoxStatic value={match.actualHome} theme={theme} />
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "24px" }}>
             <span style={{ color: theme.muted, fontSize: "11px", fontWeight: 700 }}>ضد</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", flex: 1 }}>
-            <TeamDisplay name={match.away} logo={match.awayLogo} theme={theme} noUnderline logoSize={36} venueLabel={match.venueTeam === "away" ? "المستضيف" : match.venueTeam === "home" ? "الضيف" : null} />
+            <TeamDisplay name={match.away} logo={match.awayLogo} theme={theme} logoSize={36} venueLabel={match.venueTeam === "away" ? "المستضيف" : match.venueTeam === "home" ? "الضيف" : null} />
             <ScoreBoxStatic value={match.actualAway} theme={theme} />
           </div>
         </div>
