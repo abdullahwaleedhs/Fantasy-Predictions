@@ -1785,12 +1785,12 @@ function TeamDisplay({ name, logo, theme, noUnderline, logoSize = 48, isHome }) 
               top: "-10px",
               left: "50%",
               transform: "translateX(-50%)",
-              fontSize: "11px",
               lineHeight: 1,
+              color: theme.violet,
             }}
             title="أرض الفريق"
           >
-            🏠
+            <Home size={12} fill={theme.violet} />
           </span>
         )}
         <ClubLogo logo={logo} name={name} theme={theme} size={logoSize} />
@@ -2335,13 +2335,14 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
                 border: `1px solid ${draft.venueTeam === "home" ? theme.violet : theme.inputBorder}`,
                 color: draft.venueTeam === "home" ? theme.violet : theme.muted,
                 borderRadius: "8px",
-                padding: "3px 10px",
-                fontSize: "11px",
-                fontWeight: 700,
+                padding: "5px 12px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 cursor: naturallyLocked ? "not-allowed" : "pointer",
               }}
             >
-              🏠 صاحب الأرض
+              <Home size={15} />
             </button>
             <button
               onClick={() => updateDraft({ ...draft, venueTeam: draft.venueTeam === "away" ? null : "away" })}
@@ -2352,13 +2353,14 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
                 border: `1px solid ${draft.venueTeam === "away" ? theme.violet : theme.inputBorder}`,
                 color: draft.venueTeam === "away" ? theme.violet : theme.muted,
                 borderRadius: "8px",
-                padding: "3px 10px",
-                fontSize: "11px",
-                fontWeight: 700,
+                padding: "5px 12px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 cursor: naturallyLocked ? "not-allowed" : "pointer",
               }}
             >
-              🏠 صاحب الأرض
+              <Home size={15} />
             </button>
           </div>
 
@@ -5964,7 +5966,9 @@ export default function App() {
       doublePoints: updated.doublePoints,
       venueTeam: updated.venueTeam,
     };
-    updateMatchDB(id, matchFields);
+    updateMatchDB(id, matchFields).catch((err) => {
+      alert("فشل حفظ المباراة: " + err.message);
+    });
     setMatchRows((prev) => prev.map((x) => (x.id === id ? { ...x, ...matchFields } : x)));
 
     if (currentUser) {
