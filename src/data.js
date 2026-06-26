@@ -149,6 +149,19 @@ export async function removeMatchDB(matchId) {
   if (error) throw error;
 }
 
+// Who currently has a triple/boost on this match - fetched fresh right
+// before deleting it, since the admin's locally-cached prediction list can
+// be stale relative to predictions participants saved after the page loaded.
+export async function fetchBoostedUserIdsForMatch(matchId) {
+  const { data, error } = await supabase
+    .from("predictions")
+    .select("user_id")
+    .eq("match_id", matchId)
+    .eq("user_boost", true);
+  if (error) throw error;
+  return data.map((r) => r.user_id);
+}
+
 // ============ PREDICTIONS ============
 
 export async function fetchPredictionsForUser(userId) {
