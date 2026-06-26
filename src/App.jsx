@@ -1981,19 +1981,20 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
           </div>
 
           {!isLocked && (
-            <div style={{ display: "flex", justifyContent: "center", marginTop: "14px" }}>
+            <div style={{ borderTop: `1px solid ${theme.border}`, padding: "10px 14px", marginTop: "10px" }}>
               <button
                 onClick={saveDraft}
                 disabled={saveDisabled}
                 style={{
+                  width: "100%",
                   border: `1.5px solid ${predictedTab ? (showSaved ? "#16A34A" : "#DC2626") : theme.text}`,
                   background: predictedTab ? (showSaved ? "#16A34A" : "transparent") : showSaved ? theme.text : "transparent",
                   color: predictedTab ? (showSaved ? "#FFFFFF" : "#DC2626") : showSaved ? theme.surface : theme.text,
                   borderRadius: "8px",
-                  padding: "7px 18px",
+                  padding: "9px 18px",
                   fontFamily: "Cairo, sans-serif",
                   fontWeight: 800,
-                  fontSize: "11px",
+                  fontSize: "12px",
                   cursor: saveDisabled ? "not-allowed" : "pointer",
                   opacity: saveDisabled && !showSaved ? 0.5 : 1,
                   whiteSpace: "nowrap",
@@ -2002,51 +2003,6 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
                 {showSaved ? "تم الحفظ" : "حفظ التوقع"}
               </button>
             </div>
-          )}
-
-          {/* القادمة (match hasn't happened yet) skips the result/points section
-              entirely - hasn't started, so a result has no meaning there. */}
-          {!hideResult && !isLocked && (
-          <>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <div style={{ fontSize: "11px", color: theme.muted, fontWeight: 600, marginBottom: "8px" }}>
-              النتيجة الفعلية
-            </div>
-            <div
-              style={{
-                fontSize: "12px",
-                color: theme.muted,
-                height: "40px",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              لم تنتهِ المباراة
-            </div>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", marginTop: "16px" }}>
-            {noPrediction ? (
-              <span style={{ color: theme.danger, fontWeight: 700, fontSize: "12px" }}>لم تتوقع المباراة</span>
-            ) : (
-              <div
-                style={{
-                  width: "44px",
-                  height: "44px",
-                  borderRadius: "50%",
-                  border: `2px dashed ${theme.inputBorder}`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "11px",
-                  color: theme.muted,
-                }}
-              >
-                —
-              </div>
-            )}
-          </div>
-          </>
           )}
         </div>
 
