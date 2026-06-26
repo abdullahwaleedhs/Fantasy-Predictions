@@ -1774,7 +1774,7 @@ function MatchInfoBar({ match, theme, dark }) {
 }
 
 // Static (non-editable) team display for the restricted user view.
-function TeamDisplay({ name, logo, theme, noUnderline, logoSize = 48 }) {
+function TeamDisplay({ name, logo, theme, noUnderline, logoSize = 48, venueLabel }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", flex: 1, minWidth: 0 }}>
       <div style={{ position: "relative" }}>
@@ -1796,6 +1796,9 @@ function TeamDisplay({ name, logo, theme, noUnderline, logoSize = 48 }) {
       >
         {name || "—"}
       </span>
+      {venueLabel && (
+        <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "9px", color: theme.muted }}>{venueLabel}</span>
+      )}
     </div>
   );
 }
@@ -1887,7 +1890,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
               this match. */}
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px", marginBottom: isLocked ? "0" : "16px" }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", flex: 1 }}>
-              <TeamDisplay name={match.home} logo={match.homeLogo} theme={theme} />
+              <TeamDisplay name={match.home} logo={match.homeLogo} theme={theme} venueLabel={match.venueTeam === "home" ? "المستضيف" : match.venueTeam === "away" ? "الضيف" : null} />
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", marginTop: "4px" }}>
                 <span style={{ fontSize: "10px", color: theme.muted, fontWeight: 600 }}>توقعك</span>
                 {isLocked ? (
@@ -1908,30 +1911,15 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
             </div>
 
             {isLocked ? (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minWidth: "64px", paddingTop: "44px" }}>
-                {match.venueTeam && (
-                  <div style={{ fontSize: "9px", color: theme.text, fontWeight: 700, marginBottom: "6px", whiteSpace: "nowrap" }}>
-                    ملعب {match.venueTeam === "home" ? match.home : match.away}
-                  </div>
-                )}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minWidth: "64px", paddingTop: "62px" }}>
                 <span style={{ color: theme.muted, fontSize: "13px", fontWeight: 700 }}>ضد</span>
               </div>
             ) : match.doublePoints ? (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "44px" }}>
-                {match.venueTeam && (
-                  <div style={{ fontSize: "9px", color: theme.text, fontWeight: 700, marginBottom: "6px", whiteSpace: "nowrap" }}>
-                    ملعب {match.venueTeam === "home" ? match.home : match.away}
-                  </div>
-                )}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "62px" }}>
                 <span style={{ color: theme.muted, fontSize: "12px", fontWeight: 700 }}>ضد</span>
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", paddingTop: "44px" }}>
-                {match.venueTeam && (
-                  <div style={{ fontSize: "9px", color: theme.text, fontWeight: 700, marginBottom: "2px", whiteSpace: "nowrap" }}>
-                    ملعب {match.venueTeam === "home" ? match.home : match.away}
-                  </div>
-                )}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", paddingTop: "62px" }}>
                 <button
                   onClick={() => setDraftBoost((b) => !b)}
                   disabled={boostDisabled}
@@ -1972,7 +1960,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
             )}
 
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", flex: 1 }}>
-              <TeamDisplay name={match.away} logo={match.awayLogo} theme={theme} />
+              <TeamDisplay name={match.away} logo={match.awayLogo} theme={theme} venueLabel={match.venueTeam === "away" ? "المستضيف" : match.venueTeam === "home" ? "الضيف" : null} />
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", marginTop: "4px" }}>
                 <span style={{ fontSize: "10px", color: theme.muted, fontWeight: 600 }}>توقعك</span>
                 {isLocked ? (
@@ -2258,25 +2246,67 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
                 team pair stays visually centered instead of leaning toward
                 the delete button's side. */}
             <div style={{ width: "24px", flexShrink: 0 }} />
-            <TeamPicker
-              value={draft.home}
-              logo={draft.homeLogo}
-              onChange={(name, logo) => updateDraft({ ...draft, home: name, homeLogo: logo })}
-              clubs={clubs}
-              placeholder="الفريق الأول"
-              theme={theme}
-              disabled={naturallyLocked}
-            />
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1, minWidth: 0 }}>
+              <TeamPicker
+                value={draft.home}
+                logo={draft.homeLogo}
+                onChange={(name, logo) => updateDraft({ ...draft, home: name, homeLogo: logo })}
+                clubs={clubs}
+                placeholder="الفريق الأول"
+                theme={theme}
+                disabled={naturallyLocked}
+              />
+              <button
+                onClick={() => updateDraft({ ...draft, venueTeam: draft.venueTeam === "home" ? null : "home" })}
+                disabled={naturallyLocked}
+                title="حدد الفريق الأول كصاحب أرض"
+                style={{
+                  alignSelf: "center",
+                  background: draft.venueTeam === "home" ? theme.violetSoft : "transparent",
+                  border: `1px solid ${draft.venueTeam === "home" ? theme.violet : theme.inputBorder}`,
+                  color: draft.venueTeam === "home" ? theme.violet : theme.muted,
+                  borderRadius: "8px",
+                  padding: "3px 10px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: naturallyLocked ? "not-allowed" : "pointer",
+                }}
+              >
+                <Home size={14} />
+              </button>
+            </div>
             <span style={{ color: theme.muted, fontSize: "12px", fontWeight: 600, flexShrink: 0 }}>ضد</span>
-            <TeamPicker
-              value={draft.away}
-              logo={draft.awayLogo}
-              onChange={(name, logo) => updateDraft({ ...draft, away: name, awayLogo: logo })}
-              clubs={clubs}
-              placeholder="الفريق الثاني"
-              theme={theme}
-              disabled={naturallyLocked}
-            />
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1, minWidth: 0 }}>
+              <TeamPicker
+                value={draft.away}
+                logo={draft.awayLogo}
+                onChange={(name, logo) => updateDraft({ ...draft, away: name, awayLogo: logo })}
+                clubs={clubs}
+                placeholder="الفريق الثاني"
+                theme={theme}
+                disabled={naturallyLocked}
+              />
+              <button
+                onClick={() => updateDraft({ ...draft, venueTeam: draft.venueTeam === "away" ? null : "away" })}
+                disabled={naturallyLocked}
+                title="حدد الفريق الثاني كصاحب أرض"
+                style={{
+                  alignSelf: "center",
+                  background: draft.venueTeam === "away" ? theme.violetSoft : "transparent",
+                  border: `1px solid ${draft.venueTeam === "away" ? theme.violet : theme.inputBorder}`,
+                  color: draft.venueTeam === "away" ? theme.violet : theme.muted,
+                  borderRadius: "8px",
+                  padding: "3px 10px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: naturallyLocked ? "not-allowed" : "pointer",
+                }}
+              >
+                <Home size={14} />
+              </button>
+            </div>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", flexShrink: 0 }}>
               <button
                 onClick={() => {
@@ -2323,45 +2353,6 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
                 </button>
               )}
             </div>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginBottom: "16px" }}>
-            <button
-              onClick={() => updateDraft({ ...draft, venueTeam: draft.venueTeam === "home" ? null : "home" })}
-              disabled={naturallyLocked}
-              title="حدد الفريق الأول كصاحب أرض"
-              style={{
-                background: draft.venueTeam === "home" ? theme.violetSoft : "transparent",
-                border: `1px solid ${draft.venueTeam === "home" ? theme.violet : theme.inputBorder}`,
-                color: draft.venueTeam === "home" ? theme.violet : theme.muted,
-                borderRadius: "8px",
-                padding: "5px 12px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: naturallyLocked ? "not-allowed" : "pointer",
-              }}
-            >
-              <Home size={15} />
-            </button>
-            <button
-              onClick={() => updateDraft({ ...draft, venueTeam: draft.venueTeam === "away" ? null : "away" })}
-              disabled={naturallyLocked}
-              title="حدد الفريق الثاني كصاحب أرض"
-              style={{
-                background: draft.venueTeam === "away" ? theme.violetSoft : "transparent",
-                border: `1px solid ${draft.venueTeam === "away" ? theme.violet : theme.inputBorder}`,
-                color: draft.venueTeam === "away" ? theme.violet : theme.muted,
-                borderRadius: "8px",
-                padding: "5px 12px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: naturallyLocked ? "not-allowed" : "pointer",
-              }}
-            >
-              <Home size={15} />
-            </button>
           </div>
 
           {/* Admin only enters the actual result - no predictions, no points */}
@@ -4496,19 +4487,14 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
       <div style={{ padding: "10px 12px 12px" }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "8px" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", flex: 1 }}>
-            <TeamDisplay name={match.home} logo={match.homeLogo} theme={theme} noUnderline logoSize={36} />
+            <TeamDisplay name={match.home} logo={match.homeLogo} theme={theme} noUnderline logoSize={36} venueLabel={match.venueTeam === "home" ? "المستضيف" : match.venueTeam === "away" ? "الضيف" : null} />
             <ScoreBoxStatic value={match.actualHome} theme={theme} />
           </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "16px" }}>
-            {match.venueTeam && (
-              <div style={{ fontSize: "8px", color: theme.text, fontWeight: 700, marginBottom: "4px", whiteSpace: "nowrap" }}>
-                ملعب {match.venueTeam === "home" ? match.home : match.away}
-              </div>
-            )}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "24px" }}>
             <span style={{ color: theme.muted, fontSize: "11px", fontWeight: 700 }}>ضد</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", flex: 1 }}>
-            <TeamDisplay name={match.away} logo={match.awayLogo} theme={theme} noUnderline logoSize={36} />
+            <TeamDisplay name={match.away} logo={match.awayLogo} theme={theme} noUnderline logoSize={36} venueLabel={match.venueTeam === "away" ? "المستضيف" : match.venueTeam === "home" ? "الضيف" : null} />
             <ScoreBoxStatic value={match.actualAway} theme={theme} />
           </div>
         </div>
