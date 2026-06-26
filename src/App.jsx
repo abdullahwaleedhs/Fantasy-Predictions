@@ -6134,7 +6134,7 @@ export default function App() {
                     cursor: "pointer",
                   }}
                 >
-                  انتهت
+                  مغلقة
                 </button>
               </div>
 
