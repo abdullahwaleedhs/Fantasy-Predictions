@@ -5588,15 +5588,17 @@ export default function App() {
   const [allPredictionRows, setAllPredictionRows] = useState([]); // every user's predictions, for the global leaderboard
   const [dataLoading, setDataLoading] = useState(true);
 
+  const refreshData = () => {
+    return Promise.all([fetchTournaments(), fetchClubs(), fetchMatches(), fetchAllPredictionsWithProfiles()]).then(([t, c, m, p]) => {
+      setTournamentRows(t);
+      setClubRows(c);
+      setMatchRows(m);
+      setAllPredictionRows(p);
+    });
+  };
+
   useEffect(() => {
-    Promise.all([fetchTournaments(), fetchClubs(), fetchMatches(), fetchAllPredictionsWithProfiles()])
-      .then(([t, c, m, p]) => {
-        setTournamentRows(t);
-        setClubRows(c);
-        setMatchRows(m);
-        setAllPredictionRows(p);
-      })
-      .finally(() => setDataLoading(false));
+    refreshData().finally(() => setDataLoading(false));
   }, []);
 
   // Keep the server-time offset fresh so match locking can't be tricked by
@@ -5683,6 +5685,13 @@ export default function App() {
   // bounce the user back to the home page.
   useEffect(() => {
     sessionStorage.setItem("activePage", activePage);
+  }, [activePage]);
+
+  // Re-fetch on every page switch, so e.g. a match the admin just added (or
+  // a result they just entered) shows up for participants without needing
+  // a manual page reload.
+  useEffect(() => {
+    refreshData();
   }, [activePage]);
 
   // Restore the session (if any) when the app first loads, so a refresh
