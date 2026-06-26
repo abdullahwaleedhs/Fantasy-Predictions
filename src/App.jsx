@@ -1790,7 +1790,7 @@ function TeamDisplay({ name, logo, theme, noUnderline, logoSize = 48, isHome }) 
             }}
             title="أرض الفريق"
           >
-            <Home size={12} fill={theme.violet} />
+            <Home size={14} color={theme.violet} strokeWidth={2.5} />
           </span>
         )}
         <ClubLogo logo={logo} name={name} theme={theme} size={logoSize} />
