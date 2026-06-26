@@ -399,6 +399,14 @@ function isMatchFinished(m) {
   return new Date(`${m.date}T${m.time}:00`).getTime() - serverNow() <= 0;
 }
 
+// Kickoff has passed, regardless of whether the admin has entered a result
+// yet - used by the league predictions tab so a match shows up there (with
+// "بإنتظار النتيجة") as soon as it locks, not only once it's fully finished.
+function isMatchLocked(m) {
+  if (!m.date || !m.time) return false;
+  return new Date(`${m.date}T${m.time}:00`).getTime() - serverNow() <= 0;
+}
+
 // Computes all statistics shown on the stats page from the current matches.
 // Only matches that have an actual result (finished matches) are counted.
 // A finished match with an empty prediction counts as the "didn't predict"
@@ -4199,7 +4207,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
   });
 
   const finishedMatches = filteredMatches
-    .filter(isMatchFinished)
+    .filter(isMatchLocked)
     .sort((a, b) => new Date(`${b.date}T${b.time}:00`).getTime() - new Date(`${a.date}T${a.time}:00`).getTime());
 
   const copyCode = () => {
@@ -4387,6 +4395,7 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
       })()
     : "—";
   const isGold = !!match.doublePoints;
+  const hasActual = match.actualHome !== "" && match.actualHome != null && match.actualAway !== "" && match.actualAway != null;
 
   return (
     <div
@@ -4499,7 +4508,11 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
                 )}
               </div>
               <div style={{ flex: 1, textAlign: "center", padding: "5px 4px" }}>
-                {result ? (
+                {!hasActual ? (
+                  <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} compact>
+                    بإنتظار النتيجة
+                  </ResultPill>
+                ) : result ? (
                   pred?.userBoost ? (
                     <ResultPill theme={theme} border={theme.yellow} bg={theme.yellowSoft} color={theme.yellow} compact>
                       {result.points}
