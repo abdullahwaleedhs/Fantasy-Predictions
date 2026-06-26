@@ -5701,6 +5701,7 @@ export default function App() {
           date: row.date,
           time: row.time,
           doublePoints: row.doublePoints,
+          venueTeam: row.venueTeam,
           predHome: pred?.predHome != null ? String(pred.predHome) : "",
           predAway: pred?.predAway != null ? String(pred.predAway) : "",
           userBoost: pred?.userBoost || false,
