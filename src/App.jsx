@@ -4483,6 +4483,20 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
           const multiplier = match.doublePoints ? 2 : pred?.userBoost ? 3 : 1;
           const result = pred ? calcPoints(pred.predHome, pred.predAway, match.actualHome, match.actualAway, multiplier) : null;
           const colors = result ? tierStyleFor(theme, result.basePoints) : null;
+          const predWinnerLogo = pred
+            ? pred.predHome > pred.predAway
+              ? match.homeLogo
+              : pred.predAway > pred.predHome
+              ? match.awayLogo
+              : null
+            : null;
+          const predWinnerName = pred
+            ? pred.predHome > pred.predAway
+              ? match.home
+              : pred.predAway > pred.predHome
+              ? match.away
+              : null
+            : null;
           return (
             <div
               key={p.id}
@@ -4498,9 +4512,14 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
               </div>
               <div style={{ flex: 1, textAlign: "center", padding: "5px 4px", borderLeft: `1px solid ${theme.border}` }}>
                 {pred ? (
-                  <ResultPill theme={theme} border={theme.text} bg={theme.bg} color={theme.text} compact>
-                    {pred.predHome} - {pred.predAway}
-                  </ResultPill>
+                  <>
+                    <ResultPill theme={theme} border={theme.text} bg={theme.bg} color={theme.text} compact>
+                      {pred.predHome} - {pred.predAway}
+                    </ResultPill>
+                    <div style={{ height: "18px", display: "flex", alignItems: "center", justifyContent: "center", marginTop: "3px" }}>
+                      {predWinnerLogo !== null || predWinnerName ? <ClubLogo logo={predWinnerLogo} name={predWinnerName} theme={theme} size={14} /> : null}
+                    </div>
+                  </>
                 ) : (
                   <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} compact>
                     لم يتوقع
