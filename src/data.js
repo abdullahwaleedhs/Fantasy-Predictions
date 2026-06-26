@@ -96,6 +96,7 @@ function rowToMatch(row) {
     date: row.match_date || "",
     time: row.match_time ? row.match_time.slice(0, 5) : "",
     doublePoints: row.double_points,
+    venueTeam: row.venue_team || null,
   };
 }
 
@@ -115,7 +116,7 @@ export async function addMatchDB() {
   return rowToMatch(data);
 }
 
-export async function updateMatchDB(matchId, { tournamentId, home, away, homeLogo, awayLogo, actualHome, actualAway, date, time, doublePoints }) {
+export async function updateMatchDB(matchId, { tournamentId, home, away, homeLogo, awayLogo, actualHome, actualAway, date, time, doublePoints, venueTeam }) {
   const { error } = await supabase
     .from("matches")
     .update({
@@ -129,6 +130,7 @@ export async function updateMatchDB(matchId, { tournamentId, home, away, homeLog
       match_date: date || null,
       match_time: time || null,
       double_points: !!doublePoints,
+      venue_team: venueTeam || null,
     })
     .eq("id", matchId);
   if (error) throw error;
