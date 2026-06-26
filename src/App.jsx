@@ -1881,7 +1881,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
         </div>
 
         {match.venueTeam && (
-          <div style={{ textAlign: "center", fontSize: "10px", color: theme.violet, fontWeight: 700, padding: "8px 12px 0" }}>
+          <div style={{ textAlign: "center", fontSize: "10px", color: theme.text, fontWeight: 700, padding: "12px 12px 4px" }}>
             ملعب {match.venueTeam === "home" ? match.home : match.away}
           </div>
         )}
@@ -4485,7 +4485,7 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
       </div>
 
       {match.venueTeam && (
-        <div style={{ textAlign: "center", fontSize: "10px", color: theme.violet, fontWeight: 700, padding: "8px 12px 0" }}>
+        <div style={{ textAlign: "center", fontSize: "10px", color: theme.text, fontWeight: 700, padding: "12px 12px 4px" }}>
           ملعب {match.venueTeam === "home" ? match.home : match.away}
         </div>
       )}
