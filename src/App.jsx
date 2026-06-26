@@ -15,6 +15,7 @@ import {
   addMatchDB,
   updateMatchDB,
   removeMatchDB,
+  refundBoostDB,
   fetchPredictionsForUser,
   upsertPredictionDB,
   fetchLeaguesWithMembers,
@@ -5971,6 +5972,15 @@ export default function App() {
   };
 
   const removeMatch = (id) => {
+    const boostedUserIds = allPredictionRows
+      .filter((r) => r.match_id === id && r.user_boost)
+      .map((r) => r.user_id);
+    boostedUserIds.forEach((uid) => {
+      refundBoostDB(uid);
+      if (uid === currentUser?.id) {
+        setCurrentUser((u) => ({ ...u, boosts_remaining: (u?.boosts_remaining ?? 3) + 1 }));
+      }
+    });
     removeMatchDB(id);
     setMatchRows((prev) => prev.filter((x) => x.id !== id));
     setPredictionsByMatch((prev) => {

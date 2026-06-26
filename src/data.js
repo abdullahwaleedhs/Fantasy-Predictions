@@ -20,6 +20,14 @@ export async function fetchServerTimeOffset() {
 
 // ============ PROFILES (admin user list) ============
 
+// Gives a user back one boost via the refund_boost() RPC (see
+// supabase/migration_11_refund_boost_function.sql) - used when the admin
+// deletes a match the user had spent a triple/boost on.
+export async function refundBoostDB(userId) {
+  const { error } = await supabase.rpc("refund_boost", { uid: userId });
+  if (error) throw error;
+}
+
 export async function fetchAllProfiles() {
   const { data, error } = await supabase
     .from("profiles")
