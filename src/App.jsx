@@ -4543,7 +4543,7 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
                   )
                 ) : (
                   <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} compact>
-                    لم يتوقع
+                    -
                   </ResultPill>
                 )}
               </div>
