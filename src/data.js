@@ -211,7 +211,7 @@ function generateLeagueCode() {
 export async function fetchLeaguesWithMembers() {
   const { data, error } = await supabase
     .from("leagues")
-    .select("id, code, name, created_by, league_members(id, user_id, display_name, profiles(avatar))")
+    .select("id, code, name, created_by, league_members(id, user_id, display_name, profiles(name, avatar))")
     .order("created_at");
   if (error) throw error;
   return data;

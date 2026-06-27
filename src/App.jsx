@@ -5843,7 +5843,7 @@ export default function App() {
 
   useEffect(() => {
     fetchLeaguesWithMembers().then(setLeagueRows);
-  }, []);
+  }, [activePage]);
 
   const leagues = useMemo(
     () =>
@@ -5854,7 +5854,7 @@ export default function App() {
         players: (l.league_members || []).map((m) => ({
           id: m.id,
           userId: m.user_id,
-          name: m.display_name,
+          name: m.profiles?.name || m.display_name,
           avatar: m.profiles?.avatar || null,
           isYou: currentUser ? m.user_id === currentUser.id : false,
         })),
