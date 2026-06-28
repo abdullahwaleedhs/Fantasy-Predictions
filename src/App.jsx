@@ -4936,9 +4936,18 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                   <span style={{ fontWeight: 700, color: theme.text }}>
                     {m.home} <span style={{ color: theme.muted, fontWeight: 400 }}>vs</span> {m.away}
                   </span>
-                  <span style={{ fontSize: "10px", color: theme.violet, fontWeight: 700, fontFamily: "monospace" }}>
-                    {pad(h)}:{pad(min)}:{pad(sec)}
-                  </span>
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    {[
+                      { value: h, label: "ساعة" },
+                      { value: min, label: "دقيقة" },
+                      { value: sec, label: "ثانية" },
+                    ].map((unit) => (
+                      <div key={unit.label} style={{ textAlign: "center" }}>
+                        <div style={{ fontSize: "12px", color: theme.violet, fontWeight: 700, fontFamily: "monospace" }}>{pad(unit.value)}</div>
+                        <div style={{ fontSize: "8px", color: theme.muted }}>{unit.label}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               );
             })
