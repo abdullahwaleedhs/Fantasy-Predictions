@@ -4855,7 +4855,7 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
     { key: 3, color: theme.muted, label: TIERS_META[3].label },
     { key: 1, color: theme.inputBorder, label: TIERS_META[4].label },
     { key: 0, color: theme.danger, label: TIERS_META[5].label },
-    { key: "none", color: theme.violetSoft, label: "لم يتم توقعها" },
+    { key: "none", color: theme.violet, label: "لم يتم توقعها" },
   ];
   const totalScored = tierColors.reduce((sum, t) => sum + (tierCounts[t.key] || 0), 0);
   const correctCount = totalScored - (tierCounts[0] || 0) - (tierCounts.none || 0);
