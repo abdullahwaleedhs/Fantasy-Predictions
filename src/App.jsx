@@ -379,7 +379,7 @@ const THEMES = [
 function getTiers(theme) {
   return [
     { points: 10, label: TIERS_META[0].label, example: TIERS_META[0].example, bg: theme.accentSoft, text: theme.text, ring: theme.accent },
-    { points: 5, label: TIERS_META[1].label, example: TIERS_META[1].example, bg: theme.navyBlueSoft, text: theme.text, ring: theme.navyBlue },
+    { points: 5, label: TIERS_META[1].label, example: TIERS_META[1].example, bg: theme.blueSoft, text: theme.text, ring: theme.blue },
     { points: 4, label: TIERS_META[2].label, example: TIERS_META[2].example, bg: theme.skySoft, text: theme.text, ring: theme.sky },
     { points: 3, label: TIERS_META[3].label, example: TIERS_META[3].example, bg: theme.primarySoft, text: theme.text, ring: theme.muted },
     { points: 1, label: TIERS_META[4].label, example: TIERS_META[4].example, bg: theme.surface, text: theme.muted, ring: theme.inputBorder },
