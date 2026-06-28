@@ -5019,8 +5019,13 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                   flexShrink: 0,
                   borderRadius: "50%",
                   background: `conic-gradient(${gradientStops.join(", ")})`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
-              />
+              >
+                <div style={{ width: "62px", height: "62px", borderRadius: "50%", background: theme.surface }} />
+              </div>
               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "7px" }}>
                 {tierColors.map((t) => (
                   <div key={t.key} style={{ display: "flex", alignItems: "center", gap: "7px" }}>
