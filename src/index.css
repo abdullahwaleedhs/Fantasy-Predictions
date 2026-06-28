@@ -4,3 +4,22 @@ html, body, #root {
   text-size-adjust: 100%;
   overflow-x: hidden;
 }
+
+/* On wide (desktop) viewports the home page spreads into two columns side
+   by side instead of staying squeezed into a phone-width single column;
+   on narrow viewports it stays exactly as it was (single stacked column). */
+.home-grid {
+  display: flex;
+  flex-direction: column;
+}
+@media (min-width: 900px) {
+  .home-grid {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 24px;
+  }
+  .home-grid > .home-col {
+    flex: 1;
+    min-width: 0;
+  }
+}

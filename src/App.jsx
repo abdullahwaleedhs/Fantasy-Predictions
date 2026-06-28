@@ -4873,7 +4873,9 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
 
   return (
     <div style={{ padding: "20px 16px 60px" }}>
-      <div style={{ maxWidth: "480px", margin: "0 auto" }}>
+      <div style={{ maxWidth: "980px", margin: "0 auto" }}>
+      <div className="home-grid">
+      <div className="home-col">
         {/* Points + rank hero */}
         <div
           style={{
@@ -4966,7 +4968,9 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
             ))
           )}
         </div>
+      </div>
 
+      <div className="home-col">
         {/* Global leaderboard preview */}
         <HomeSectionHeader title="لوحة الترتيب العام" onMore={() => onNavigate("globalLeaderboard")} theme={theme} />
         <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "14px", padding: "12px", marginBottom: "20px" }}>
@@ -5052,6 +5056,8 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
             </div>
           )}
         </div>
+      </div>
+      </div>
       </div>
     </div>
   );
