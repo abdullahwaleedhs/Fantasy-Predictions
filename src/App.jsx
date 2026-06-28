@@ -5497,30 +5497,6 @@ function NavDrawer({ open, onClose, activePage, onNavigate, viewMode, setViewMod
   );
 }
 
-// Custom logo: a football inside a crosshair/target ring, symbolizing
-// "predicting a match outcome" rather than a generic icon.
-function PredictionLogo({ theme, size = 30 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Outer crosshair ring */}
-      <circle cx="16" cy="16" r="14" stroke={theme.primary} strokeWidth="1.6" />
-      <line x1="16" y1="0.5" x2="16" y2="5.5" stroke={theme.primary} strokeWidth="1.6" strokeLinecap="round" />
-      <line x1="16" y1="26.5" x2="16" y2="31.5" stroke={theme.primary} strokeWidth="1.6" strokeLinecap="round" />
-      <line x1="0.5" y1="16" x2="5.5" y2="16" stroke={theme.primary} strokeWidth="1.6" strokeLinecap="round" />
-      <line x1="26.5" y1="16" x2="31.5" y2="16" stroke={theme.primary} strokeWidth="1.6" strokeLinecap="round" />
-
-      {/* Ball */}
-      <circle cx="16" cy="16" r="8.5" fill={theme.surface} stroke={theme.primary} strokeWidth="1.4" />
-      <polygon points="16,11.8 19.99,14.7 18.47,19.4 13.53,19.4 12.01,14.7" fill={theme.violet} />
-      <line x1="16" y1="11.8" x2="16" y2="8.8" stroke={theme.primary} strokeWidth="1.1" strokeLinecap="round" />
-      <line x1="19.99" y1="14.7" x2="22.85" y2="13.78" stroke={theme.primary} strokeWidth="1.1" strokeLinecap="round" />
-      <line x1="18.47" y1="19.4" x2="20.23" y2="21.82" stroke={theme.primary} strokeWidth="1.1" strokeLinecap="round" />
-      <line x1="13.53" y1="19.4" x2="11.77" y2="21.82" stroke={theme.primary} strokeWidth="1.1" strokeLinecap="round" />
-      <line x1="12.01" y1="14.7" x2="9.15" y2="13.78" stroke={theme.primary} strokeWidth="1.1" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 // A hand-drawn-style wavy divider line, used as a decorative violet accent
 // beneath the header and above each match's schedule row.
 function VioletDivider({ theme }) {
@@ -5539,7 +5515,7 @@ function TopBar({ onMenuClick, theme }) {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-        <PredictionLogo theme={theme} />
+        <img src="/logo.png" alt="" width={36} height={36} style={{ borderRadius: "8px" }} />
         <div>
           <h1
             style={{
