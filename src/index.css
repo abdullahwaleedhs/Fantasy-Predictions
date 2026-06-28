@@ -8,6 +8,16 @@ html, body, #root {
 /* On wide (desktop) viewports the home page spreads into two columns side
    by side instead of staying squeezed into a phone-width single column;
    on narrow viewports it stays exactly as it was (single stacked column). */
+.page-container {
+  max-width: 480px;
+  margin: 0 auto;
+}
+@media (min-width: 900px) {
+  .page-container {
+    max-width: 720px;
+  }
+}
+
 .home-grid {
   display: flex;
   flex-direction: column;

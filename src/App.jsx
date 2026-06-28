@@ -2744,7 +2744,7 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
 
   return (
     <div style={{ padding: "20px 16px 60px" }}>
-      <div style={{ maxWidth: "480px", margin: "0 auto" }}>
+      <div className="page-container">
         <h2 style={{ fontSize: "16px", fontWeight: 800, color: theme.primary, marginBottom: "4px" }}>
           إدارة الأندية
         </h2>
@@ -4144,7 +4144,7 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
 
   return (
     <div style={{ padding: "20px 16px 60px" }}>
-      <div style={{ maxWidth: "480px", margin: "0 auto" }}>
+      <div className="page-container">
         <h2 style={{ fontSize: "16px", fontWeight: 800, color: theme.primary, marginBottom: "4px" }}>
           لوحة الترتيب العام
         </h2>
@@ -4271,7 +4271,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
 
   return (
     <div style={{ padding: "20px 16px 60px" }}>
-      <div style={{ maxWidth: "480px", margin: "0 auto" }}>
+      <div className="page-container">
         <button
           onClick={onBack}
           style={{
@@ -4638,7 +4638,7 @@ function PrivateLeaguesPage({ leagues, matches, allPredictionRows, onCreateLeagu
 
   return (
     <div style={{ padding: "20px 16px 60px" }}>
-      <div style={{ maxWidth: "480px", margin: "0 auto" }}>
+      <div className="page-container">
         <h2 style={{ fontSize: "16px", fontWeight: 800, color: theme.primary, marginBottom: "4px" }}>
           الدوريات
         </h2>
@@ -5124,7 +5124,7 @@ function PointsSystemPage({ theme }) {
 
   return (
     <div style={{ padding: "20px 16px 60px" }}>
-      <div style={{ maxWidth: "480px", margin: "0 auto" }}>
+      <div className="page-container">
         <h2 style={{ fontSize: "16px", fontWeight: 800, color: theme.primary, marginBottom: "4px" }}>
           نظام النقاط
         </h2>
@@ -5249,7 +5249,7 @@ function StatsPage({ matches, tournaments, tournamentLogos, theme }) {
 
   return (
     <div style={{ padding: "20px 16px 60px" }}>
-      <div style={{ maxWidth: "480px", margin: "0 auto" }}>
+      <div className="page-container">
         <h2 style={{ fontSize: "16px", fontWeight: 800, color: theme.primary, marginBottom: "4px" }}>
           الإحصائيات
         </h2>
@@ -6233,7 +6233,7 @@ export default function App() {
 
       {activePage === "predictions" && currentUser && (
         <div style={{ padding: "20px 16px 60px" }}>
-          <div style={{ maxWidth: "480px", margin: "0 auto" }}>
+          <div className="page-container">
             {/* Theme switcher - admin only */}
             {viewMode === "admin" && (
               <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "16px" }}>
