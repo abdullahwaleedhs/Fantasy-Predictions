@@ -5032,7 +5032,7 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                 </div>
               </div>
               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "7px" }}>
-                {tierColors.filter((t) => tierCounts[t.key] > 0).map((t) => (
+                {tierColors.map((t) => (
                   <div key={t.key} style={{ display: "flex", alignItems: "center", gap: "7px" }}>
                     <span
                       style={{
