@@ -2433,6 +2433,64 @@ function compareTierCounts(a, b) {
   return 0;
 }
 
+// Shared real-data ranking: scores every registered user from their own
+// actual predictions on the given (already filtered) matches, using the same
+// rules as the stats page (calcPoints + the admin x2 / personal x3
+// multiplier). Used by the global leaderboard and the home page summary.
+function computeGlobalRanking(matches, allPredictionRows, currentUser) {
+  const matchById = Object.fromEntries(matches.map((m) => [m.id, m]));
+
+  const byUser = {};
+  for (const row of allPredictionRows) {
+    const match = matchById[row.match_id];
+    if (!match) continue;
+    if (!isMatchFinished(match)) continue;
+
+    if (!byUser[row.user_id]) {
+      byUser[row.user_id] = {
+        id: row.user_id,
+        name: row.profiles?.name || "مستخدم",
+        username: row.profiles?.username || null,
+        avatar: row.profiles?.avatar || null,
+        points: 0,
+        tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 },
+      };
+    }
+    const entry = byUser[row.user_id];
+
+    const adminMultiplier = match.doublePoints ? 2 : 1;
+    const userMultiplier = row.user_boost ? 3 : 1;
+    const multiplier = match.doublePoints ? adminMultiplier : userMultiplier;
+
+    const hasPrediction = row.pred_home !== null && row.pred_home !== undefined && row.pred_away !== null && row.pred_away !== undefined;
+    if (!hasPrediction) {
+      entry.tierCounts.none += 1;
+      continue;
+    }
+    const result = calcPoints(row.pred_home, row.pred_away, match.actualHome, match.actualAway, multiplier);
+    if (result) {
+      entry.tierCounts[result.basePoints] = (entry.tierCounts[result.basePoints] || 0) + 1;
+      entry.points += result.points;
+    }
+  }
+
+  const players = Object.values(byUser).map((p) => ({ ...p, isYou: currentUser && p.id === currentUser.id }));
+
+  if (currentUser && !players.some((p) => p.id === currentUser.id)) {
+    players.push({
+      id: currentUser.id,
+      name: currentUser.name,
+      username: currentUser.username,
+      avatar: currentUser.avatar,
+      points: 0,
+      tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 },
+      isYou: true,
+    });
+  }
+
+  return [...players].sort((a, b) => b.points - a.points || compareTierCounts(a.tierCounts, b.tierCounts));
+}
+
 // Logos/avatars are stored as base64 directly in the database (no file
 // storage bucket), so an unresized phone photo can be several MB - and since
 // every match/club/tournament row embeds its logo, that gets re-downloaded
@@ -4082,58 +4140,7 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
   // Real leaderboard: every registered user is scored from their own actual
   // predictions on the matches in this filter, using the same scoring rules
   // as the stats page (calcPoints + the admin x2 / personal x3 multiplier).
-  const matchById = Object.fromEntries(filteredMatches.map((m) => [m.id, m]));
-
-  const byUser = {};
-  for (const row of allPredictionRows) {
-    const match = matchById[row.match_id];
-    if (!match) continue; // outside the current tournament filter, or unknown match
-    if (!isMatchFinished(match)) continue; // match hasn't finished/locked yet
-
-    if (!byUser[row.user_id]) {
-      byUser[row.user_id] = {
-        id: row.user_id,
-        name: row.profiles?.name || "مستخدم",
-        username: row.profiles?.username || null,
-        avatar: row.profiles?.avatar || null,
-        points: 0,
-        tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 },
-      };
-    }
-    const entry = byUser[row.user_id];
-
-    const adminMultiplier = match.doublePoints ? 2 : 1;
-    const userMultiplier = row.user_boost ? 3 : 1;
-    const multiplier = match.doublePoints ? adminMultiplier : userMultiplier;
-
-    const hasPrediction = row.pred_home !== null && row.pred_home !== undefined && row.pred_away !== null && row.pred_away !== undefined;
-    if (!hasPrediction) {
-      entry.tierCounts.none += 1;
-      continue;
-    }
-    const result = calcPoints(row.pred_home, row.pred_away, match.actualHome, match.actualAway, multiplier);
-    if (result) {
-      entry.tierCounts[result.basePoints] = (entry.tierCounts[result.basePoints] || 0) + 1;
-      entry.points += result.points;
-    }
-  }
-
-  const players = Object.values(byUser).map((p) => ({ ...p, isYou: currentUser && p.id === currentUser.id }));
-
-  // Make sure the current user shows up even before they've made a single prediction.
-  if (currentUser && !players.some((p) => p.id === currentUser.id)) {
-    players.push({
-      id: currentUser.id,
-      name: currentUser.name,
-      username: currentUser.username,
-      avatar: currentUser.avatar,
-      points: 0,
-      tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 },
-      isYou: true,
-    });
-  }
-
-  const ranked = [...players].sort((a, b) => b.points - a.points || compareTierCounts(a.tierCounts, b.tierCounts));
+  const ranked = computeGlobalRanking(filteredMatches, allPredictionRows, currentUser);
 
   return (
     <div style={{ padding: "20px 16px 60px" }}>
@@ -4799,85 +4806,240 @@ function PrivateLeaguesPage({ leagues, matches, allPredictionRows, onCreateLeagu
   );
 }
 
-function HomePage({ theme, onNavigate }) {
+function HomeSectionHeader({ title, onMore, theme }) {
   return (
-    <div style={{ padding: "40px 20px 60px", textAlign: "center" }}>
-      <div style={{ maxWidth: "420px", margin: "0 auto" }}>
-        {/* Big headline */}
-        <h1
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 2px 8px", marginTop: "4px" }}>
+      <span style={{ fontSize: "13px", fontWeight: 800, color: theme.text }}>{title}</span>
+      {onMore && (
+        <span onClick={onMore} style={{ fontSize: "11px", color: theme.violet, fontWeight: 600, cursor: "pointer" }}>
+          عرض الكل
+        </span>
+      )}
+    </div>
+  );
+}
+
+function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, leagues }) {
+  const globalRanked = useMemo(() => computeGlobalRanking(matches, allPredictionRows, currentUser), [matches, allPredictionRows, currentUser]);
+  const me = currentUser ? globalRanked.find((p) => p.isYou) : null;
+  const myGlobalRank = currentUser ? globalRanked.findIndex((p) => p.isYou) + 1 : 0;
+  const pointsByUserId = useMemo(() => Object.fromEntries(globalRanked.map((p) => [p.id, p.points])), [globalRanked]);
+
+  const nextDayMatches = useMemo(() => {
+    const now = serverNow();
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    return matches
+      .filter((m) => m.date && m.time)
+      .map((m) => ({ ...m, kickoff: new Date(`${m.date}T${m.time}:00`).getTime() }))
+      .filter((m) => m.kickoff > now && m.kickoff - now <= DAY_MS)
+      .sort((a, b) => a.kickoff - b.kickoff);
+  }, [matches]);
+
+  const myLeagues = useMemo(
+    () =>
+      leagues
+        .filter((l) => l.players.some((p) => p.isYou))
+        .map((l) => {
+          const ranked = [...l.players].sort((a, b) => (pointsByUserId[b.userId] || 0) - (pointsByUserId[a.userId] || 0));
+          const myRank = ranked.findIndex((p) => p.isYou) + 1;
+          return { ...l, myRank, memberCount: l.players.length };
+        }),
+    [leagues, pointsByUserId]
+  );
+
+  const tierCounts = me?.tierCounts || { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 };
+  const tierColors = [
+    { key: 10, color: theme.accent, label: "نتيجة مضبوطة" },
+    { key: 5, color: theme.navyBlue, label: "فوز + فرق الأهداف" },
+    { key: 4, color: theme.sky, label: "فوز فقط" },
+    { key: 3, color: theme.muted, label: "تعادل" },
+    { key: 1, color: theme.inputBorder, label: "هدف واحد فقط" },
+    { key: 0, color: theme.danger, label: "خاطئة" },
+  ];
+  const totalScored = tierColors.reduce((sum, t) => sum + (tierCounts[t.key] || 0), 0);
+  const correctCount = totalScored - (tierCounts[0] || 0);
+  const accuracy = totalScored > 0 ? Math.round((correctCount / totalScored) * 100) : 0;
+
+  let acc = 0;
+  const gradientStops = tierColors
+    .filter((t) => tierCounts[t.key] > 0)
+    .map((t) => {
+      const from = (acc / totalScored) * 100;
+      acc += tierCounts[t.key];
+      const to = (acc / totalScored) * 100;
+      return `${t.color} ${from}% ${to}%`;
+    });
+
+  return (
+    <div style={{ padding: "20px 16px 60px" }}>
+      <div style={{ maxWidth: "480px", margin: "0 auto" }}>
+        {/* Points + rank hero */}
+        <div
           style={{
-            fontSize: "38px",
-            fontWeight: 800,
-            color: theme.primary,
-            lineHeight: "1.25",
-            margin: "40px 0 18px",
+            background: theme.surface,
+            border: `1px solid ${theme.border}`,
+            borderRadius: "16px",
+            padding: "16px",
+            marginBottom: "16px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
-          توقع
-          <br />
-          المباريات!
-        </h1>
+          <div>
+            <div style={{ fontSize: "30px", fontWeight: 900, color: theme.violet }}>{me?.points || 0}</div>
+            <div style={{ fontSize: "11px", color: theme.muted, marginTop: "2px" }}>إجمالي نقاطك</div>
+          </div>
+          <div style={{ background: theme.violetSoft, color: theme.violet, borderRadius: "10px", padding: "6px 14px", fontSize: "12px", fontWeight: 700, textAlign: "center" }}>
+            ترتيبك
+            <div style={{ fontSize: "16px", marginTop: "2px" }}>{myGlobalRank ? `#${myGlobalRank}` : "—"}</div>
+          </div>
+        </div>
 
-        {/* CTA buttons */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "32px" }}>
+        {/* Next 24h matches */}
+        <HomeSectionHeader title="مباريات الـ24 ساعة القادمة" onMore={() => onNavigate("predictions")} theme={theme} />
+        <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "14px", padding: "8px", marginBottom: "20px" }}>
+          {nextDayMatches.length === 0 ? (
+            <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "16px 0" }}>لا توجد مباريات خلال الـ24 ساعة القادمة</p>
+          ) : (
+            nextDayMatches.slice(0, 5).map((m) => {
+              const hoursLeft = Math.max(0, Math.round((m.kickoff - serverNow()) / (60 * 60 * 1000)));
+              return (
+                <div
+                  key={m.id}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 8px", borderBottom: `1px solid ${theme.border}`, fontSize: "12px" }}
+                >
+                  <span style={{ fontWeight: 700, color: theme.text }}>
+                    {m.home} <span style={{ color: theme.muted, fontWeight: 400 }}>vs</span> {m.away}
+                  </span>
+                  <span style={{ fontSize: "10px", color: theme.muted }}>بعد {hoursLeft} س</span>
+                </div>
+              );
+            })
+          )}
           <button
             onClick={() => onNavigate("predictions")}
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
               width: "100%",
+              marginTop: "6px",
+              background: theme.violet,
+              color: "#fff",
               border: "none",
-              borderRadius: "12px",
-              padding: "14px",
-              background: theme.primary,
-              color: theme.surface,
+              borderRadius: "10px",
+              padding: "11px",
               fontFamily: "Cairo, sans-serif",
-              fontWeight: 700,
-              fontSize: "15px",
+              fontWeight: 800,
+              fontSize: "13px",
               cursor: "pointer",
             }}
           >
-            ابدأ التوقع الآن
-            <ArrowDown size={16} />
-          </button>
-          <button
-            onClick={() => onNavigate("pointsSystem")}
-            style={{
-              width: "100%",
-              border: `1.5px solid ${theme.violet}`,
-              borderRadius: "12px",
-              padding: "14px",
-              background: theme.surface,
-              color: theme.text,
-              fontFamily: "Cairo, sans-serif",
-              fontWeight: 700,
-              fontSize: "15px",
-              cursor: "pointer",
-            }}
-          >
-            تعرف على نظام النقاط
+            أدخل توقعك
           </button>
         </div>
 
-        {/* Footer info row */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "10px",
-            flexWrap: "wrap",
-            fontSize: "11px",
-            color: theme.muted,
-          }}
-        >
-          <span>RTL كامل</span>
-          <span style={{ color: theme.inputBorder }}>•</span>
-          <span>يعمل بدون إنترنت</span>
-          <span style={{ color: theme.inputBorder }}>•</span>
-          <span>محفوظ محليًا</span>
+        {/* My leagues */}
+        <HomeSectionHeader title="دورياتي" onMore={() => onNavigate("leagues")} theme={theme} />
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "20px" }}>
+          {myLeagues.length === 0 ? (
+            <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "12px", padding: "16px", textAlign: "center" }}>
+              <p style={{ fontSize: "12px", color: theme.muted }}>ما انضممت لأي دوري بعد</p>
+            </div>
+          ) : (
+            myLeagues.map((l) => (
+              <div
+                key={l.id}
+                onClick={() => onNavigate("leagues")}
+                style={{ display: "flex", alignItems: "center", gap: "10px", background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "12px", padding: "10px 12px", cursor: "pointer" }}
+              >
+                <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: theme.violetSoft, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Users size={14} color={theme.violet} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: theme.text }}>{l.name}</div>
+                  <div style={{ fontSize: "9px", color: theme.muted, marginTop: "1px" }}>{l.memberCount} أعضاء</div>
+                </div>
+                <div style={{ fontSize: "11px", fontWeight: 800, color: theme.violet, background: theme.violetSoft, padding: "4px 9px", borderRadius: "8px" }}>
+                  ترتيبك #{l.myRank}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Global leaderboard preview */}
+        <HomeSectionHeader title="لوحة الترتيب العام" onMore={() => onNavigate("globalLeaderboard")} theme={theme} />
+        <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "14px", padding: "12px", marginBottom: "20px" }}>
+          {globalRanked.length === 0 ? (
+            <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "12px 0" }}>لا يوجد توقعات لمباريات منتهية بعد</p>
+          ) : (
+            globalRanked.slice(0, 10).map((p, i) => (
+              <div
+                key={p.id}
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 2px", fontSize: "12px", borderBottom: `1px solid ${theme.border}` }}
+              >
+                <span style={{ display: "flex", alignItems: "center" }}>
+                  <span
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                      borderRadius: "50%",
+                      background: theme.violetSoft,
+                      color: theme.violet,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "10px",
+                      marginLeft: "8px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {i + 1}
+                  </span>
+                  {p.isYou ? "أنت" : p.name}
+                </span>
+                <span style={{ color: p.isYou ? theme.violet : theme.text, fontWeight: p.isYou ? 700 : 400 }}>{p.points} نقطة</span>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Stats */}
+        <HomeSectionHeader title="إحصائياتك" onMore={() => onNavigate("stats")} theme={theme} />
+        <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "14px", padding: "14px", marginBottom: "10px" }}>
+          <p style={{ fontSize: "12px", fontWeight: 800, color: theme.text, marginBottom: "10px" }}>توقعاتك حسب الدقة ({totalScored} مباراة)</p>
+          {totalScored === 0 ? (
+            <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "16px 0" }}>لا توجد مباريات منتهية بعد</p>
+          ) : (
+            <>
+              <div
+                style={{
+                  width: "100px",
+                  height: "100px",
+                  margin: "0 auto 10px",
+                  borderRadius: "50%",
+                  background: `conic-gradient(${gradientStops.join(", ")})`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <div style={{ width: "60px", height: "60px", borderRadius: "50%", background: theme.surface, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ textAlign: "center" }}>
+                    <div style={{ fontSize: "14px", fontWeight: 900, color: theme.text }}>{accuracy}%</div>
+                    <div style={{ fontSize: "8px", color: theme.muted, fontWeight: 600 }}>صحيحة</div>
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center", fontSize: "9px", color: theme.muted }}>
+                {tierColors.filter((t) => tierCounts[t.key] > 0).map((t) => (
+                  <div key={t.key} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: t.color, display: "inline-block" }} />
+                    {t.label}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -6425,7 +6587,16 @@ export default function App() {
         </div>
       )}
 
-      {activePage === "home" && <HomePage theme={theme} onNavigate={setActivePage} />}
+      {activePage === "home" && (
+        <HomePage
+          theme={theme}
+          onNavigate={setActivePage}
+          currentUser={currentUser}
+          matches={matches}
+          allPredictionRows={allPredictionRows}
+          leagues={leagues}
+        />
+      )}
 
       {activePage === "clubs" && (
         <ClubsManagementPage
