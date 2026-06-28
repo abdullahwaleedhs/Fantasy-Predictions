@@ -1828,7 +1828,13 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
   const effectiveMultiplier = match.doublePoints ? adminMultiplier : userMultiplier;
 
   const result = calcPoints(match.predHome, match.predAway, match.actualHome, match.actualAway, effectiveMultiplier);
-  const colors = result ? tierStyleFor(theme, result.basePoints) : null;
+  const colors = result
+    ? match.userBoost
+      ? { bg: theme.yellowSoft, text: theme.yellow, ring: theme.yellow }
+      : match.doublePoints
+      ? { bg: theme.primarySoft, text: theme.text, ring: theme.primary }
+      : tierStyleFor(theme, result.basePoints)
+    : null;
 
   const num = (v) => (v === "" ? "" : String(v).replace(/[^0-9]/g, "").slice(0, 2));
 
@@ -4482,7 +4488,13 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
           const pred = playerPredictionsById[p.id]?.[match.id];
           const multiplier = match.doublePoints ? 2 : pred?.userBoost ? 3 : 1;
           const result = pred ? calcPoints(pred.predHome, pred.predAway, match.actualHome, match.actualAway, multiplier) : null;
-          const colors = result ? tierStyleFor(theme, result.basePoints) : null;
+          const colors = result
+            ? pred?.userBoost
+              ? { bg: theme.yellowSoft, text: theme.yellow, ring: theme.yellow }
+              : match.doublePoints
+              ? { bg: theme.primarySoft, text: theme.text, ring: theme.primary }
+              : tierStyleFor(theme, result.basePoints)
+            : null;
           return (
             <div
               key={p.id}
