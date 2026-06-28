@@ -4833,6 +4833,12 @@ function HomeSectionHeader({ title, onMore, theme }) {
 }
 
 function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, leagues }) {
+  const [now, setNow] = useState(() => serverNow());
+  useEffect(() => {
+    const id = setInterval(() => setNow(serverNow()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
   const globalRanked = useMemo(() => computeGlobalRanking(matches, allPredictionRows, currentUser), [matches, allPredictionRows, currentUser]);
   const me = currentUser ? globalRanked.find((p) => p.isYou) : null;
   const myGlobalRank = currentUser ? globalRanked.findIndex((p) => p.isYou) + 1 : 0;
@@ -4917,7 +4923,11 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
             <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "16px 0" }}>لا توجد مباريات خلال الـ24 ساعة القادمة</p>
           ) : (
             nextDayMatches.slice(0, 5).map((m) => {
-              const hoursLeft = Math.max(0, Math.round((m.kickoff - serverNow()) / (60 * 60 * 1000)));
+              const msLeft = Math.max(0, m.kickoff - now);
+              const h = Math.floor(msLeft / (60 * 60 * 1000));
+              const min = Math.floor((msLeft % (60 * 60 * 1000)) / (60 * 1000));
+              const sec = Math.floor((msLeft % (60 * 1000)) / 1000);
+              const pad = (n) => String(n).padStart(2, "0");
               return (
                 <div
                   key={m.id}
@@ -4926,7 +4936,9 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                   <span style={{ fontWeight: 700, color: theme.text }}>
                     {m.home} <span style={{ color: theme.muted, fontWeight: 400 }}>vs</span> {m.away}
                   </span>
-                  <span style={{ fontSize: "10px", color: theme.muted }}>بعد {hoursLeft} س</span>
+                  <span style={{ fontSize: "10px", color: theme.violet, fontWeight: 700, fontFamily: "monospace" }}>
+                    {pad(h)}:{pad(min)}:{pad(sec)}
+                  </span>
                 </div>
               );
             })
