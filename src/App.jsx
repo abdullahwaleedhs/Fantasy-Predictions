@@ -4879,10 +4879,12 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
   const totalScored = tierColors.reduce((sum, t) => sum + (tierCounts[t.key] || 0), 0);
 
   let acc = 0;
+  const segmentStartByKey = {};
   const gradientStops = tierColors
     .filter((t) => tierCounts[t.key] > 0)
     .map((t) => {
       const from = (acc / totalScored) * 100;
+      segmentStartByKey[t.key] = acc;
       acc += tierCounts[t.key];
       const to = (acc / totalScored) * 100;
       return `${t.color} ${from}% ${to}%`;
@@ -5050,8 +5052,9 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
             <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
               <div
                 style={{
-                  width: "100px",
-                  height: "100px",
+                  position: "relative",
+                  width: "140px",
+                  height: "140px",
                   flexShrink: 0,
                   borderRadius: "50%",
                   background: `conic-gradient(${gradientStops.join(", ")})`,
@@ -5060,46 +5063,53 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                   justifyContent: "center",
                 }}
               >
-                <div style={{ width: "62px", height: "62px", borderRadius: "50%", background: theme.surface }} />
+                <div style={{ width: "86px", height: "86px", borderRadius: "50%", background: theme.surface }} />
+                {tierColors
+                  .filter((t) => tierCounts[t.key] > 0)
+                  .map((t) => {
+                    const pct = Math.round((tierCounts[t.key] / totalScored) * 100);
+                    const from = (segmentStartByKey[t.key] / totalScored) * 360;
+                    const to = ((segmentStartByKey[t.key] + tierCounts[t.key]) / totalScored) * 360;
+                    const midAngleRad = ((from + to) / 2) * (Math.PI / 180);
+                    const r = 52;
+                    const x = 70 + r * Math.sin(midAngleRad);
+                    const y = 70 - r * Math.cos(midAngleRad);
+                    return (
+                      <span
+                        key={t.key}
+                        style={{
+                          position: "absolute",
+                          left: `${x}px`,
+                          top: `${y}px`,
+                          transform: "translate(-50%, -50%)",
+                          fontSize: "10px",
+                          fontWeight: 800,
+                          color: "#FFFFFF",
+                          textShadow: "0 1px 2px rgba(0,0,0,0.45)",
+                          pointerEvents: "none",
+                        }}
+                      >
+                        {pct}%
+                      </span>
+                    );
+                  })}
               </div>
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "9px" }}>
-                {tierColors.map((t) => {
-                  const pct = Math.round((tierCounts[t.key] / totalScored) * 100);
-                  return (
-                    <div key={t.key}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "7px", marginBottom: "3px" }}>
-                        <span
-                          style={{
-                            width: "10px",
-                            height: "10px",
-                            borderRadius: "50%",
-                            border: `2.5px solid ${t.color}`,
-                            display: "inline-block",
-                            flexShrink: 0,
-                          }}
-                        />
-                        <span style={{ fontSize: "10px", color: theme.text, flex: 1 }}>{t.label}</span>
-                      </div>
-                      <div style={{ position: "relative", height: "13px", background: theme.bg, borderRadius: "6px", overflow: "hidden" }}>
-                        <div style={{ position: "absolute", inset: 0, width: `${pct}%`, background: t.color, borderRadius: "6px" }} />
-                        <span
-                          style={{
-                            position: "relative",
-                            display: "block",
-                            textAlign: "left",
-                            fontSize: "8px",
-                            fontWeight: 800,
-                            color: theme.text,
-                            padding: "0 6px",
-                            lineHeight: "13px",
-                          }}
-                        >
-                          {pct}%
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "7px" }}>
+                {tierColors.map((t) => (
+                  <div key={t.key} style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+                    <span
+                      style={{
+                        width: "10px",
+                        height: "10px",
+                        borderRadius: "50%",
+                        border: `2.5px solid ${t.color}`,
+                        display: "inline-block",
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span style={{ fontSize: "10px", color: theme.text }}>{t.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
           )}
