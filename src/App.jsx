@@ -4832,7 +4832,7 @@ function HomeSectionHeader({ title, onMore, theme }) {
   );
 }
 
-function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, leagues }) {
+function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, leagues, tournamentLogos }) {
   const [now, setNow] = useState(() => serverNow());
   useEffect(() => {
     const id = setInterval(() => setNow(serverNow()), 1000);
@@ -4933,8 +4933,15 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
               return (
                 <div
                   key={m.id}
-                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 8px", borderBottom: `1px solid ${theme.border}`, fontSize: "12px" }}
+                  style={{ padding: "10px 8px", borderBottom: `1px solid ${theme.border}`, fontSize: "12px" }}
                 >
+                  {m.tournament && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "6px" }}>
+                      <TournamentIcon name={m.tournament} logo={tournamentLogos?.[m.tournament]} theme={theme} size={12} color={theme.muted} />
+                      <span style={{ fontSize: "10px", color: theme.muted, fontWeight: 600 }}>{m.tournament}</span>
+                    </div>
+                  )}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <span style={{ fontWeight: 700, color: theme.text }}>
                     {m.home} <span style={{ color: theme.muted, fontWeight: 400 }}>vs</span> {m.away}
                   </span>
@@ -4959,6 +4966,7 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                         <div style={{ fontSize: "8px", color: theme.muted }}>{unit.label}</div>
                       </div>
                     ))}
+                  </div>
                   </div>
                 </div>
               );
@@ -6679,6 +6687,7 @@ export default function App() {
           matches={matches}
           allPredictionRows={allPredictionRows}
           leagues={leagues}
+          tournamentLogos={tournamentLogos}
         />
       )}
 
