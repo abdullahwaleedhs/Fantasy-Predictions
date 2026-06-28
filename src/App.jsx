@@ -4767,21 +4767,8 @@ function HomePage({ theme, onNavigate }) {
         >
           توقع
           <br />
-          المباريات
-          <br />
-          والبطولات!
+          المباريات!
         </h1>
-
-        <p
-          style={{
-            fontSize: "14px",
-            color: theme.muted,
-            lineHeight: "22px",
-            margin: "0 0 32px",
-          }}
-        >
-          موقع شامل لجميع توقعات مباريات كرة القدم المهمة
-        </p>
 
         {/* CTA buttons */}
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "32px" }}>
@@ -5503,7 +5490,7 @@ function VioletDivider({ theme }) {
   return <div style={{ height: "0.5px", background: theme.violet }} />;
 }
 
-function TopBar({ onMenuClick, theme }) {
+function TopBar({ onMenuClick, onLogoClick, theme }) {
   return (
     <div
       style={{
@@ -5514,7 +5501,10 @@ function TopBar({ onMenuClick, theme }) {
         background: theme.surface,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+      <div
+        onClick={onLogoClick}
+        style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}
+      >
         <img src="/logo.png" alt="" width={48} height={48} style={{ borderRadius: "8px" }} />
         <div>
           <h1
@@ -6005,7 +5995,7 @@ export default function App() {
         input::placeholder { color: ${theme.muted}; opacity: 0.7; }
       `}</style>
 
-      <TopBar onMenuClick={() => setDrawerOpen(true)} theme={theme} />
+      <TopBar onMenuClick={() => setDrawerOpen(true)} onLogoClick={() => setActivePage("home")} theme={theme} />
       <div style={{ background: theme.surface }}>
         <VioletDivider theme={theme} />
       </div>
