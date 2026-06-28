@@ -4938,7 +4938,17 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                   <span style={{ fontWeight: 700, color: theme.text }}>
                     {m.home} <span style={{ color: theme.muted, fontWeight: 400 }}>vs</span> {m.away}
                   </span>
-                  <div dir="ltr" style={{ display: "flex", gap: "6px" }}>
+                  <div
+                    dir="ltr"
+                    style={{
+                      display: "flex",
+                      gap: "6px",
+                      background: theme.bg,
+                      border: `1px solid ${theme.border}`,
+                      borderRadius: "8px",
+                      padding: "4px 8px",
+                    }}
+                  >
                     {[
                       { value: h, label: "ساعة" },
                       { value: min, label: "دقيقة" },
@@ -5045,7 +5055,6 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
         {/* Stats */}
         <HomeSectionHeader title="إحصائياتك" onMore={() => onNavigate("stats")} theme={theme} />
         <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "14px", padding: "14px", marginBottom: "10px" }}>
-          <p style={{ fontSize: "12px", fontWeight: 800, color: theme.text, marginBottom: "10px" }}>توقعاتك حسب الدقة ({totalScored} مباراة)</p>
           {totalScored === 0 ? (
             <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "16px 0" }}>لا توجد مباريات منتهية بعد</p>
           ) : (
