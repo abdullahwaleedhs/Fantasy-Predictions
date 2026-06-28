@@ -4938,7 +4938,7 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                   <span style={{ fontWeight: 700, color: theme.text }}>
                     {m.home} <span style={{ color: theme.muted, fontWeight: 400 }}>vs</span> {m.away}
                   </span>
-                  <div style={{ display: "flex", gap: "6px" }}>
+                  <div dir="ltr" style={{ display: "flex", gap: "6px" }}>
                     {[
                       { value: h, label: "ساعة" },
                       { value: min, label: "دقيقة" },
