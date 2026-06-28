@@ -4858,8 +4858,6 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
     { key: "none", color: theme.violet, label: "لم يتم توقعها" },
   ];
   const totalScored = tierColors.reduce((sum, t) => sum + (tierCounts[t.key] || 0), 0);
-  const correctCount = totalScored - (tierCounts[0] || 0) - (tierCounts.none || 0);
-  const accuracy = totalScored > 0 ? Math.round((correctCount / totalScored) * 100) : 0;
 
   let acc = 0;
   const gradientStops = tierColors
@@ -5023,18 +5021,8 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                   flexShrink: 0,
                   borderRadius: "50%",
                   background: `conic-gradient(${gradientStops.join(", ")})`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
                 }}
-              >
-                <div style={{ width: "62px", height: "62px", borderRadius: "50%", background: theme.surface, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ textAlign: "center" }}>
-                    <div style={{ fontSize: "14px", fontWeight: 900, color: theme.text }}>{accuracy}%</div>
-                    <div style={{ fontSize: "8px", color: theme.muted, fontWeight: 600 }}>صحيحة</div>
-                  </div>
-                </div>
-              </div>
+              />
               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "7px" }}>
                 {tierColors.map((t) => (
                   <div key={t.key} style={{ display: "flex", alignItems: "center", gap: "7px" }}>
