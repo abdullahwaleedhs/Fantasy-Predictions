@@ -4849,15 +4849,16 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
 
   const tierCounts = me?.tierCounts || { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 };
   const tierColors = [
-    { key: 10, color: theme.accent, label: "نتيجة مضبوطة" },
-    { key: 5, color: theme.navyBlue, label: "فوز + فرق الأهداف" },
-    { key: 4, color: theme.sky, label: "فوز فقط" },
-    { key: 3, color: theme.muted, label: "تعادل" },
-    { key: 1, color: theme.inputBorder, label: "هدف واحد فقط" },
-    { key: 0, color: theme.danger, label: "خاطئة" },
+    { key: 10, color: theme.accent, label: TIERS_META[0].label },
+    { key: 5, color: theme.navyBlue, label: TIERS_META[1].label },
+    { key: 4, color: theme.sky, label: TIERS_META[2].label },
+    { key: 3, color: theme.muted, label: TIERS_META[3].label },
+    { key: 1, color: theme.inputBorder, label: TIERS_META[4].label },
+    { key: 0, color: theme.danger, label: TIERS_META[5].label },
+    { key: "none", color: theme.violetSoft, label: "لم يتم توقعها" },
   ];
   const totalScored = tierColors.reduce((sum, t) => sum + (tierCounts[t.key] || 0), 0);
-  const correctCount = totalScored - (tierCounts[0] || 0);
+  const correctCount = totalScored - (tierCounts[0] || 0) - (tierCounts.none || 0);
   const accuracy = totalScored > 0 ? Math.round((correctCount / totalScored) * 100) : 0;
 
   let acc = 0;
@@ -5010,12 +5011,12 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
           {totalScored === 0 ? (
             <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "16px 0" }}>لا توجد مباريات منتهية بعد</p>
           ) : (
-            <>
+            <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
               <div
                 style={{
                   width: "100px",
                   height: "100px",
-                  margin: "0 auto 10px",
+                  flexShrink: 0,
                   borderRadius: "50%",
                   background: `conic-gradient(${gradientStops.join(", ")})`,
                   display: "flex",
@@ -5023,22 +5024,32 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                   justifyContent: "center",
                 }}
               >
-                <div style={{ width: "60px", height: "60px", borderRadius: "50%", background: theme.surface, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ width: "62px", height: "62px", borderRadius: "50%", background: theme.surface, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <div style={{ textAlign: "center" }}>
                     <div style={{ fontSize: "14px", fontWeight: 900, color: theme.text }}>{accuracy}%</div>
                     <div style={{ fontSize: "8px", color: theme.muted, fontWeight: 600 }}>صحيحة</div>
                   </div>
                 </div>
               </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center", fontSize: "9px", color: theme.muted }}>
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "7px" }}>
                 {tierColors.filter((t) => tierCounts[t.key] > 0).map((t) => (
-                  <div key={t.key} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: t.color, display: "inline-block" }} />
-                    {t.label}
+                  <div key={t.key} style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+                    <span
+                      style={{
+                        width: "14px",
+                        height: "14px",
+                        borderRadius: "50%",
+                        border: `2.5px solid ${t.color}`,
+                        display: "inline-block",
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span style={{ fontSize: "10px", color: theme.text, flex: 1 }}>{t.label}</span>
+                    <span style={{ fontSize: "10px", fontWeight: 800, color: theme.muted }}>{Math.round((tierCounts[t.key] / totalScored) * 100)}%</span>
                   </div>
                 ))}
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>
