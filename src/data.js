@@ -114,10 +114,10 @@ export async function fetchMatches() {
   return data.map(rowToMatch);
 }
 
-export async function addMatchDB() {
+export async function addMatchDB(date) {
   const { data, error } = await supabase
     .from("matches")
-    .insert({ home: "", away: "" })
+    .insert({ home: "", away: "", match_date: date || null })
     .select()
     .single();
   if (error) throw error;

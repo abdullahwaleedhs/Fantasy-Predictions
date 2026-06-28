@@ -6118,7 +6118,7 @@ export default function App() {
   };
 
   const addMatch = () => {
-    addMatchDB().then((row) => setMatchRows((prev) => [...prev, row]));
+    addMatchDB(toLocalISODate(new Date(serverNow()))).then((row) => setMatchRows((prev) => [...prev, row]));
   };
 
   const updateMatch = (id, updated) => {
