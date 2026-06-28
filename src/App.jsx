@@ -1217,6 +1217,7 @@ const MONTH_NAMES_AR = [
 // (today through +59 days), so admins can only schedule within that window.
 function DateCalendarPicker({ value, onChange, theme, disabled }) {
   const [open, setOpen] = useState(false);
+  const activeMonthRef = useRef(null);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -1228,6 +1229,19 @@ function DateCalendarPicker({ value, onChange, theme, disabled }) {
 
   const [viewYear, setViewYear] = useState((selectedDate || today).getFullYear());
   const [viewMonth, setViewMonth] = useState((selectedDate || today).getMonth());
+
+  // When opening the picker, jump straight to today's month/year tab instead
+  // of leaving the view wherever it last was (which defaults to the earliest
+  // available month - January - on first open since the tab row scrolls
+  // to its start).
+  useEffect(() => {
+    if (open) {
+      const base = selectedDate || today;
+      setViewYear(base.getFullYear());
+      setViewMonth(base.getMonth());
+      activeMonthRef.current?.scrollIntoView({ block: "nearest", inline: "center" });
+    }
+  }, [open]);
 
   // Only months that contain at least one day within the allowed range.
   const availableMonths = [];
@@ -1349,6 +1363,7 @@ function DateCalendarPicker({ value, onChange, theme, disabled }) {
               <button
                 key={month}
                 type="button"
+                ref={viewMonth === month ? activeMonthRef : null}
                 onClick={() => setViewMonth(month)}
                 style={{
                   flexShrink: 0,
