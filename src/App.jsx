@@ -5071,7 +5071,7 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                     const from = (segmentStartByKey[t.key] / totalScored) * 360;
                     const to = ((segmentStartByKey[t.key] + tierCounts[t.key]) / totalScored) * 360;
                     const midAngleRad = ((from + to) / 2) * (Math.PI / 180);
-                    const r = 52;
+                    const r = 56;
                     const x = 70 + r * Math.sin(midAngleRad);
                     const y = 70 - r * Math.cos(midAngleRad);
                     return (
@@ -5082,7 +5082,7 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                           left: `${x}px`,
                           top: `${y}px`,
                           transform: "translate(-50%, -50%)",
-                          fontSize: "10px",
+                          fontSize: "8px",
                           fontWeight: 800,
                           color: "#FFFFFF",
                           textShadow: "0 1px 2px rgba(0,0,0,0.45)",
