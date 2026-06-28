@@ -5515,7 +5515,7 @@ function TopBar({ onMenuClick, theme }) {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-        <img src="/logo.png" alt="" width={36} height={36} style={{ borderRadius: "8px" }} />
+        <img src="/logo.png" alt="" width={48} height={48} style={{ borderRadius: "8px" }} />
         <div>
           <h1
             style={{
