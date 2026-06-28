@@ -5062,23 +5062,44 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
               >
                 <div style={{ width: "62px", height: "62px", borderRadius: "50%", background: theme.surface }} />
               </div>
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "7px" }}>
-                {tierColors.map((t) => (
-                  <div key={t.key} style={{ display: "flex", alignItems: "center", gap: "7px" }}>
-                    <span
-                      style={{
-                        width: "14px",
-                        height: "14px",
-                        borderRadius: "50%",
-                        border: `2.5px solid ${t.color}`,
-                        display: "inline-block",
-                        flexShrink: 0,
-                      }}
-                    />
-                    <span style={{ fontSize: "10px", color: theme.text, flex: 1 }}>{t.label}</span>
-                    <span style={{ fontSize: "10px", fontWeight: 800, color: theme.muted }}>{Math.round((tierCounts[t.key] / totalScored) * 100)}%</span>
-                  </div>
-                ))}
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "9px" }}>
+                {tierColors.map((t) => {
+                  const pct = Math.round((tierCounts[t.key] / totalScored) * 100);
+                  return (
+                    <div key={t.key}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "7px", marginBottom: "3px" }}>
+                        <span
+                          style={{
+                            width: "10px",
+                            height: "10px",
+                            borderRadius: "50%",
+                            border: `2.5px solid ${t.color}`,
+                            display: "inline-block",
+                            flexShrink: 0,
+                          }}
+                        />
+                        <span style={{ fontSize: "10px", color: theme.text, flex: 1 }}>{t.label}</span>
+                      </div>
+                      <div style={{ position: "relative", height: "13px", background: theme.bg, borderRadius: "6px", overflow: "hidden" }}>
+                        <div style={{ position: "absolute", inset: 0, width: `${pct}%`, background: t.color, borderRadius: "6px" }} />
+                        <span
+                          style={{
+                            position: "relative",
+                            display: "block",
+                            textAlign: "left",
+                            fontSize: "8px",
+                            fontWeight: 800,
+                            color: theme.text,
+                            padding: "0 6px",
+                            lineHeight: "13px",
+                          }}
+                        >
+                          {pct}%
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
