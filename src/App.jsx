@@ -1831,8 +1831,6 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
   const colors = result
     ? match.userBoost
       ? { bg: theme.yellowSoft, text: theme.yellow, ring: theme.yellow }
-      : match.doublePoints
-      ? { bg: theme.primarySoft, text: theme.text, ring: theme.primary }
       : tierStyleFor(theme, result.basePoints)
     : null;
 
@@ -4491,8 +4489,6 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
           const colors = result
             ? pred?.userBoost
               ? { bg: theme.yellowSoft, text: theme.yellow, ring: theme.yellow }
-              : match.doublePoints
-              ? { bg: theme.primarySoft, text: theme.text, ring: theme.primary }
               : tierStyleFor(theme, result.basePoints)
             : null;
           return (
