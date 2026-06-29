@@ -4998,9 +4998,9 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
               <p style={{ fontSize: "12px", color: theme.muted }}>ما انضممت لأي دوري بعد</p>
             </div>
           ) : (
-            <div style={{ background: theme.surface, border: "1px solid #000", borderRadius: "12px", overflow: "hidden" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 60px", borderBottom: "1px solid #000" }}>
-                <div style={{ display: "flex", alignItems: "center", fontSize: "10px", fontWeight: 700, color: theme.text, borderInlineEnd: "1px solid #000", padding: "8px 12px" }}>الدوري</div>
+            <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "12px", overflow: "hidden" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 60px", borderBottom: `1px solid ${theme.border}` }}>
+                <div style={{ display: "flex", alignItems: "center", fontSize: "10px", fontWeight: 700, color: theme.text, borderInlineEnd: `1px solid ${theme.border}`, padding: "8px 12px" }}>الدوري</div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", fontWeight: 700, color: theme.text }}>الترتيب</div>
               </div>
               {myLeagues.map((l, i) => (
@@ -5009,7 +5009,7 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                   onClick={() => onNavigate("leagues")}
                   style={{ display: "grid", gridTemplateColumns: "1fr 60px", borderBottom: i < myLeagues.length - 1 ? `1px solid ${theme.border}` : "none", cursor: "pointer" }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", borderInlineEnd: "1px solid #000", padding: "10px 12px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", borderInlineEnd: `1px solid ${theme.border}`, padding: "10px 12px" }}>
                     <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: theme.violetSoft, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       <Users size={14} color={theme.violet} />
                     </div>
