@@ -5000,7 +5000,13 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
               <p style={{ fontSize: "12px", color: theme.muted }}>ما انضممت لأي دوري بعد</p>
             </div>
           ) : (
-            myLeagues.map((l) => (
+            <>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "0 12px" }}>
+                <div style={{ width: "32px", flexShrink: 0 }} />
+                <div style={{ flex: 1, fontSize: "10px", fontWeight: 700, color: theme.muted }}>الدوري</div>
+                <div style={{ fontSize: "10px", fontWeight: 700, color: theme.muted, padding: "0 9px" }}>الترتيب</div>
+              </div>
+              {myLeagues.map((l) => (
               <div
                 key={l.id}
                 onClick={() => onNavigate("leagues")}
@@ -5016,7 +5022,8 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                   {l.myRank}
                 </div>
               </div>
-            ))
+              ))}
+            </>
           )}
         </div>
       </div>
