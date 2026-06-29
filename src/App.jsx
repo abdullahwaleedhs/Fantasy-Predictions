@@ -4559,20 +4559,18 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
                 borderTop: idx === 0 ? "none" : `1px solid ${theme.border}`,
               }}
             >
-              <div style={{ flex: 1, textAlign: "center", padding: "5px 4px", borderLeft: `1px solid ${theme.border}` }}>
-                <ResultPill theme={theme} border={theme.text} bg={theme.bg} color={theme.text} compact>
-                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60px" }}>{p.name}</span>
-                </ResultPill>
+              <div style={{ flex: 1, textAlign: "center", padding: "5px 4px" }}>
+                <span style={{ fontSize: "11px", fontWeight: 700, color: theme.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60px", display: "inline-block" }}>{p.name}</span>
               </div>
-              <div style={{ flex: 1, textAlign: "center", padding: "5px 4px", borderLeft: `1px solid ${theme.border}` }}>
+              <div style={{ flex: 1, textAlign: "center", padding: "5px 4px" }}>
                 {pred ? (
-                  <ResultPill theme={theme} border={theme.text} bg={theme.bg} color={theme.text} compact>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: theme.text }}>
                     {pred.predHome} - {pred.predAway}
-                  </ResultPill>
+                  </span>
                 ) : (
-                  <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} compact>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: theme.muted }}>
                     لم يتوقع
-                  </ResultPill>
+                  </span>
                 )}
               </div>
               <div style={{ flex: 1, textAlign: "center", padding: "5px 4px" }}>
