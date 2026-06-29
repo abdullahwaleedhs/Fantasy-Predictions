@@ -5001,7 +5001,8 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
             </div>
           ) : (
             <div style={{ background: theme.surface, border: "1px solid #000", borderRadius: "12px", overflow: "hidden" }}>
-              <div style={{ display: "flex", alignItems: "center", borderBottom: "1px solid #000", padding: "8px 12px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", borderBottom: "1px solid #000", padding: "8px 12px" }}>
+                <div style={{ width: "32px", flexShrink: 0 }} />
                 <div style={{ flex: 1, fontSize: "10px", fontWeight: 700, color: theme.text, borderInlineEnd: "1px solid #000", paddingInlineEnd: "10px" }}>الدوري</div>
                 <div style={{ fontSize: "10px", fontWeight: 700, color: theme.text, paddingInlineStart: "10px" }}>الترتيب</div>
               </div>
@@ -5014,7 +5015,7 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                   <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: theme.violetSoft, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     <Users size={14} color={theme.violet} />
                   </div>
-                  <div style={{ flex: 1 }}>
+                  <div style={{ flex: 1, borderInlineEnd: "1px solid #000", paddingInlineEnd: "10px" }}>
                     <div style={{ fontSize: "12px", fontWeight: 700, color: theme.text }}>{l.name}</div>
                   </div>
                   <div style={{ fontSize: "11px", fontWeight: 800, color: theme.violet, background: theme.violetSoft, padding: "4px 9px", borderRadius: "8px" }}>
