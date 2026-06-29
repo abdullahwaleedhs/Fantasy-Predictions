@@ -4994,35 +4994,35 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
 
         {/* My leagues */}
         <HomeSectionHeader title="دورياتي" onMore={() => onNavigate("leagues")} theme={theme} />
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "20px" }}>
+        <div style={{ marginBottom: "20px" }}>
           {myLeagues.length === 0 ? (
             <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "12px", padding: "16px", textAlign: "center" }}>
               <p style={{ fontSize: "12px", color: theme.muted }}>ما انضممت لأي دوري بعد</p>
             </div>
           ) : (
-            <>
-              <div style={{ display: "flex", alignItems: "center", background: theme.surface, border: "1px solid #000", borderRadius: "12px", padding: "8px 12px", marginBottom: "2px" }}>
+            <div style={{ background: theme.surface, border: "1px solid #000", borderRadius: "12px", overflow: "hidden" }}>
+              <div style={{ display: "flex", alignItems: "center", borderBottom: "1px solid #000", padding: "8px 12px" }}>
                 <div style={{ flex: 1, fontSize: "10px", fontWeight: 700, color: theme.text, borderInlineEnd: "1px solid #000", paddingInlineEnd: "10px" }}>الدوري</div>
                 <div style={{ fontSize: "10px", fontWeight: 700, color: theme.text, paddingInlineStart: "10px" }}>الترتيب</div>
               </div>
-              {myLeagues.map((l) => (
-              <div
-                key={l.id}
-                onClick={() => onNavigate("leagues")}
-                style={{ display: "flex", alignItems: "center", gap: "10px", background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "12px", padding: "10px 12px", cursor: "pointer" }}
-              >
-                <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: theme.violetSoft, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Users size={14} color={theme.violet} />
+              {myLeagues.map((l, i) => (
+                <div
+                  key={l.id}
+                  onClick={() => onNavigate("leagues")}
+                  style={{ display: "flex", alignItems: "center", gap: "10px", borderBottom: i < myLeagues.length - 1 ? `1px solid ${theme.border}` : "none", padding: "10px 12px", cursor: "pointer" }}
+                >
+                  <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: theme.violetSoft, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <Users size={14} color={theme.violet} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: "12px", fontWeight: 700, color: theme.text }}>{l.name}</div>
+                  </div>
+                  <div style={{ fontSize: "11px", fontWeight: 800, color: theme.violet, background: theme.violetSoft, padding: "4px 9px", borderRadius: "8px" }}>
+                    {l.myRank}
+                  </div>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: "12px", fontWeight: 700, color: theme.text }}>{l.name}</div>
-                </div>
-                <div style={{ fontSize: "11px", fontWeight: 800, color: theme.violet, background: theme.violetSoft, padding: "4px 9px", borderRadius: "8px" }}>
-                  {l.myRank}
-                </div>
-              </div>
               ))}
-            </>
+            </div>
           )}
         </div>
       </div>
