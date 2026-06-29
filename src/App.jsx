@@ -4962,7 +4962,7 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                       { value: sec, label: "ثانية" },
                     ].map((unit) => (
                       <div key={unit.label} style={{ textAlign: "center" }}>
-                        <div style={{ fontSize: "12px", color: theme.violet, fontWeight: 700, fontFamily: "monospace" }}>{pad(unit.value)}</div>
+                        <div style={{ fontSize: "12px", color: theme.text, fontWeight: 700, fontFamily: "monospace" }}>{pad(unit.value)}</div>
                         <div style={{ fontSize: "8px", color: theme.muted }}>{unit.label}</div>
                       </div>
                     ))}
