@@ -4933,12 +4933,12 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
               return (
                 <div
                   key={m.id}
-                  style={{ padding: "10px 8px", borderBottom: `1px solid ${theme.border}`, fontSize: "12px" }}
+                  style={{ padding: "8px 8px", borderBottom: `1px solid ${theme.border}`, fontSize: "12px" }}
                 >
                   {m.tournament && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "6px" }}>
-                      <TournamentIcon name={m.tournament} logo={tournamentLogos?.[m.tournament]} theme={theme} size={12} color={theme.muted} />
-                      <span style={{ fontSize: "10px", color: theme.muted, fontWeight: 600 }}>{m.tournament}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "4px", marginBottom: "3px" }}>
+                      <TournamentIcon name={m.tournament} logo={tournamentLogos?.[m.tournament]} theme={theme} size={9} color={theme.muted} />
+                      <span style={{ fontSize: "8px", color: theme.muted, fontWeight: 600 }}>{m.tournament}</span>
                     </div>
                   )}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
