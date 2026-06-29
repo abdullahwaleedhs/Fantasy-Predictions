@@ -4913,8 +4913,8 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
             <div style={{ fontSize: "11px", color: theme.muted, marginTop: "2px" }}>إجمالي نقاطك</div>
           </div>
           <div style={{ background: theme.violetSoft, color: theme.violet, borderRadius: "10px", padding: "6px 14px", fontSize: "12px", fontWeight: 700, textAlign: "center" }}>
-            ترتيبك
-            <div style={{ fontSize: "16px", marginTop: "2px" }}>{myGlobalRank ? `#${myGlobalRank}` : "—"}</div>
+            الترتيب العام
+            <div style={{ fontSize: "16px", marginTop: "2px" }}>{myGlobalRank || "—"}</div>
           </div>
         </div>
 
@@ -4962,7 +4962,7 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                       { value: sec, label: "ثانية" },
                     ].map((unit) => (
                       <div key={unit.label} style={{ textAlign: "center" }}>
-                        <div style={{ fontSize: "12px", color: theme.text, fontWeight: 700, fontFamily: "monospace" }}>{pad(unit.value)}</div>
+                        <div style={{ fontSize: "12px", color: "#16a34a", fontWeight: 700, fontFamily: "monospace" }}>{pad(unit.value)}</div>
                         <div style={{ fontSize: "8px", color: theme.muted }}>{unit.label}</div>
                       </div>
                     ))}
@@ -5011,10 +5011,9 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: "12px", fontWeight: 700, color: theme.text }}>{l.name}</div>
-                  <div style={{ fontSize: "9px", color: theme.muted, marginTop: "1px" }}>{l.memberCount} أعضاء</div>
                 </div>
                 <div style={{ fontSize: "11px", fontWeight: 800, color: theme.violet, background: theme.violetSoft, padding: "4px 9px", borderRadius: "8px" }}>
-                  ترتيبك #{l.myRank}
+                  {l.myRank}
                 </div>
               </div>
             ))
