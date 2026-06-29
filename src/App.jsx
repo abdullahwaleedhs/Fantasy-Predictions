@@ -4521,7 +4521,7 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
             <ScoreBoxStatic value={match.actualHome} theme={theme} />
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "24px" }}>
-            <span style={{ color: theme.muted, fontSize: "11px", fontWeight: 700 }}>ضد</span>
+            <span style={{ color: theme.muted, fontSize: "11px", fontWeight: 700 }}>{hasActual ? "ضد" : "(بالإنتظار)"}</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", flex: 1 }}>
             <TeamDisplay name={match.away} logo={match.awayLogo} theme={theme} logoSize={36} venueLabel={match.venueTeam === "away" ? "المستضيف" : match.venueTeam === "home" ? "الضيف" : null} />
@@ -4578,7 +4578,7 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
               <div style={{ flex: 1, textAlign: "center", padding: "5px 4px" }}>
                 {!hasActual ? (
                   <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} compact>
-                    بإنتظار النتيجة
+                    (بالإنتظار)
                   </ResultPill>
                 ) : result ? (
                   pred?.userBoost ? (
