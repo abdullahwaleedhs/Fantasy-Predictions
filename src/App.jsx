@@ -5001,10 +5001,9 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
             </div>
           ) : (
             <>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "0 12px" }}>
-                <div style={{ width: "32px", flexShrink: 0 }} />
-                <div style={{ flex: 1, fontSize: "10px", fontWeight: 700, color: theme.muted }}>الدوري</div>
-                <div style={{ fontSize: "10px", fontWeight: 700, color: theme.muted, padding: "0 9px" }}>الترتيب</div>
+              <div style={{ display: "flex", alignItems: "center", background: theme.surface, border: "1px solid #000", borderRadius: "12px", padding: "8px 12px", marginBottom: "2px" }}>
+                <div style={{ flex: 1, fontSize: "10px", fontWeight: 700, color: theme.text, borderInlineEnd: "1px solid #000", paddingInlineEnd: "10px" }}>الدوري</div>
+                <div style={{ fontSize: "10px", fontWeight: 700, color: theme.text, paddingInlineStart: "10px" }}>الترتيب</div>
               </div>
               {myLeagues.map((l) => (
               <div
