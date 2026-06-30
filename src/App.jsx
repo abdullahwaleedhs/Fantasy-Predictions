@@ -4908,7 +4908,9 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
     const counts = {};
     allPredictionRows.forEach((row) => {
       if (row.pred_home === "" || row.pred_home == null || row.pred_away === "" || row.pred_away == null) return;
-      const key = `${row.pred_home}-${row.pred_away}`;
+      const a = Number(row.pred_home);
+      const b = Number(row.pred_away);
+      const key = a >= b ? `${a}-${b}` : `${b}-${a}`;
       counts[key] = (counts[key] || 0) + 1;
     });
     let best = null;
@@ -5171,14 +5173,14 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
             <div style={{ display: "flex", gap: "10px", marginTop: "14px", paddingTop: "14px", borderTop: `1px solid ${theme.border}` }}>
               {mostCommonActualResult && (
                 <div style={{ flex: 1, textAlign: "center" }}>
-                  <div style={{ fontSize: "9px", color: theme.muted, marginBottom: "4px" }}>أكثر نتيجة صحيحة تحققت</div>
-                  <div style={{ fontSize: "14px", fontWeight: 800, color: theme.text }}>{mostCommonActualResult}</div>
+                  <div style={{ fontSize: "11px", color: theme.muted, marginBottom: "5px" }}>أكثر نتيجة انتهت بها المباريات</div>
+                  <div style={{ fontSize: "18px", fontWeight: 800, color: theme.text }}>{mostCommonActualResult}</div>
                 </div>
               )}
               {mostCommonPredictedResult && (
                 <div style={{ flex: 1, textAlign: "center" }}>
-                  <div style={{ fontSize: "9px", color: theme.muted, marginBottom: "4px" }}>أكثر نتيجة تم إدخالها</div>
-                  <div style={{ fontSize: "14px", fontWeight: 800, color: theme.text }}>{mostCommonPredictedResult}</div>
+                  <div style={{ fontSize: "11px", color: theme.muted, marginBottom: "5px" }}>أكثر نتيجة تم إدخالها من قبل المشاركين</div>
+                  <div style={{ fontSize: "18px", fontWeight: 800, color: theme.text }}>{mostCommonPredictedResult}</div>
                 </div>
               )}
             </div>
