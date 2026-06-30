@@ -4892,7 +4892,9 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
     const counts = {};
     matches.forEach((m) => {
       if (m.actualHome === "" || m.actualHome == null || m.actualAway === "" || m.actualAway == null) return;
-      const key = `${m.actualHome}-${m.actualAway}`;
+      const a = Number(m.actualHome);
+      const b = Number(m.actualAway);
+      const key = a >= b ? `${a}-${b}` : `${b}-${a}`;
       counts[key] = (counts[key] || 0) + 1;
     });
     let best = null;
