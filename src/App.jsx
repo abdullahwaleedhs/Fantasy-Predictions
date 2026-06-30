@@ -5179,7 +5179,7 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
               )}
               {mostCommonPredictedResult && (
                 <div style={{ flex: 1, textAlign: "center" }}>
-                  <div style={{ fontSize: "11px", color: theme.muted, marginBottom: "5px" }}>أكثر نتيجة تم إدخالها من قبل المشاركين</div>
+                  <div style={{ fontSize: "11px", color: theme.muted, marginBottom: "5px" }}>أكثر نتيجة مدخلة من المشاركين</div>
                   <div style={{ fontSize: "18px", fontWeight: 800, color: theme.text }}>{mostCommonPredictedResult}</div>
                 </div>
               )}
