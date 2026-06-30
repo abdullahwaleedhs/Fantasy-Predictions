@@ -4888,6 +4888,36 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
       return `${t.color} ${from}% ${to}%`;
     });
 
+  const mostCommonActualResult = useMemo(() => {
+    const counts = {};
+    matches.forEach((m) => {
+      if (m.actualHome === "" || m.actualHome == null || m.actualAway === "" || m.actualAway == null) return;
+      const key = `${m.actualHome}-${m.actualAway}`;
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    let best = null;
+    for (const key in counts) {
+      if (!best || counts[key] > counts[best]) best = key;
+    }
+    return best;
+  }, [matches]);
+
+  const mostCommonPredictedResult = useMemo(() => {
+    if (!currentUser) return null;
+    const counts = {};
+    allPredictionRows.forEach((row) => {
+      if (row.user_id !== currentUser.id) return;
+      if (row.pred_home === "" || row.pred_home == null || row.pred_away === "" || row.pred_away == null) return;
+      const key = `${row.pred_home}-${row.pred_away}`;
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    let best = null;
+    for (const key in counts) {
+      if (!best || counts[key] > counts[best]) best = key;
+    }
+    return best;
+  }, [allPredictionRows, currentUser]);
+
   return (
     <div style={{ padding: "20px 16px 60px" }}>
       <div style={{ maxWidth: "980px", margin: "0 auto" }}>
@@ -5135,6 +5165,22 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+          {(mostCommonActualResult || mostCommonPredictedResult) && (
+            <div style={{ display: "flex", gap: "10px", marginTop: "14px", paddingTop: "14px", borderTop: `1px solid ${theme.border}` }}>
+              {mostCommonActualResult && (
+                <div style={{ flex: 1, textAlign: "center" }}>
+                  <div style={{ fontSize: "9px", color: theme.muted, marginBottom: "4px" }}>أكثر نتيجة صحيحة تحققت</div>
+                  <div style={{ fontSize: "14px", fontWeight: 800, color: theme.text }}>{mostCommonActualResult}</div>
+                </div>
+              )}
+              {mostCommonPredictedResult && (
+                <div style={{ flex: 1, textAlign: "center" }}>
+                  <div style={{ fontSize: "9px", color: theme.muted, marginBottom: "4px" }}>أكثر نتيجة تم إدخالها</div>
+                  <div style={{ fontSize: "14px", fontWeight: 800, color: theme.text }}>{mostCommonPredictedResult}</div>
+                </div>
+              )}
             </div>
           )}
         </div>
