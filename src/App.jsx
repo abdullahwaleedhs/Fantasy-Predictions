@@ -4903,10 +4903,8 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
   }, [matches]);
 
   const mostCommonPredictedResult = useMemo(() => {
-    if (!currentUser) return null;
     const counts = {};
     allPredictionRows.forEach((row) => {
-      if (row.user_id !== currentUser.id) return;
       if (row.pred_home === "" || row.pred_home == null || row.pred_away === "" || row.pred_away == null) return;
       const key = `${row.pred_home}-${row.pred_away}`;
       counts[key] = (counts[key] || 0) + 1;
@@ -4916,7 +4914,7 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
       if (!best || counts[key] > counts[best]) best = key;
     }
     return best;
-  }, [allPredictionRows, currentUser]);
+  }, [allPredictionRows]);
 
   return (
     <div style={{ padding: "20px 16px 60px" }}>
