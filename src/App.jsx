@@ -4843,7 +4843,7 @@ function HomeSectionHeader({ title, onMore, theme }) {
   );
 }
 
-function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, leagues, tournamentLogos }) {
+function HomePage({ theme, onNavigate, onGoToPredictions, currentUser, matches, allPredictionRows, leagues, tournamentLogos }) {
   const [now, setNow] = useState(() => serverNow());
   useEffect(() => {
     const id = setInterval(() => setNow(serverNow()), 1000);
@@ -4962,7 +4962,7 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
         </div>
 
         {/* Next 24h matches */}
-        <HomeSectionHeader title="مباريات الـ24 ساعة القادمة" onMore={() => onNavigate("predictions")} theme={theme} />
+        <HomeSectionHeader title="مباريات الـ24 ساعة القادمة" onMore={() => onGoToPredictions()} theme={theme} />
         <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "14px", padding: "8px", marginBottom: "20px" }}>
           {nextDayMatches.length === 0 ? (
             <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "16px 0" }}>لا توجد مباريات خلال الـ24 ساعة القادمة</p>
@@ -4985,9 +4985,11 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                     </div>
                   )}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span style={{ fontWeight: 700, color: theme.text }}>
-                    {m.home} <span style={{ color: theme.muted, fontWeight: 400 }}>vs</span> {m.away}
-                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px", fontWeight: 700, color: theme.text }}>
+                    <span>{m.home}</span>
+                    <span style={{ color: theme.muted, fontWeight: 400, fontSize: "10px" }}>vs</span>
+                    <span>{m.away}</span>
+                  </div>
                   <div
                     dir="ltr"
                     style={{
@@ -5016,7 +5018,7 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
             })
           )}
           <button
-            onClick={() => onNavigate("predictions")}
+            onClick={() => onGoToPredictions()}
             style={{
               width: "100%",
               marginTop: "6px",
@@ -6761,6 +6763,7 @@ export default function App() {
         <HomePage
           theme={theme}
           onNavigate={setActivePage}
+          onGoToPredictions={() => { setPredictionsTabView("available"); setActivePage("predictions"); }}
           currentUser={currentUser}
           matches={matches}
           allPredictionRows={allPredictionRows}
