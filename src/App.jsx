@@ -5132,7 +5132,10 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
                   justifyContent: "center",
                 }}
               >
-                <div style={{ width: "86px", height: "86px", borderRadius: "50%", background: theme.surface }} />
+                <div style={{ width: "86px", height: "86px", borderRadius: "50%", background: theme.surface, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ fontSize: "18px", fontWeight: 900, color: theme.text, lineHeight: 1 }}>{totalScored - (tierCounts["none"] || 0)}</div>
+                  <div style={{ fontSize: "8px", color: theme.muted, marginTop: "3px" }}>توقعات</div>
+                </div>
                 {tierColors
                   .filter((t) => tierCounts[t.key] > 0)
                   .map((t) => {
