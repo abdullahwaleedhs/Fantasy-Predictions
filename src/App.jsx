@@ -2455,7 +2455,11 @@ function compareTierCounts(a, b) {
 function computeGlobalRanking(matches, allPredictionRows, currentUser) {
   const matchById = Object.fromEntries(matches.map((m) => [m.id, m]));
 
+  const finishedMatchIds = new Set(matches.filter(isMatchFinished).map((m) => m.id));
+  const finishedMatchCount = finishedMatchIds.size;
+
   const byUser = {};
+  const predictedMatchIdsByUser = {};
   for (const row of allPredictionRows) {
     const match = matchById[row.match_id];
     if (!match) continue;
@@ -2470,6 +2474,7 @@ function computeGlobalRanking(matches, allPredictionRows, currentUser) {
         points: 0,
         tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 },
       };
+      predictedMatchIdsByUser[row.user_id] = new Set();
     }
     const entry = byUser[row.user_id];
 
@@ -2480,13 +2485,21 @@ function computeGlobalRanking(matches, allPredictionRows, currentUser) {
     const hasPrediction = row.pred_home !== null && row.pred_home !== undefined && row.pred_away !== null && row.pred_away !== undefined;
     if (!hasPrediction) {
       entry.tierCounts.none += 1;
+      predictedMatchIdsByUser[row.user_id].add(row.match_id);
       continue;
     }
+    predictedMatchIdsByUser[row.user_id].add(row.match_id);
     const result = calcPoints(row.pred_home, row.pred_away, match.actualHome, match.actualAway, multiplier);
     if (result) {
       entry.tierCounts[result.basePoints] = (entry.tierCounts[result.basePoints] || 0) + 1;
       entry.points += result.points;
     }
+  }
+
+  // Count finished matches the user never submitted a prediction row for
+  for (const userId in byUser) {
+    const missed = finishedMatchCount - (predictedMatchIdsByUser[userId]?.size || 0);
+    if (missed > 0) byUser[userId].tierCounts.none += missed;
   }
 
   const players = Object.values(byUser).map((p) => ({ ...p, isYou: currentUser && p.id === currentUser.id }));
@@ -2498,7 +2511,7 @@ function computeGlobalRanking(matches, allPredictionRows, currentUser) {
       username: currentUser.username,
       avatar: currentUser.avatar,
       points: 0,
-      tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 },
+      tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: finishedMatchCount },
       isYou: true,
     });
   }
