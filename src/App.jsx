@@ -5168,18 +5168,25 @@ function HomePage({ theme, onNavigate, currentUser, matches, allPredictionRows, 
               </div>
               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "7px" }}>
                 {tierColors.map((t) => (
-                  <div key={t.key} style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+                  <div key={t.key} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <span
                       style={{
-                        width: "10px",
-                        height: "10px",
+                        width: "22px",
+                        height: "22px",
                         borderRadius: "50%",
                         border: `2.5px solid ${t.color}`,
-                        display: "inline-block",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                         flexShrink: 0,
+                        fontSize: "8px",
+                        fontWeight: 800,
+                        color: t.color,
                       }}
-                    />
-                    <span style={{ fontSize: "10px", color: theme.text }}>{t.label}</span>
+                    >
+                      {tierCounts[t.key] || 0}
+                    </span>
+                    <span style={{ fontSize: "11px", color: theme.text }}>{t.label}</span>
                   </div>
                 ))}
               </div>
