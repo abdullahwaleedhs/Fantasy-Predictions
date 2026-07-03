@@ -194,7 +194,7 @@ export async function upsertPredictionDB(userId, matchId, { predHome, predAway, 
 export async function fetchAllPredictionsWithProfiles() {
   const { data, error } = await supabase
     .from("predictions")
-    .select("match_id, user_id, pred_home, pred_away, user_boost, profiles(name, username, avatar)");
+    .select("match_id, user_id, pred_home, pred_away, user_boost, updated_at, profiles(name, username, avatar)");
   if (error) throw error;
   return data;
 }
