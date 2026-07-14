@@ -3307,9 +3307,10 @@ function PlayerAvatar({ name, avatar, isYou, theme, size = 32 }) {
   );
 }
 
-function LeaderboardRow({ rank, name, username, avatar, points, isYou, theme }) {
+function LeaderboardRow({ rank, name, username, avatar, points, isYou, theme, onViewProfile }) {
   return (
     <div
+      onClick={onViewProfile}
       style={{
         display: "flex",
         alignItems: "center",
@@ -3318,6 +3319,7 @@ function LeaderboardRow({ rank, name, username, avatar, points, isYou, theme }) 
         borderRadius: "10px",
         background: isYou ? theme.primarySoft : theme.surface,
         border: `1px solid ${isYou ? theme.primary : theme.border}`,
+        cursor: onViewProfile ? "pointer" : "default",
       }}
     >
       <div style={{ width: "22px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -3350,6 +3352,147 @@ function LeaderboardRow({ rank, name, username, avatar, points, isYou, theme }) 
       <span style={{ fontFamily: "Cairo, sans-serif", fontWeight: 800, fontSize: "14px", color: theme.primary }}>
         {points}
       </span>
+    </div>
+  );
+}
+
+function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
+  const tierColors = [
+    { key: 10, color: theme.accent, label: TIERS_META[0].label },
+    { key: 5, color: theme.navyBlue, label: TIERS_META[1].label },
+    { key: 4, color: theme.sky, label: TIERS_META[2].label },
+    { key: 3, color: theme.muted, label: TIERS_META[3].label },
+    { key: 1, color: theme.inputBorder, label: TIERS_META[4].label },
+    { key: 0, color: theme.danger, label: TIERS_META[5].label },
+    { key: "none", color: theme.violet, label: "لم يتم توقعها" },
+  ];
+
+  const tierCounts = user.tierCounts || { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 };
+  const totalScored = tierColors.reduce((sum, t) => sum + (tierCounts[t.key] || 0), 0);
+
+  let acc = 0;
+  const segmentStartByKey = {};
+  const gradientStops = tierColors
+    .filter((t) => tierCounts[t.key] > 0)
+    .map((t) => {
+      const from = (acc / totalScored) * 100;
+      segmentStartByKey[t.key] = acc;
+      acc += tierCounts[t.key];
+      const to = (acc / totalScored) * 100;
+      return `${t.color} ${from}% ${to}%`;
+    });
+
+  const initial = (user.name || "؟").charAt(0).toUpperCase();
+
+  return (
+    <div style={{ padding: "20px 16px 60px" }}>
+      <div className="page-container">
+        <button
+          onClick={onBack}
+          style={{ background: "none", border: "none", cursor: "pointer", color: theme.primary, fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "13px", padding: "0 0 16px 0", display: "flex", alignItems: "center", gap: "4px" }}
+        >
+          <ChevronRight size={16} /> رجوع
+        </button>
+
+        {/* Avatar + name */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", marginBottom: "24px" }}>
+          {user.avatar ? (
+            <img src={user.avatar} alt={user.name} style={{ width: "80px", height: "80px", borderRadius: "50%", objectFit: "cover", border: `2px solid ${theme.border}` }} />
+          ) : (
+            <div style={{ width: "80px", height: "80px", borderRadius: "50%", background: theme.violetSoft, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "30px", fontWeight: 800, color: theme.violet }}>
+              {initial}
+            </div>
+          )}
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: "18px", fontWeight: 800, color: theme.text }}>{user.name}</div>
+            {user.username && <div dir="ltr" style={{ fontFamily: "monospace", fontSize: "13px", color: theme.muted }}>@{user.username}</div>}
+          </div>
+          <div style={{ background: theme.violetSoft, color: theme.violet, borderRadius: "10px", padding: "6px 18px", fontSize: "14px", fontWeight: 800 }}>
+            {user.points} نقطة
+          </div>
+        </div>
+
+        {/* Stats donut */}
+        <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "14px", padding: "14px" }}>
+          {totalScored === 0 ? (
+            <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "16px 0" }}>لا توجد مباريات منتهية بعد</p>
+          ) : (
+            <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+              <div
+                style={{
+                  position: "relative",
+                  width: "140px",
+                  height: "140px",
+                  flexShrink: 0,
+                  borderRadius: "50%",
+                  background: `conic-gradient(${gradientStops.join(", ")})`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <div style={{ width: "86px", height: "86px", borderRadius: "50%", background: theme.surface, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ fontSize: "18px", fontWeight: 900, color: theme.text, lineHeight: 1 }}>{totalScored - (tierCounts["none"] || 0)}</div>
+                  <div style={{ fontSize: "8px", color: theme.muted, marginTop: "3px" }}>توقعات</div>
+                </div>
+                {tierColors
+                  .filter((t) => tierCounts[t.key] > 0)
+                  .map((t) => {
+                    const pct = Math.round((tierCounts[t.key] / totalScored) * 100);
+                    const from = (segmentStartByKey[t.key] / totalScored) * 360;
+                    const to = ((segmentStartByKey[t.key] + tierCounts[t.key]) / totalScored) * 360;
+                    const midAngleRad = ((from + to) / 2) * (Math.PI / 180);
+                    const r = 56;
+                    const x = 70 + r * Math.sin(midAngleRad);
+                    const y = 70 - r * Math.cos(midAngleRad);
+                    return (
+                      <span
+                        key={t.key}
+                        style={{
+                          position: "absolute",
+                          left: `${x}px`,
+                          top: `${y}px`,
+                          transform: "translate(-50%, -50%)",
+                          fontSize: "8px",
+                          fontWeight: 800,
+                          color: "#FFFFFF",
+                          textShadow: "0 1px 2px rgba(0,0,0,0.45)",
+                          pointerEvents: "none",
+                        }}
+                      >
+                        {pct}%
+                      </span>
+                    );
+                  })}
+              </div>
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "7px" }}>
+                {tierColors.map((t) => (
+                  <div key={t.key} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span
+                      style={{
+                        width: "22px",
+                        height: "22px",
+                        borderRadius: "50%",
+                        border: `2.5px solid ${t.color}`,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                        fontSize: "8px",
+                        fontWeight: 800,
+                        color: t.color,
+                      }}
+                    >
+                      {tierCounts[t.key] || 0}
+                    </span>
+                    <span style={{ fontSize: "11px", color: theme.text }}>{t.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -4187,7 +4330,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
   );
 }
 
-function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tournamentLogos, currentUser, theme }) {
+function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tournamentLogos, currentUser, onViewProfile, theme }) {
   const [tournamentFilter, setTournamentFilter] = usePersistedState("globalLeaderboard.tournamentFilter", "الكل");
 
   const filteredMatches = tournamentFilter === "الكل" ? matches : matches.filter((m) => (m.tournament || "بدون بطولة") === tournamentFilter);
@@ -4222,7 +4365,7 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
             {ranked.map((p, i) => (
-              <LeaderboardRow key={p.id} rank={i + 1} name={p.name} username={p.username} avatar={p.avatar} points={p.points} isYou={p.isYou} theme={theme} />
+              <LeaderboardRow key={p.id} rank={i + 1} name={p.name} username={p.username} avatar={p.avatar} points={p.points} isYou={p.isYou} theme={theme} onViewProfile={() => onViewProfile(p)} />
             ))}
           </div>
         )}
@@ -4235,7 +4378,7 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
   );
 }
 
-function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBack, tournaments, tournamentLogos, currentUser, theme }) {
+function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBack, tournaments, tournamentLogos, currentUser, onViewProfile, theme }) {
   const [codeCopied, setCodeCopied] = useState(false);
   const [activeTab, setActiveTab] = usePersistedState("leagueDetail.activeTab", "ranking"); // "ranking" | "predictions"
   const [tournamentFilter, setTournamentFilter] = usePersistedState("leagueDetail.tournamentFilter", "الكل");
@@ -4457,7 +4600,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
           <>
             <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
               {ranked.map((p, i) => (
-                <LeaderboardRow key={p.id} rank={i + 1} name={p.name} username={p.username} avatar={p.avatar} points={p.points} isYou={p.isYou} theme={theme} />
+                <LeaderboardRow key={p.id} rank={i + 1} name={p.name} username={p.username} avatar={p.avatar} points={p.points} isYou={p.isYou} theme={theme} onViewProfile={onViewProfile ? () => onViewProfile(p) : undefined} />
               ))}
             </div>
 
@@ -4642,7 +4785,7 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
   );
 }
 
-function PrivateLeaguesPage({ leagues, matches, allPredictionRows, onCreateLeague, onJoinLeague, tournaments, tournamentLogos, currentUser, theme }) {
+function PrivateLeaguesPage({ leagues, matches, allPredictionRows, onCreateLeague, onJoinLeague, tournaments, tournamentLogos, currentUser, onViewProfile, theme }) {
   const [selectedLeagueId, setSelectedLeagueId] = usePersistedState("leagues.selectedLeagueId", null);
   const [newLeagueName, setNewLeagueName] = useState("");
   const [joinCodeInput, setJoinCodeInput] = useState("");
@@ -4661,6 +4804,7 @@ function PrivateLeaguesPage({ leagues, matches, allPredictionRows, onCreateLeagu
         tournaments={tournaments}
         tournamentLogos={tournamentLogos}
         currentUser={currentUser}
+        onViewProfile={onViewProfile}
         theme={theme}
       />
     );
@@ -5142,7 +5286,7 @@ function HomePage({ theme, onNavigate, onGoToPredictions, currentUser, matches, 
         </div>
 
         {/* Stats */}
-        <HomeSectionHeader title="إحصائياتك" onMore={() => onNavigate("stats")} theme={theme} />
+        <HomeSectionHeader title="إحصائيات" onMore={() => onNavigate("stats")} theme={theme} />
         <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "14px", padding: "14px", marginBottom: "10px" }}>
           {totalScored === 0 ? (
             <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "16px 0" }}>لا توجد مباريات منتهية بعد</p>
@@ -6050,6 +6194,7 @@ export default function App() {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activePage, setActivePage] = useState(() => sessionStorage.getItem("activePage") || "home");
+  const [profileUser, setProfileUser] = useState(null); // { id, name, username, avatar, points, tierCounts } - when set, show UserProfilePage overlay
   const [viewMode, setViewMode] = usePersistedState("viewMode", "user"); // "admin" | "user" - only admins may switch to "admin"
   const [predictionsTabView, setPredictionsTabView] = usePersistedState("predictionsTabView", "available"); // "available" | "predicted" | "archived" - for the توقع! page's match list
   const [archivedVisibleCount, setArchivedVisibleCount] = useState(10); // المنتهية loads 10 at a time so the page doesn't slow down as old matches pile up
@@ -6821,7 +6966,7 @@ export default function App() {
         <LoginGate onNavigateToAuth={() => setActivePage("auth")} theme={theme} />
       )}
 
-      {activePage === "leagues" && currentUser && (
+      {activePage === "leagues" && currentUser && !profileUser && (
         <PrivateLeaguesPage
           leagues={leagues}
           matches={matches}
@@ -6831,17 +6976,29 @@ export default function App() {
           tournaments={tournaments}
           tournamentLogos={tournamentLogos}
           currentUser={currentUser}
+          onViewProfile={setProfileUser}
           theme={theme}
         />
       )}
 
-      {activePage === "globalLeaderboard" && (
+      {activePage === "globalLeaderboard" && !profileUser && (
         <GlobalLeaderboardPage
           matches={matches}
           allPredictionRows={allPredictionRows}
           tournaments={tournaments}
           tournamentLogos={tournamentLogos}
           currentUser={currentUser}
+          onViewProfile={setProfileUser}
+          theme={theme}
+        />
+      )}
+
+      {profileUser && (
+        <UserProfilePage
+          user={profileUser}
+          matches={matches}
+          allPredictionRows={allPredictionRows}
+          onBack={() => setProfileUser(null)}
           theme={theme}
         />
       )}
