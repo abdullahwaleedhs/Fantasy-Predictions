@@ -3651,6 +3651,7 @@ function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [usernameError, setUsernameError] = useState("");
+  const [checkingUsername, setCheckingUsername] = useState(false);
   const [authError, setAuthError] = useState("");
   const [authNotice, setAuthNotice] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -3770,11 +3771,21 @@ function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme
                       setUsernameError("");
                     }
                   }}
+                  onBlur={async () => {
+                    const val = username.trim().toLowerCase();
+                    if (!val || !/^[a-zA-Z0-9]+$/.test(val)) return;
+                    setCheckingUsername(true);
+                    const taken = await isUsernameTaken(val);
+                    setCheckingUsername(false);
+                    if (taken) setUsernameError("اسم المستخدم هذا مستخدم من قبل، جرّب واحد ثاني");
+                  }}
                   placeholder="username"
                   style={{ ...inputStyle, border: `1.5px solid ${usernameError ? theme.danger : theme.inputBorder}`, textAlign: "right" }}
                 />
                 {usernameError ? (
                   <p style={{ fontSize: "11px", color: theme.danger, marginTop: "5px" }}>{usernameError}</p>
+                ) : checkingUsername ? (
+                  <p style={{ fontSize: "11px", color: theme.muted, marginTop: "5px" }}>جاري التحقق...</p>
                 ) : (
                   <p style={{ fontSize: "11px", color: theme.muted, marginTop: "5px" }}>حروف وأرقام فقط</p>
                 )}
