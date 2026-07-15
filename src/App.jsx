@@ -6245,44 +6245,67 @@ export default function App() {
   }, []);
 
   // Pull-to-refresh for PWA/standalone mode on iOS/iPad
+  const pullState = useRef({ active: false, startY: 0, currentY: 0 });
+
+  // Reset pull indicator whenever page or tab changes
+  useEffect(() => {
+    pullState.current = { active: false, startY: 0, currentY: 0 };
+    setPullY(0);
+    setPullRefreshing(false);
+  }, [activePage]);
+
   useEffect(() => {
     const THRESHOLD = 80;
-    let startY = 0;
-    let currentY = 0;
-    let active = false;
 
     const onTouchStart = (e) => {
-      if (window.scrollY === 0) {
-        startY = e.touches[0].clientY;
-        active = true;
+      // Only activate when truly at the top of the page
+      if (window.scrollY === 0 && e.touches.length === 1) {
+        pullState.current = { active: true, startY: e.touches[0].clientY, currentY: e.touches[0].clientY };
+      } else {
+        pullState.current.active = false;
       }
     };
     const onTouchMove = (e) => {
-      if (!active) return;
-      currentY = e.touches[0].clientY;
-      const diff = Math.max(0, Math.min(currentY - startY, THRESHOLD * 1.5));
-      if (diff > 0) setPullY(diff);
+      const s = pullState.current;
+      if (!s.active) return;
+      s.currentY = e.touches[0].clientY;
+      const diff = s.currentY - s.startY;
+      // Only show indicator if clearly pulling DOWN (not sideways or up)
+      if (diff > 5) {
+        setPullY(Math.min(diff, THRESHOLD * 1.5));
+      } else {
+        // Moved up or sideways — cancel
+        s.active = false;
+        setPullY(0);
+      }
     };
     const onTouchEnd = () => {
-      if (!active) return;
-      active = false;
-      const diff = currentY - startY;
+      const s = pullState.current;
+      if (!s.active) return;
+      const diff = s.currentY - s.startY;
+      pullState.current.active = false;
       setPullY(0);
       if (diff >= THRESHOLD) {
         setPullRefreshing(true);
         refreshData().catch(() => {}).finally(() => setPullRefreshing(false));
       }
     };
+    const onTouchCancel = () => {
+      pullState.current.active = false;
+      setPullY(0);
+    };
 
     document.addEventListener("touchstart", onTouchStart, { passive: true });
     document.addEventListener("touchmove", onTouchMove, { passive: true });
     document.addEventListener("touchend", onTouchEnd);
+    document.addEventListener("touchcancel", onTouchCancel);
     return () => {
       document.removeEventListener("touchstart", onTouchStart);
       document.removeEventListener("touchmove", onTouchMove);
       document.removeEventListener("touchend", onTouchEnd);
+      document.removeEventListener("touchcancel", onTouchCancel);
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Keep the server-time offset fresh so match locking can't be tricked by
   // changing the device's date/time; re-sync on load and every 2 minutes.
