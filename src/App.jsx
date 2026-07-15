@@ -6548,7 +6548,10 @@ export default function App() {
   };
 
   const addMatch = () => {
-    addMatchDB(toLocalISODate(new Date(serverNow()))).then((row) => setMatchRows((prev) => [...prev, row]));
+    const tempId = `temp-${Date.now()}`;
+    const date = toLocalISODate(new Date(serverNow()));
+    setMatchRows((prev) => [...prev, { id: tempId, home: "", away: "", homeLogo: null, awayLogo: null, actualHome: "", actualAway: "", date, time: "", doublePoints: false, venueTeam: null, tournamentId: null }]);
+    addMatchDB(date).then((row) => setMatchRows((prev) => prev.map((m) => m.id === tempId ? row : m)));
   };
 
   const updateMatch = (id, updated) => {
