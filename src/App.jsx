@@ -6217,6 +6217,7 @@ export default function App() {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activePage, setActivePage] = useState(() => sessionStorage.getItem("activePage") || "home");
+  const navigateTo = (page) => { setActivePage(page); refreshData().catch(() => {}); };
   const [profileUser, setProfileUser] = useState(null); // { id, name, username, avatar, points, tierCounts } - when set, show UserProfilePage overlay
   const [viewMode, setViewMode] = usePersistedState("viewMode", "user"); // "admin" | "user" - only admins may switch to "admin"
   const [predictionsTabView, setPredictionsTabView] = usePersistedState("predictionsTabView", "available"); // "available" | "predicted" | "archived" - for the توقع! page's match list
@@ -6572,7 +6573,7 @@ export default function App() {
         input::placeholder { color: ${theme.muted}; opacity: 0.7; }
       `}</style>
 
-      <TopBar onMenuClick={() => setDrawerOpen(true)} onLogoClick={() => setActivePage("home")} theme={theme} />
+      <TopBar onMenuClick={() => setDrawerOpen(true)} onLogoClick={() => navigateTo("home")} theme={theme} />
       <div style={{ background: theme.surface }}>
         <VioletDivider theme={theme} />
       </div>
@@ -6581,7 +6582,7 @@ export default function App() {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         activePage={activePage}
-        onNavigate={setActivePage}
+        onNavigate={navigateTo}
         viewMode={viewMode}
         setViewMode={setViewMode}
         currentUser={currentUser}
@@ -6958,8 +6959,8 @@ export default function App() {
       {activePage === "home" && (
         <HomePage
           theme={theme}
-          onNavigate={setActivePage}
-          onGoToPredictions={() => { setPredictionsTabView("available"); setActivePage("predictions"); }}
+          onNavigate={navigateTo}
+          onGoToPredictions={() => { setPredictionsTabView("available"); navigateTo("predictions"); }}
           currentUser={currentUser}
           matches={matches}
           allPredictionRows={allPredictionRows}
