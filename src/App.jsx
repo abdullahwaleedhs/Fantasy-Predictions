@@ -3762,8 +3762,13 @@ function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme
                   dir="ltr"
                   value={username}
                   onChange={(e) => {
-                    setUsername(e.target.value);
-                    setUsernameError("");
+                    const val = e.target.value;
+                    setUsername(val);
+                    if (val && !/^[a-zA-Z0-9]*$/.test(val)) {
+                      setUsernameError("حروف إنجليزية وأرقام فقط — بدون مسافات أو رموز");
+                    } else {
+                      setUsernameError("");
+                    }
                   }}
                   placeholder="username"
                   style={{ ...inputStyle, border: `1.5px solid ${usernameError ? theme.danger : theme.inputBorder}`, textAlign: "right" }}
@@ -4302,8 +4307,13 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
               dir="ltr"
               value={username}
               onChange={(e) => {
-                setUsername(e.target.value);
-                setUsernameError("");
+                const val = e.target.value;
+                setUsername(val);
+                if (val && !/^[a-zA-Z0-9]*$/.test(val)) {
+                  setUsernameError("حروف إنجليزية وأرقام فقط — بدون مسافات أو رموز");
+                } else {
+                  setUsernameError("");
+                }
               }}
               style={{
                 width: "100%",
