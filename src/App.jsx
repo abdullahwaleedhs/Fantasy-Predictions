@@ -4852,7 +4852,7 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
               }}
             >
               <div style={{ flex: 1, textAlign: "center", padding: "5px 4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ fontSize: "11px", fontWeight: 700, color: theme.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60px", display: "inline-block" }}>{p.name}</span>
+                <span style={{ fontSize: "11px", fontWeight: 700, color: theme.text, wordBreak: "break-word" }}>{p.name}</span>
               </div>
               <div style={{ flex: 1, textAlign: "center", padding: "5px 4px" }}>
                 {pred ? (
