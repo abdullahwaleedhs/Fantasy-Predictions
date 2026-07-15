@@ -3679,6 +3679,11 @@ function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme
 
     if (!name.trim() || !username.trim() || !email.trim() || !password.trim()) return;
 
+    if (!/^[a-zA-Z0-9]+$/.test(username.trim())) {
+      setUsernameError("اسم المستخدم يقبل فقط حروف إنجليزية وأرقام بدون مسافات أو رموز");
+      return;
+    }
+
     if (password !== confirmPassword) {
       setAuthError("كلمتا السر غير متطابقتين");
       return;
@@ -4188,6 +4193,10 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
 
   const handleSave = async () => {
     const normalized = username.trim().toLowerCase();
+    if (normalized && !/^[a-zA-Z0-9]+$/.test(normalized)) {
+      setUsernameError("اسم المستخدم يقبل فقط حروف إنجليزية وأرقام بدون مسافات أو رموز");
+      return;
+    }
     setUsernameError("");
     setSaving(true);
     const result = await onUpdateProfile({ name: name.trim(), username: normalized, avatar });
