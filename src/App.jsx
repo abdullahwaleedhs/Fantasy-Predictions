@@ -6228,6 +6228,8 @@ export default function App() {
   const [savedPredictions, setSavedPredictions] = usePersistedState("savedPredictions", {}); // matchId -> true once a full prediction has been saved at least once; controls تم توقعها tab placement, only cleared when the prediction is fully cleared
   const [allPredictionRows, setAllPredictionRows] = useState([]); // every user's predictions, for the global leaderboard
   const [dataLoading, setDataLoading] = useState(true);
+  const [pullRefreshing, setPullRefreshing] = useState(false);
+  const [pullY, setPullY] = useState(0);
 
   const refreshData = () => {
     return Promise.all([fetchTournaments(), fetchClubs(), fetchMatches(), fetchAllPredictionsWithProfiles()]).then(([t, c, m, p]) => {
@@ -6240,6 +6242,46 @@ export default function App() {
 
   useEffect(() => {
     refreshData().finally(() => setDataLoading(false));
+  }, []);
+
+  // Pull-to-refresh for PWA/standalone mode on iOS/iPad
+  useEffect(() => {
+    const THRESHOLD = 80;
+    let startY = 0;
+    let currentY = 0;
+    let active = false;
+
+    const onTouchStart = (e) => {
+      if (window.scrollY === 0) {
+        startY = e.touches[0].clientY;
+        active = true;
+      }
+    };
+    const onTouchMove = (e) => {
+      if (!active) return;
+      currentY = e.touches[0].clientY;
+      const diff = Math.max(0, Math.min(currentY - startY, THRESHOLD * 1.5));
+      if (diff > 0) setPullY(diff);
+    };
+    const onTouchEnd = () => {
+      if (!active) return;
+      active = false;
+      const diff = currentY - startY;
+      setPullY(0);
+      if (diff >= THRESHOLD) {
+        setPullRefreshing(true);
+        refreshData().catch(() => {}).finally(() => setPullRefreshing(false));
+      }
+    };
+
+    document.addEventListener("touchstart", onTouchStart, { passive: true });
+    document.addEventListener("touchmove", onTouchMove, { passive: true });
+    document.addEventListener("touchend", onTouchEnd);
+    return () => {
+      document.removeEventListener("touchstart", onTouchStart);
+      document.removeEventListener("touchmove", onTouchMove);
+      document.removeEventListener("touchend", onTouchEnd);
+    };
   }, []);
 
   // Keep the server-time offset fresh so match locking can't be tricked by
@@ -6660,6 +6702,26 @@ export default function App() {
         * { box-sizing: border-box; }
         input::placeholder { color: ${theme.muted}; opacity: 0.7; }
       `}</style>
+
+      {/* Pull-to-refresh indicator */}
+      {(pullY > 0 || pullRefreshing) && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, zIndex: 999,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          height: `${pullRefreshing ? 56 : Math.min(pullY * 0.6, 56)}px`,
+          background: theme.violetSoft,
+          transition: pullRefreshing ? "none" : "height 0.1s",
+          overflow: "hidden",
+        }}>
+          <div style={{
+            width: "22px", height: "22px", borderRadius: "50%",
+            border: `3px solid ${theme.violet}`, borderTopColor: "transparent",
+            animation: pullRefreshing ? "spin 0.7s linear infinite" : "none",
+            opacity: pullRefreshing ? 1 : Math.min(pullY / 80, 1),
+          }} />
+        </div>
+      )}
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
       <TopBar onMenuClick={() => setDrawerOpen(true)} onLogoClick={() => setActivePage("home")} theme={theme} />
       <div style={{ background: theme.surface }}>
