@@ -3357,6 +3357,16 @@ function LeaderboardRow({ rank, name, username, avatar, points, isYou, theme, on
 }
 
 function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
+  // Always compute global stats so the profile shows the same numbers
+  // regardless of whether the user was tapped from the global leaderboard
+  // or from inside a private league (which may be filtered to a subset).
+  const userId = user.id || user.userId;
+  const { globalEntry, globalRank } = useMemo(() => {
+    const ranked = computeGlobalRanking(matches, allPredictionRows, null);
+    const idx = ranked.findIndex((p) => p.id === userId);
+    return { globalEntry: idx >= 0 ? ranked[idx] : null, globalRank: idx >= 0 ? idx + 1 : null };
+  }, [matches, allPredictionRows, userId]);
+
   const tierColors = [
     { key: 10, color: theme.accent, label: TIERS_META[0].label },
     { key: 5, color: theme.navyBlue, label: TIERS_META[1].label },
@@ -3367,7 +3377,8 @@ function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
     { key: "none", color: theme.violet, label: "لم يتم توقعها" },
   ];
 
-  const tierCounts = user.tierCounts || { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 };
+  const tierCounts = (globalEntry?.tierCounts) || { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 };
+  const globalPoints = globalEntry?.points ?? 0;
   const totalScored = tierColors.reduce((sum, t) => sum + (tierCounts[t.key] || 0), 0);
 
   let acc = 0;
@@ -3382,7 +3393,10 @@ function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
       return `${t.color} ${from}% ${to}%`;
     });
 
-  const initial = (user.name || "؟").charAt(0).toUpperCase();
+  const name = globalEntry?.name || user.name || user.displayName || "؟";
+  const username = globalEntry?.username || user.username || null;
+  const avatar = globalEntry?.avatar || user.avatar || null;
+  const initial = name.charAt(0).toUpperCase();
 
   return (
     <div style={{ padding: "20px 16px 60px" }}>
@@ -3396,19 +3410,27 @@ function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
 
         {/* Avatar + name */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", marginBottom: "24px" }}>
-          {user.avatar ? (
-            <img src={user.avatar} alt={user.name} style={{ width: "80px", height: "80px", borderRadius: "50%", objectFit: "cover", border: `2px solid ${theme.border}` }} />
+          {avatar ? (
+            <img src={avatar} alt={name} style={{ width: "80px", height: "80px", borderRadius: "50%", objectFit: "cover", border: `2px solid ${theme.border}` }} />
           ) : (
             <div style={{ width: "80px", height: "80px", borderRadius: "50%", background: theme.violetSoft, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "30px", fontWeight: 800, color: theme.violet }}>
               {initial}
             </div>
           )}
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "18px", fontWeight: 800, color: theme.text }}>{user.name}</div>
-            {user.username && <div dir="ltr" style={{ fontFamily: "monospace", fontSize: "13px", color: theme.muted }}>@{user.username}</div>}
+            <div style={{ fontSize: "18px", fontWeight: 800, color: theme.text }}>{name}</div>
+            {username && <div dir="ltr" style={{ fontFamily: "monospace", fontSize: "13px", color: theme.muted }}>@{username}</div>}
           </div>
-          <div style={{ background: theme.violetSoft, color: theme.violet, borderRadius: "10px", padding: "6px 18px", fontSize: "14px", fontWeight: 800 }}>
-            {user.points} نقطة
+          <div style={{ display: "flex", gap: "10px" }}>
+            <div style={{ background: theme.violetSoft, color: theme.violet, borderRadius: "10px", padding: "6px 18px", fontSize: "14px", fontWeight: 800, textAlign: "center" }}>
+              {globalPoints} نقطة
+            </div>
+            {globalRank && (
+              <div style={{ background: theme.violetSoft, color: theme.violet, borderRadius: "10px", padding: "6px 14px", fontSize: "12px", fontWeight: 700, textAlign: "center" }}>
+                الترتيب العام
+                <div style={{ fontSize: "16px", fontWeight: 900 }}>{globalRank}</div>
+              </div>
+            )}
           </div>
         </div>
 
