@@ -2742,6 +2742,92 @@ function TournamentFilterPicker({ value, onChange, tournaments, tournamentLogos,
   );
 }
 
+const AR_MONTHS = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+
+function monthLabel(ym) {
+  if (!ym) return "الكل";
+  const [y, m] = ym.split("-");
+  return `${AR_MONTHS[parseInt(m, 10) - 1]} ${y}`;
+}
+
+function getFinishedMonths(matches) {
+  const seen = new Set();
+  matches.forEach((m) => {
+    if (m.date && m.actualHome !== "" && m.actualHome != null && m.actualAway !== "" && m.actualAway != null) {
+      seen.add(m.date.slice(0, 7));
+    }
+  });
+  return [...seen].sort();
+}
+
+function filterMatchesByMonth(matches, month) {
+  if (!month || month === "الكل") return matches;
+  return matches.filter((m) => m.date && m.date.slice(0, 7) === month);
+}
+
+function MonthFilterPicker({ value, onChange, matches, theme }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const months = getFinishedMonths(matches);
+  const options = ["الكل", ...months];
+
+  return (
+    <div ref={ref} style={{ position: "relative", marginBottom: "12px" }}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        style={{
+          display: "flex", alignItems: "center", gap: "6px",
+          background: theme.surface, color: theme.text,
+          border: `1.5px solid ${value !== "الكل" ? theme.violet : theme.border}`,
+          borderRadius: open ? "10px 10px 0 0" : "10px",
+          padding: "10px 14px", fontFamily: "Cairo, sans-serif",
+          fontWeight: 700, fontSize: "10px", cursor: "pointer",
+          width: "100%", justifyContent: "space-between",
+        }}
+      >
+        <span>{value === "الكل" ? "الترتيب العام (كل الشهور)" : monthLabel(value)}</span>
+        <ChevronDown size={11} color={theme.muted} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
+      </button>
+
+      {open && (
+        <div style={{
+          position: "absolute", top: "100%", right: 0, left: 0, zIndex: 20,
+          background: theme.surface, border: `1.5px solid ${theme.violet}`,
+          borderTop: "none", borderRadius: "0 0 10px 10px",
+          boxShadow: "0 8px 20px rgba(0,0,0,0.18)", maxHeight: "260px", overflowY: "auto",
+        }}>
+          {options.map((opt) => (
+            <div
+              key={opt}
+              onClick={() => { onChange(opt); setOpen(false); }}
+              style={{
+                padding: "10px 14px", fontSize: "11px", fontFamily: "Cairo, sans-serif",
+                color: opt === value ? theme.violet : theme.text,
+                fontWeight: opt === value ? 700 : 400,
+                background: opt === value ? theme.violetSoft : "transparent",
+                cursor: "pointer",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = theme.bg)}
+              onMouseLeave={(e) => (e.currentTarget.style.background = opt === value ? theme.violetSoft : "transparent")}
+            >
+              {opt === "الكل" ? "الترتيب العام (كل الشهور)" : monthLabel(opt)}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, onAddClub, onUpdateClub, onRemoveClub, tournamentLogos, onSetTournamentLogo, onRemoveTournament, theme }) {
   const [selectedTournament, setSelectedTournament] = useState("");
   const [newClubName, setNewClubName] = useState("");
@@ -4355,12 +4441,11 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
 
 function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tournamentLogos, currentUser, onViewProfile, theme }) {
   const [tournamentFilter, setTournamentFilter] = usePersistedState("globalLeaderboard.tournamentFilter", "الكل");
+  const [monthFilter, setMonthFilter] = usePersistedState("globalLeaderboard.monthFilter", "الكل");
 
-  const filteredMatches = tournamentFilter === "الكل" ? matches : matches.filter((m) => (m.tournament || "بدون بطولة") === tournamentFilter);
+  const byTournament = tournamentFilter === "الكل" ? matches : matches.filter((m) => (m.tournament || "بدون بطولة") === tournamentFilter);
+  const filteredMatches = filterMatchesByMonth(byTournament, monthFilter === "الكل" ? null : monthFilter);
 
-  // Real leaderboard: every registered user is scored from their own actual
-  // predictions on the matches in this filter, using the same scoring rules
-  // as the stats page (calcPoints + the admin x2 / personal x3 multiplier).
   const ranked = computeGlobalRanking(filteredMatches, allPredictionRows, currentUser);
 
   return (
@@ -4372,6 +4457,8 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
         <p style={{ fontSize: "12px", color: theme.muted, marginBottom: "16px" }}>
           ترتيب جميع المشاركين حسب إجمالي النقاط
         </p>
+
+        <MonthFilterPicker value={monthFilter} onChange={setMonthFilter} matches={matches} theme={theme} />
 
         <TournamentFilterPicker
           value={tournamentFilter}
@@ -4405,21 +4492,18 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
   const [codeCopied, setCodeCopied] = useState(false);
   const [activeTab, setActiveTab] = usePersistedState("leagueDetail.activeTab", "ranking"); // "ranking" | "predictions"
   const [tournamentFilter, setTournamentFilter] = usePersistedState("leagueDetail.tournamentFilter", "الكل");
+  const [monthFilter, setMonthFilter] = usePersistedState("leagueDetail.monthFilter", "الكل");
 
   const youPlayer = league.players.find((p) => p.isYou);
 
-  // Auto-join: a logged-in user who opens a league they haven't joined yet
-  // is added automatically using their account name/username - no manual
-  // "enter your name" step needed anymore.
   useEffect(() => {
     if (currentUser && !youPlayer) {
       onJoin(league.id, currentUser.name, currentUser.username);
     }
   }, [currentUser, youPlayer, league.id, onJoin]);
 
-  // Tournament filter applies to both tabs (الترتيب والتوقعات) - defaults
-  // to "الكل" (no filter), scoping every downstream computation below.
-  const filteredMatches = tournamentFilter === "الكل" ? matches : matches.filter((m) => (m.tournament || "بدون بطولة") === tournamentFilter);
+  const byTournament = tournamentFilter === "الكل" ? matches : matches.filter((m) => (m.tournament || "بدون بطولة") === tournamentFilter);
+  const filteredMatches = filterMatchesByMonth(byTournament, monthFilter === "الكل" ? null : monthFilter);
 
   // Every league member is scored from their own real predictions and the
   // real match results, same scoring rules as the global leaderboard - no
@@ -4562,6 +4646,8 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
             </p>
           </div>
         )}
+
+        <MonthFilterPicker value={monthFilter} onChange={setMonthFilter} matches={matches} theme={theme} />
 
         {/* Tournament filter - applies to both الترتيب and التوقعات tabs */}
         <TournamentFilterPicker
