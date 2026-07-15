@@ -4,7 +4,7 @@ export async function isUsernameTaken(username, excludeUserId) {
   let query = supabase.from("profiles").select("id").eq("username", username);
   if (excludeUserId) query = query.neq("id", excludeUserId);
   const { data, error } = await query.maybeSingle();
-  if (error && error.code !== "PGRST116") throw error;
+  if (error && error.code !== "PGRST116") return false; // can't verify; let DB unique constraint catch it
   return !!data;
 }
 

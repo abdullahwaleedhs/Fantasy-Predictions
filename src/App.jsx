@@ -6445,6 +6445,10 @@ export default function App() {
       setActivePage("home");
       return {};
     } catch (err) {
+      // Postgres unique-constraint violation on the username column
+      if (err.message && (err.message.includes("profiles_username_key") || err.message.includes("duplicate key") || err.message.includes("unique"))) {
+        return { usernameError: "اسم المستخدم هذا مستخدم من قبل، جرّب واحد ثاني" };
+      }
       return { error: err.message || "حدث خطأ، حاول مرة أخرى" };
     }
   };
