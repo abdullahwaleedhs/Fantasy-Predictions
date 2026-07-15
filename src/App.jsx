@@ -2418,34 +2418,34 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
             {dirty ? "حفظ التعديلات" : "تم الحفظ"}
           </button>
         </div>
-      </div>
-      {allPredictionRows && (() => {
-        const matchPreds = allPredictionRows
-          .filter((r) => r.match_id === match.id && r.pred_home !== null && r.pred_away !== null)
-          .sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at));
-        if (matchPreds.length === 0) return null;
-        const fmt = (iso) => {
-          if (!iso) return "—";
-          const d = new Date(iso);
-          return d.toLocaleDateString("ar-SA", { day: "numeric", month: "short" }) + " " + d.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" });
-        };
-        return (
-          <div style={{ marginTop: "10px", background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "12px", overflow: "hidden" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 60px 1fr", padding: "6px 12px", borderBottom: `1px solid ${theme.border}`, background: theme.bg }}>
-              <span style={{ fontSize: "9px", fontWeight: 700, color: theme.muted }}>المشارك</span>
-              <span style={{ fontSize: "9px", fontWeight: 700, color: theme.muted, textAlign: "center" }}>التوقع</span>
-              <span style={{ fontSize: "9px", fontWeight: 700, color: theme.muted, textAlign: "end" }}>وقت الإدخال</span>
-            </div>
-            {matchPreds.map((r) => (
-              <div key={r.user_id} style={{ display: "grid", gridTemplateColumns: "1fr 60px 1fr", alignItems: "center", padding: "7px 12px", borderBottom: `1px solid ${theme.border}` }}>
-                <span style={{ fontSize: "11px", fontWeight: 700, color: theme.text }}>{r.profiles?.name || "—"}</span>
-                <span style={{ fontSize: "11px", fontWeight: 800, color: theme.violet, textAlign: "center" }}>{r.pred_home}-{r.pred_away}</span>
-                <span style={{ fontSize: "9px", color: theme.muted, textAlign: "end" }}>{fmt(r.updated_at)}</span>
+        {allPredictionRows && (() => {
+          const matchPreds = allPredictionRows
+            .filter((r) => r.match_id === match.id && r.pred_home !== null && r.pred_away !== null)
+            .sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at));
+          if (matchPreds.length === 0) return null;
+          const fmt = (iso) => {
+            if (!iso) return "—";
+            const d = new Date(iso);
+            return d.toLocaleDateString("ar-SA", { day: "numeric", month: "short" }) + " " + d.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" });
+          };
+          return (
+            <div style={{ borderTop: `1px solid ${theme.border}` }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 60px 1fr", padding: "6px 12px", borderBottom: `1px solid ${theme.border}`, background: theme.bg }}>
+                <span style={{ fontSize: "9px", fontWeight: 700, color: theme.muted }}>المشارك</span>
+                <span style={{ fontSize: "9px", fontWeight: 700, color: theme.muted, textAlign: "center" }}>التوقع</span>
+                <span style={{ fontSize: "9px", fontWeight: 700, color: theme.muted, textAlign: "end" }}>وقت الإدخال</span>
               </div>
-            ))}
-          </div>
-        );
-      })()}
+              {matchPreds.map((r) => (
+                <div key={r.user_id} style={{ display: "grid", gridTemplateColumns: "1fr 60px 1fr", alignItems: "center", padding: "7px 12px", borderBottom: `1px solid ${theme.border}` }}>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: theme.text }}>{r.profiles?.name || "—"}</span>
+                  <span style={{ fontSize: "11px", fontWeight: 800, color: theme.violet, textAlign: "center" }}>{r.pred_home}-{r.pred_away}</span>
+                  <span style={{ fontSize: "9px", color: theme.muted, textAlign: "end" }}>{fmt(r.updated_at)}</span>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+      </div>
     </div>
   );
 }
