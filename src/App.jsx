@@ -3430,7 +3430,7 @@ function LeaderboardRow({ rank, name, username, avatar, points, isYou, theme, on
           {name} {isYou && <span style={{ fontSize: "10px", color: theme.primary }}>(أنت)</span>}
         </span>
         {username && (
-          <span dir="ltr" style={{ fontFamily: "Cairo, sans-serif", fontSize: "10px", color: theme.muted, textAlign: "right", letterSpacing: "0.3px" }}>
+          <span dir="ltr" style={{ fontFamily: "system-ui, -apple-system, sans-serif", fontSize: "10px", color: theme.muted, textAlign: "right", letterSpacing: "0.5px" }}>
             @{username}
           </span>
         )}
@@ -3505,7 +3505,7 @@ function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
           )}
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: "18px", fontWeight: 800, color: theme.text }}>{name}</div>
-            {username && <div dir="ltr" style={{ fontFamily: "Cairo, sans-serif", fontSize: "13px", color: theme.muted, letterSpacing: "0.3px" }}>@{username}</div>}
+            {username && <div dir="ltr" style={{ fontFamily: "system-ui, -apple-system, sans-serif", fontSize: "13px", color: theme.muted, letterSpacing: "0.5px" }}>@{username}</div>}
           </div>
           <div style={{ display: "flex", gap: "10px" }}>
             <div style={{ background: theme.violetSoft, color: theme.violet, borderRadius: "10px", padding: "6px 18px", textAlign: "center" }}>
