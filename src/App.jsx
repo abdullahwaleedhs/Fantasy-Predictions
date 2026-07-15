@@ -6156,6 +6156,16 @@ export default function App() {
     refreshData().finally(() => setDataLoading(false));
   }, []);
 
+  // Refresh data silently whenever the user navigates to a different main page,
+  // so each section always shows up-to-date info without a full page reload.
+  const prevPageRef = useRef(null);
+  useEffect(() => {
+    if (prevPageRef.current !== null && prevPageRef.current !== activePage) {
+      refreshData();
+    }
+    prevPageRef.current = activePage;
+  }, [activePage]);
+
   // Keep the server-time offset fresh so match locking can't be tricked by
   // changing the device's date/time; re-sync on load and every 2 minutes.
   useEffect(() => {
