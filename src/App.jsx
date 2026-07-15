@@ -3765,7 +3765,7 @@ function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme
                     const val = e.target.value;
                     setUsername(val);
                     if (val && !/^[a-zA-Z0-9]*$/.test(val)) {
-                      setUsernameError("حروف إنجليزية وأرقام فقط — بدون مسافات أو رموز");
+                      setUsernameError("حروف وأرقام فقط");
                     } else {
                       setUsernameError("");
                     }
@@ -3776,7 +3776,7 @@ function AuthPage({ onRegister, onLoginExisting, onForgotPassword, onBack, theme
                 {usernameError ? (
                   <p style={{ fontSize: "11px", color: theme.danger, marginTop: "5px" }}>{usernameError}</p>
                 ) : (
-                  <p style={{ fontSize: "11px", color: theme.muted, marginTop: "5px" }}>يجب أن يكون اسم المستخدم فريد، يظهر بلوحة الترتيب</p>
+                  <p style={{ fontSize: "11px", color: theme.muted, marginTop: "5px" }}>حروف وأرقام فقط</p>
                 )}
               </div>
             </>
@@ -4310,7 +4310,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
                 const val = e.target.value;
                 setUsername(val);
                 if (val && !/^[a-zA-Z0-9]*$/.test(val)) {
-                  setUsernameError("حروف إنجليزية وأرقام فقط — بدون مسافات أو رموز");
+                  setUsernameError("حروف وأرقام فقط");
                 } else {
                   setUsernameError("");
                 }
