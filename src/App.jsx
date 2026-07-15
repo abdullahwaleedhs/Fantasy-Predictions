@@ -6156,15 +6156,6 @@ export default function App() {
     refreshData().finally(() => setDataLoading(false));
   }, []);
 
-  // Silently refresh data whenever the user navigates to a different main page.
-  const prevPageRef = useRef(null);
-  useEffect(() => {
-    if (prevPageRef.current !== null && prevPageRef.current !== activePage) {
-      refreshData().catch(() => {});
-    }
-    prevPageRef.current = activePage;
-  }, [activePage]); // eslint-disable-line react-hooks/exhaustive-deps
-
   // Keep the server-time offset fresh so match locking can't be tricked by
   // changing the device's date/time; re-sync on load and every 2 minutes.
   useEffect(() => {
