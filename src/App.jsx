@@ -3422,13 +3422,14 @@ function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
             {username && <div dir="ltr" style={{ fontFamily: "monospace", fontSize: "13px", color: theme.muted }}>@{username}</div>}
           </div>
           <div style={{ display: "flex", gap: "10px" }}>
-            <div style={{ background: theme.violetSoft, color: theme.violet, borderRadius: "10px", padding: "6px 18px", fontSize: "14px", fontWeight: 800, textAlign: "center" }}>
-              {globalPoints} نقطة
+            <div style={{ background: theme.violetSoft, color: theme.violet, borderRadius: "10px", padding: "6px 18px", textAlign: "center" }}>
+              <div style={{ fontSize: "11px", fontWeight: 600, marginBottom: "2px" }}>إجمالي النقاط</div>
+              <div style={{ fontSize: "22px", fontWeight: 900 }}>{globalPoints}</div>
             </div>
             {globalRank && (
-              <div style={{ background: theme.violetSoft, color: theme.violet, borderRadius: "10px", padding: "6px 14px", fontSize: "12px", fontWeight: 700, textAlign: "center" }}>
-                الترتيب العام
-                <div style={{ fontSize: "16px", fontWeight: 900 }}>{globalRank}</div>
+              <div style={{ background: theme.violetSoft, color: theme.violet, borderRadius: "10px", padding: "6px 14px", textAlign: "center" }}>
+                <div style={{ fontSize: "11px", fontWeight: 600, marginBottom: "2px" }}>الترتيب العام</div>
+                <div style={{ fontSize: "22px", fontWeight: 900 }}>{globalRank}</div>
               </div>
             )}
           </div>
