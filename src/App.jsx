@@ -7121,7 +7121,7 @@ export default function App() {
                         marginTop: "4px",
                       }}
                     >
-                      عرض المزيد ({sortedTabMatches.length - visibleCount} متبقية)
+                      عرض المزيد ({sortedTabMatches.length - archivedVisibleCount} متبقية)
                     </button>
                   )}
                 </>
