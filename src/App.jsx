@@ -6522,11 +6522,11 @@ export default function App() {
   const handleUpdatePassword = async (newPassword) => {
     try {
       await updatePassword(newPassword);
-      // brief pause so the success screen shows before navigating away
+      // brief pause so the success screen shows, then send to login
       setTimeout(async () => {
-        const user = await getSessionUser();
-        setCurrentUser(user);
-        setActivePage("home");
+        await logoutUser();
+        setCurrentUser(null);
+        setActivePage("auth");
       }, 2000);
       return { success: true };
     } catch (err) {
