@@ -109,9 +109,9 @@ export async function getSessionUser() {
     const profile = await fetchProfile(sessionUser.id);
     return { id: sessionUser.id, email: sessionUser.email, ...profile };
   } catch (e) {
-    // A transient network/profile error here shouldn't be treated as
-    // "logged out" by the caller throwing - surface no user for this
-    // load instead of crashing the auth-restore flow.
-    return null;
+    // Profile fetch failed (likely a transient network error on PWA startup).
+    // Return a minimal user so the app treats them as logged in — the caller
+    // can detect the missing profile fields and retry later.
+    return { id: sessionUser.id, email: sessionUser.email, _profilePending: true };
   }
 }

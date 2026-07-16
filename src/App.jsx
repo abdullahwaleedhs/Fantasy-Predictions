@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Plus, Trash2, ChevronDown, ChevronRight, Search, Palette, Lock, Unlock, Calendar, Clock, Menu, X, Home, Target, Trophy, BarChart3, Zap, Shield, Upload, CircleDot, Users, Copy, Check, Crown, ArrowDown, Award, TrendingUp, User, LogIn, LogOut, Mail, Camera, Eye, EyeOff, Pencil, Globe } from "lucide-react";
-import { isUsernameTaken, registerUser, loginUser, logoutUser, deleteAccount, updateProfile, getSessionUser, setBoostsRemaining as setBoostsRemainingDB, requestPasswordReset, updatePassword } from "./auth";
+import { isUsernameTaken, registerUser, loginUser, logoutUser, deleteAccount, updateProfile, fetchProfile, getSessionUser, setBoostsRemaining as setBoostsRemainingDB, requestPasswordReset, updatePassword } from "./auth";
 import { supabase } from "./supabaseClient";
 import {
   fetchTournaments,
@@ -6533,6 +6533,20 @@ export default function App() {
       .then((user) => setCurrentUser(user))
       .finally(() => setAuthLoading(false));
   }, []);
+
+  // If the profile failed to load on startup (e.g. no network when PWA opened),
+  // retry once the device is back online.
+  useEffect(() => {
+    if (!currentUser?._profilePending) return;
+    const retry = () => {
+      fetchProfile(currentUser.id)
+        .then((profile) => setCurrentUser((u) => u?._profilePending ? { ...u, ...profile, _profilePending: false } : u))
+        .catch(() => {});
+    };
+    retry();
+    window.addEventListener("online", retry);
+    return () => window.removeEventListener("online", retry);
+  }, [currentUser?._profilePending, currentUser?.id]);
 
   // Clicking the password-reset link from the email lands back here and
   // Supabase fires this event instead of a normal sign-in - send the user
