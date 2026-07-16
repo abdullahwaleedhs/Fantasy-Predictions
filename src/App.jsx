@@ -3590,6 +3590,7 @@ function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
         })()}
 
         {/* Stats donut */}
+        <p style={{ fontSize: "12px", fontWeight: 700, color: theme.muted, marginBottom: "8px" }}>الإحصائيات</p>
         <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "14px", padding: "14px" }}>
           {totalScored === 0 ? (
             <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "16px 0" }}>لا توجد مباريات منتهية بعد</p>
@@ -3609,7 +3610,7 @@ function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
                 }}
               >
                 <div style={{ width: "86px", height: "86px", borderRadius: "50%", background: theme.surface, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ fontSize: "18px", fontWeight: 900, color: theme.text, lineHeight: 1 }}>{totalScored - (tierCounts["none"] || 0)}</div>
+                  <div style={{ fontSize: "18px", fontWeight: 900, color: theme.text, lineHeight: 1 }}>{allPredictionRows.filter((r) => r.user_id === userId && r.pred_home !== null && r.pred_away !== null).length}</div>
                   <div style={{ fontSize: "8px", color: theme.muted, marginTop: "3px" }}>توقعات</div>
                 </div>
                 {tierColors
@@ -5554,7 +5555,7 @@ function HomePage({ theme, onNavigate, onGoToPredictions, currentUser, matches, 
                 }}
               >
                 <div style={{ width: "86px", height: "86px", borderRadius: "50%", background: theme.surface, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ fontSize: "18px", fontWeight: 900, color: theme.text, lineHeight: 1 }}>{totalScored - (tierCounts["none"] || 0)}</div>
+                  <div style={{ fontSize: "18px", fontWeight: 900, color: theme.text, lineHeight: 1 }}>{allPredictionRows.filter((r) => r.user_id === currentUser?.id && r.pred_home !== null && r.pred_away !== null).length}</div>
                   <div style={{ fontSize: "8px", color: theme.muted, marginTop: "3px" }}>توقعات</div>
                 </div>
                 {tierColors
