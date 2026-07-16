@@ -69,7 +69,7 @@ export async function requestPasswordReset(identifier) {
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin,
+    redirectTo: "https://www.fantasy-predictions.com",
   });
   if (error) throw error;
 }
