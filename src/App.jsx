@@ -3611,7 +3611,7 @@ function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
               >
                 <div style={{ width: "86px", height: "86px", borderRadius: "50%", background: theme.surface, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                   <div style={{ fontSize: "18px", fontWeight: 900, color: theme.text, lineHeight: 1 }}>{allPredictionRows.filter((r) => r.user_id === userId && r.pred_home !== null && r.pred_away !== null).length}</div>
-                  <div style={{ fontSize: "8px", color: theme.muted, marginTop: "3px" }}>توقعات</div>
+                  <div style={{ fontSize: "8px", color: theme.muted, marginTop: "3px" }}>عدد التوقعات</div>
                 </div>
                 {tierColors
                   .filter((t) => tierCounts[t.key] > 0)
@@ -5556,7 +5556,7 @@ function HomePage({ theme, onNavigate, onGoToPredictions, currentUser, matches, 
               >
                 <div style={{ width: "86px", height: "86px", borderRadius: "50%", background: theme.surface, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                   <div style={{ fontSize: "18px", fontWeight: 900, color: theme.text, lineHeight: 1 }}>{allPredictionRows.filter((r) => r.user_id === currentUser?.id && r.pred_home !== null && r.pred_away !== null).length}</div>
-                  <div style={{ fontSize: "8px", color: theme.muted, marginTop: "3px" }}>توقعات</div>
+                  <div style={{ fontSize: "8px", color: theme.muted, marginTop: "3px" }}>عدد التوقعات</div>
                 </div>
                 {tierColors
                   .filter((t) => tierCounts[t.key] > 0)
