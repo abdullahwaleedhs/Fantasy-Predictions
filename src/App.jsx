@@ -2665,7 +2665,7 @@ function TournamentFilterPicker({ value, onChange, tournaments, tournamentLogos,
         }}
       >
         <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          {value !== "الكل" && <TournamentIcon name={value} logo={tournamentLogos?.[value]} theme={theme} color={theme.muted} />}
+          {value === "الكل" ? <Globe size={11} color={theme.muted} /> : <TournamentIcon name={value} logo={tournamentLogos?.[value]} theme={theme} color={theme.muted} />}
           {value}
         </span>
         <ChevronDown size={11} color={theme.muted} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
@@ -2729,7 +2729,7 @@ function TournamentFilterPicker({ value, onChange, tournaments, tournamentLogos,
               onMouseEnter={(e) => (e.currentTarget.style.background = theme.bg)}
               onMouseLeave={(e) => (e.currentTarget.style.background = t === value ? theme.violetSoft : "transparent")}
             >
-              {t !== "الكل" && <TournamentIcon name={t} logo={tournamentLogos?.[t]} theme={theme} color={t === value ? theme.violet : theme.muted} />}
+              {t === "الكل" ? <Globe size={11} color={t === value ? theme.violet : theme.muted} /> : <TournamentIcon name={t} logo={tournamentLogos?.[t]} theme={theme} color={t === value ? theme.violet : theme.muted} />}
               {t}
             </div>
           ))}
@@ -4506,16 +4506,8 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
           ترتيب جميع المشاركين حسب إجمالي النقاط
         </p>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px", marginTop: "4px" }}>
-          <Globe size={13} color={theme.muted} />
-          <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>الكل</span>
-        </div>
         <MonthFilterPicker value={monthFilter} onChange={setMonthFilter} matches={matches} theme={theme} />
 
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px", marginTop: "10px" }}>
-          <Globe size={13} color={theme.muted} />
-          <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>الكل</span>
-        </div>
         <TournamentFilterPicker
           value={tournamentFilter}
           onChange={setTournamentFilter}
@@ -4704,16 +4696,8 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
           </div>
         )}
 
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px", marginTop: "4px" }}>
-          <Globe size={13} color={theme.muted} />
-          <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>الكل</span>
-        </div>
         <MonthFilterPicker value={monthFilter} onChange={setMonthFilter} matches={matches} theme={theme} />
 
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px", marginTop: "10px" }}>
-          <Globe size={13} color={theme.muted} />
-          <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>الكل</span>
-        </div>
         {/* Tournament filter - applies to both الترتيب and التوقعات tabs */}
         <TournamentFilterPicker
           value={tournamentFilter}
