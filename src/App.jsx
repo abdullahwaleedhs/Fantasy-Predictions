@@ -25,6 +25,8 @@ import {
   fetchAllProfiles,
   fetchAllPredictionsWithProfiles,
   fetchServerTimeOffset,
+  bustTournamentsCache,
+  bustClubsCache,
 } from "./data";
 
 // Tracks the server's clock relative to a *monotonic* timer (performance.now),
@@ -6642,7 +6644,7 @@ export default function App() {
   const addTournament = (name) => {
     if (tournaments.includes(name)) return;
     addTournamentDB(name)
-      .then((row) => setTournamentRows((prev) => [...prev, row]))
+      .then((row) => { bustTournamentsCache(); setTournamentRows((prev) => [...prev, row]); })
       .catch((err) => alert("تعذّرت إضافة البطولة: " + (err?.message || "خطأ غير متوقع")));
   };
 
@@ -6650,6 +6652,7 @@ export default function App() {
     const id = tournamentIdByName[tournamentName];
     if (!id) return;
     setTournamentLogoDB(id, logo);
+    bustTournamentsCache();
     setTournamentRows((prev) => prev.map((t) => (t.id === id ? { ...t, logo } : t)));
   };
 
@@ -6657,6 +6660,7 @@ export default function App() {
     const id = tournamentIdByName[tournamentName];
     if (!id) return;
     removeTournamentDB(id).then(() => {
+      bustTournamentsCache();
       setTournamentRows((prev) => prev.filter((t) => t.id !== id));
       setClubRows((prev) => prev.filter((c) => c.tournament_id !== id));
       setMatchRows((prev) => prev.map((m) => (m.tournament_id === id ? { ...m, tournament_id: null } : m)));
@@ -6666,16 +6670,18 @@ export default function App() {
   const addClub = (tournamentName, club) => {
     const tournamentId = tournamentIdByName[tournamentName];
     if (!tournamentId) return;
-    addClubDB(tournamentId, club).then((row) => setClubRows((prev) => [...prev, row]));
+    addClubDB(tournamentId, club).then((row) => { bustClubsCache(); setClubRows((prev) => [...prev, row]); });
   };
 
   const updateClub = (tournamentName, clubId, updated) => {
     updateClubDB(clubId, updated);
+    bustClubsCache();
     setClubRows((prev) => prev.map((c) => (c.id === clubId ? { ...c, ...updated } : c)));
   };
 
   const removeClub = (tournamentName, clubId) => {
     removeClubDB(clubId);
+    bustClubsCache();
     setClubRows((prev) => prev.filter((c) => c.id !== clubId));
   };
 

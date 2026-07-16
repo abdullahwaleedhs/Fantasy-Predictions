@@ -39,11 +39,15 @@ export async function fetchAllProfiles() {
 
 // ============ TOURNAMENTS ============
 
-export async function fetchTournaments() {
+let _tournamentsCache = null;
+export async function fetchTournaments({ bust } = {}) {
+  if (!bust && _tournamentsCache) return _tournamentsCache;
   const { data, error } = await supabase.from("tournaments").select("id, name, logo").order("created_at");
   if (error) throw error;
+  _tournamentsCache = data;
   return data;
 }
+export function bustTournamentsCache() { _tournamentsCache = null; }
 
 export async function addTournamentDB(name) {
   const { data, error } = await supabase.from("tournaments").insert({ name }).select().single();
@@ -63,11 +67,15 @@ export async function removeTournamentDB(tournamentId) {
 
 // ============ CLUBS ============
 
-export async function fetchClubs() {
+let _clubsCache = null;
+export async function fetchClubs({ bust } = {}) {
+  if (!bust && _clubsCache) return _clubsCache;
   const { data, error } = await supabase.from("clubs").select("id, tournament_id, name, logo").order("created_at");
   if (error) throw error;
+  _clubsCache = data;
   return data;
 }
+export function bustClubsCache() { _clubsCache = null; }
 
 export async function addClubDB(tournamentId, { name, logo }) {
   const { data, error } = await supabase
