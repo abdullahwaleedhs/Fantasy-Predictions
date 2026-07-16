@@ -4506,8 +4506,16 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
           ترتيب جميع المشاركين حسب إجمالي النقاط
         </p>
 
+        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px", marginTop: "4px" }}>
+          <Calendar size={13} color={theme.muted} />
+          <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>الفترة</span>
+        </div>
         <MonthFilterPicker value={monthFilter} onChange={setMonthFilter} matches={matches} theme={theme} />
 
+        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px", marginTop: "10px" }}>
+          <Trophy size={13} color={theme.muted} />
+          <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>البطولات</span>
+        </div>
         <TournamentFilterPicker
           value={tournamentFilter}
           onChange={setTournamentFilter}
@@ -4696,8 +4704,16 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
           </div>
         )}
 
+        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px", marginTop: "4px" }}>
+          <Calendar size={13} color={theme.muted} />
+          <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>الفترة</span>
+        </div>
         <MonthFilterPicker value={monthFilter} onChange={setMonthFilter} matches={matches} theme={theme} />
 
+        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px", marginTop: "10px" }}>
+          <Trophy size={13} color={theme.muted} />
+          <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>البطولات</span>
+        </div>
         {/* Tournament filter - applies to both الترتيب and التوقعات tabs */}
         <TournamentFilterPicker
           value={tournamentFilter}
