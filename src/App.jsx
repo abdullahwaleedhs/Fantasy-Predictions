@@ -6378,7 +6378,12 @@ export default function App() {
   );
 
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [activePage, setActivePage] = useState(() => sessionStorage.getItem("activePage") || "home");
+  const [activePage, setActivePage] = useState(() => {
+    // If the URL contains a Supabase password-recovery token, go straight to
+    // the reset form before sessionStorage can push us elsewhere.
+    if (window.location.hash.includes("type=recovery")) return "resetPassword";
+    return sessionStorage.getItem("activePage") || "home";
+  });
   const [profileUser, setProfileUser] = useState(null); // { id, name, username, avatar, points, tierCounts } - when set, show UserProfilePage overlay
   const [viewMode, setViewMode] = usePersistedState("viewMode", "user"); // "admin" | "user" - only admins may switch to "admin"
   const [predictionsTabView, setPredictionsTabView] = usePersistedState("predictionsTabView", "available"); // "available" | "predicted" | "archived" - for the توقع! page's match list
