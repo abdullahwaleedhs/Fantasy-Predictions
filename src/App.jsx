@@ -3574,9 +3574,9 @@ function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
 
                   return (
                     <div key={m.id} style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "10px", padding: "8px 10px", display: "flex", alignItems: "center", gap: "6px" }}>
-                      <span style={{ flex: 1, fontSize: "11px", fontWeight: 700, color: theme.text, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.home}</span>
+                      <span style={{ flex: 1, fontSize: "11px", fontWeight: 700, color: theme.text, textAlign: "left", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>{m.home}</span>
                       {predPill}
-                      <span style={{ flex: 1, fontSize: "11px", fontWeight: 700, color: theme.text, textAlign: "left", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.away}</span>
+                      <span style={{ flex: 1, fontSize: "11px", fontWeight: 700, color: theme.text, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>{m.away}</span>
                       <div style={{ minWidth: "34px", textAlign: "center", background: boosted ? `${GOLD}18` : theme.bg, border: `1.5px solid ${ptColor}`, borderRadius: "7px", padding: "3px 5px", flexShrink: 0 }}>
                         <div style={{ fontSize: "13px", fontWeight: 900, color: ptColor, lineHeight: 1 }}>{pts ?? (hasResult ? "—" : "⏳")}</div>
                         {hasResult && <div style={{ fontSize: "7px", color: theme.muted, marginTop: "1px" }}>نقطة</div>}
