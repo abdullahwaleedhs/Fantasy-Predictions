@@ -2797,7 +2797,10 @@ function MonthFilterPicker({ value, onChange, matches, theme }) {
           width: "100%", justifyContent: "space-between",
         }}
       >
-        <span>{value === "الكل" ? "الترتيب العام (كل الشهور)" : monthLabel(value)}</span>
+        <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          {value === "الكل" && <Globe size={11} color={theme.muted} />}
+          {value === "الكل" ? "الكل" : monthLabel(value)}
+        </span>
         <ChevronDown size={11} color={theme.muted} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
       </button>
 
@@ -2822,7 +2825,10 @@ function MonthFilterPicker({ value, onChange, matches, theme }) {
               onMouseEnter={(e) => (e.currentTarget.style.background = theme.bg)}
               onMouseLeave={(e) => (e.currentTarget.style.background = opt === value ? theme.violetSoft : "transparent")}
             >
-              {opt === "الكل" ? "الترتيب العام (كل الشهور)" : monthLabel(opt)}
+              <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                {opt === "الكل" && <Globe size={11} color={opt === value ? theme.violet : theme.muted} />}
+                {opt === "الكل" ? "الكل" : monthLabel(opt)}
+              </span>
             </div>
           ))}
         </div>
