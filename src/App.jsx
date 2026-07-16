@@ -3530,6 +3530,61 @@ function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
           </div>
         </div>
 
+        {/* Last 5 closed predictions */}
+        {(() => {
+          const userPreds = allPredictionRows.filter((r) => r.user_id === userId);
+          const predMap = Object.fromEntries(userPreds.map((r) => [r.match_id, r]));
+          const closedMatches = matches
+            .filter((m) => m.actualHome !== "" && m.actualAway !== "" && predMap[m.id])
+            .sort((a, b) => {
+              const da = (a.date || "") + " " + (a.time || "");
+              const db = (b.date || "") + " " + (b.time || "");
+              return db.localeCompare(da);
+            })
+            .slice(0, 5);
+          if (closedMatches.length === 0) return null;
+          return (
+            <div style={{ marginBottom: "14px" }}>
+              <p style={{ fontSize: "12px", fontWeight: 700, color: theme.muted, marginBottom: "8px" }}>آخر التوقعات</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {closedMatches.map((m) => {
+                  const pred = predMap[m.id];
+                  const multiplier = pred.user_boost ? 2 : m.doublePoints ? 2 : 1;
+                  const result = calcPoints(pred.pred_home, pred.pred_away, m.actualHome, m.actualAway, multiplier);
+                  const pts = result ? result.points : null;
+                  const ptColor = pts === null ? theme.muted : pts >= 8 ? theme.accent : pts >= 4 ? theme.primary : pts >= 1 ? theme.muted : theme.danger;
+                  return (
+                    <div key={m.id} style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "12px", padding: "10px 12px", display: "flex", alignItems: "center", gap: "10px" }}>
+                      {/* Teams + scores */}
+                      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "3px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: theme.text }}>
+                          <span>{m.home}</span>
+                          <span dir="ltr" style={{ fontVariantNumeric: "tabular-nums", color: theme.muted, fontSize: "11px" }}>
+                            {m.actualHome} - {m.actualAway}
+                          </span>
+                          <span>{m.away}</span>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: theme.muted }}>
+                          <span>توقع:</span>
+                          <span dir="ltr" style={{ fontVariantNumeric: "tabular-nums" }}>
+                            {pred.pred_home ?? "—"} - {pred.pred_away ?? "—"}
+                          </span>
+                          <span>{m.date || ""}</span>
+                        </div>
+                      </div>
+                      {/* Points badge */}
+                      <div style={{ minWidth: "34px", textAlign: "center", background: theme.bg, border: `1.5px solid ${ptColor}`, borderRadius: "8px", padding: "4px 6px" }}>
+                        <div style={{ fontSize: "14px", fontWeight: 900, color: ptColor, lineHeight: 1 }}>{pts ?? "—"}</div>
+                        <div style={{ fontSize: "8px", color: theme.muted, marginTop: "2px" }}>نقطة</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Stats donut */}
         <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "14px", padding: "14px" }}>
           {totalScored === 0 ? (
