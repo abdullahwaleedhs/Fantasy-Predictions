@@ -3555,25 +3555,27 @@ function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
                   const ptColor = pts === null ? theme.muted : pts >= 8 ? theme.accent : pts >= 4 ? theme.primary : pts >= 1 ? theme.muted : theme.danger;
                   return (
                     <div key={m.id} style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "12px", padding: "10px 12px", display: "flex", alignItems: "center", gap: "10px" }}>
-                      {/* Teams + scores */}
-                      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "3px" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: theme.text }}>
-                          <span>{m.home}</span>
-                          <span dir="ltr" style={{ fontVariantNumeric: "tabular-nums", color: theme.muted, fontSize: "11px" }}>
+                      {/* Match info */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        {/* Team names + actual score */}
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
+                          <span style={{ flex: 1, fontSize: "12px", fontWeight: 700, color: theme.text, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.home}</span>
+                          <span dir="ltr" style={{ fontSize: "13px", fontWeight: 900, color: theme.text, background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: "6px", padding: "2px 7px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
                             {m.actualHome} - {m.actualAway}
                           </span>
-                          <span>{m.away}</span>
+                          <span style={{ flex: 1, fontSize: "12px", fontWeight: 700, color: theme.text, textAlign: "left", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.away}</span>
                         </div>
-                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: theme.muted }}>
-                          <span>توقع:</span>
-                          <span dir="ltr" style={{ fontVariantNumeric: "tabular-nums" }}>
+                        {/* Prediction row */}
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                          <span style={{ fontSize: "10px", color: theme.muted }}>توقعي</span>
+                          <span dir="ltr" style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, fontVariantNumeric: "tabular-nums" }}>
                             {pred.pred_home ?? "—"} - {pred.pred_away ?? "—"}
                           </span>
-                          <span>{m.date || ""}</span>
+                          {m.date && <span style={{ fontSize: "10px", color: theme.inputBorder }}>· {m.date}</span>}
                         </div>
                       </div>
                       {/* Points badge */}
-                      <div style={{ minWidth: "34px", textAlign: "center", background: theme.bg, border: `1.5px solid ${ptColor}`, borderRadius: "8px", padding: "4px 6px" }}>
+                      <div style={{ minWidth: "34px", textAlign: "center", background: theme.bg, border: `1.5px solid ${ptColor}`, borderRadius: "8px", padding: "4px 6px", flexShrink: 0 }}>
                         <div style={{ fontSize: "14px", fontWeight: 900, color: ptColor, lineHeight: 1 }}>{pts ?? "—"}</div>
                         <div style={{ fontSize: "8px", color: theme.muted, marginTop: "2px" }}>نقطة</div>
                       </div>
