@@ -3943,6 +3943,7 @@ function ResetPasswordPage({ onUpdatePassword, theme }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const inputStyle = {
     width: "100%",
@@ -3969,8 +3970,22 @@ function ResetPasswordPage({ onUpdatePassword, theme }) {
     setSubmitting(true);
     const result = await onUpdatePassword(password);
     setSubmitting(false);
-    if (result?.error) setError(result.error);
+    if (result?.error) {
+      setError(result.error);
+    } else if (result?.success) {
+      setSaved(true);
+    }
   };
+
+  if (saved) {
+    return (
+      <div style={{ padding: "60px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
+        <div style={{ fontSize: "48px" }}>✅</div>
+        <h2 style={{ fontSize: "20px", fontWeight: 800, color: theme.primary, textAlign: "center", margin: 0 }}>تم حفظ كلمة السر</h2>
+        <p style={{ fontSize: "13px", color: theme.muted, textAlign: "center", margin: 0 }}>رح نسجّلك دخول الحين...</p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: "30px 20px 60px" }}>
@@ -6507,8 +6522,13 @@ export default function App() {
   const handleUpdatePassword = async (newPassword) => {
     try {
       await updatePassword(newPassword);
-      setActivePage("home");
-      return {};
+      // brief pause so the success screen shows before navigating away
+      setTimeout(async () => {
+        const user = await getSessionUser();
+        setCurrentUser(user);
+        setActivePage("home");
+      }, 2000);
+      return { success: true };
     } catch (err) {
       return { error: err.message || "حدث خطأ، حاول مرة أخرى" };
     }
