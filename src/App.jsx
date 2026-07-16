@@ -4538,6 +4538,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
   const [activeTab, setActiveTab] = usePersistedState("leagueDetail.activeTab", "ranking"); // "ranking" | "predictions"
   const [tournamentFilter, setTournamentFilter] = usePersistedState("leagueDetail.tournamentFilter", "الكل");
   const [monthFilter, setMonthFilter] = usePersistedState("leagueDetail.monthFilter", "الكل");
+  const [leaguePredVisibleCount, setLeaguePredVisibleCount] = useState(5);
 
   const youPlayer = league.players.find((p) => p.isYou);
 
@@ -4769,9 +4770,30 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
                 ما فيه مباريات منتهية بعد
               </p>
             ) : (
-              finishedMatches.map((match) => (
-                <LeaguePredictionCard key={match.id} match={match} league={league} playerPredictionsById={playerPredictionsById} tournamentLogos={tournamentLogos} theme={theme} />
-              ))
+              <>
+                {finishedMatches.slice(0, leaguePredVisibleCount).map((match) => (
+                  <LeaguePredictionCard key={match.id} match={match} league={league} playerPredictionsById={playerPredictionsById} tournamentLogos={tournamentLogos} theme={theme} />
+                ))}
+                {finishedMatches.length > leaguePredVisibleCount && (
+                  <button
+                    onClick={() => setLeaguePredVisibleCount((c) => c + 5)}
+                    style={{
+                      width: "100%",
+                      padding: "12px",
+                      borderRadius: "12px",
+                      border: `1.5px dashed ${theme.inputBorder}`,
+                      background: "transparent",
+                      color: theme.text,
+                      fontFamily: "Cairo, sans-serif",
+                      fontWeight: 600,
+                      fontSize: "13px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    عرض المزيد ({finishedMatches.length - leaguePredVisibleCount} متبقية)
+                  </button>
+                )}
+              </>
             )}
           </div>
         )}
@@ -6403,8 +6425,6 @@ export default function App() {
   const [viewMode, setViewMode] = usePersistedState("viewMode", "user"); // "admin" | "user" - only admins may switch to "admin"
   const [predictionsTabView, setPredictionsTabView] = usePersistedState("predictionsTabView", "available"); // "available" | "predicted" | "archived" - for the توقع! page's match list
   const [archivedVisibleCount, setArchivedVisibleCount] = useState(5);
-  const [availableVisibleCount, setAvailableVisibleCount] = useState(5);
-  const [predictedVisibleCount, setPredictedVisibleCount] = useState(5);
   const [currentUser, setCurrentUser] = useState(null); // null when logged out, { id, name, username, email, avatar } when logged in
   const [authLoading, setAuthLoading] = useState(true);
 
@@ -6415,10 +6435,8 @@ export default function App() {
     if (!authLoading && viewMode === "admin" && !currentUser?.is_admin) setViewMode("user");
   }, [currentUser, viewMode, authLoading]);
 
-  // Reset visible counts when switching tabs
+  // Reset archived count when switching tabs
   useEffect(() => {
-    setAvailableVisibleCount(5);
-    setPredictedVisibleCount(5);
     setArchivedVisibleCount(5);
   }, [predictionsTabView]);
 
@@ -7040,11 +7058,11 @@ export default function App() {
               };
 
               const sortedTabMatches = [...tabMatches].sort(sortByKickoff);
-              const visibleCount =
-                predictionsTabView === "archived" ? archivedVisibleCount :
-                predictionsTabView === "predicted" ? predictedVisibleCount : availableVisibleCount;
-              const visibleTabMatches = viewMode === "admin" ? sortedTabMatches : sortedTabMatches.slice(0, visibleCount);
-              const hasMore = viewMode !== "admin" && sortedTabMatches.length > visibleCount;
+              const visibleTabMatches =
+                (viewMode !== "admin" && predictionsTabView === "archived")
+                  ? sortedTabMatches.slice(0, archivedVisibleCount)
+                  : sortedTabMatches;
+              const hasMore = viewMode !== "admin" && predictionsTabView === "archived" && sortedTabMatches.length > archivedVisibleCount;
 
               return (
                 <>
@@ -7080,11 +7098,7 @@ export default function App() {
                       ))}
                   {hasMore && (
                     <button
-                      onClick={() => {
-                        if (predictionsTabView === "archived") setArchivedVisibleCount((c) => c + 5);
-                        else if (predictionsTabView === "predicted") setPredictedVisibleCount((c) => c + 5);
-                        else setAvailableVisibleCount((c) => c + 5);
-                      }}
+                      onClick={() => setArchivedVisibleCount((c) => c + 5)}
                       style={{
                         width: "100%",
                         padding: "12px",
