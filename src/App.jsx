@@ -3564,31 +3564,22 @@ function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
                   const boosted = multiplier > 1;
                   const ptColor = boosted ? GOLD : (pts !== null ? (TIER_COLORS[result.basePoints] || theme.muted) : theme.muted);
 
+                  const predPill = !hasResult ? (
+                    <span style={{ fontSize: "10px", color: theme.muted, background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: "6px", padding: "3px 8px", whiteSpace: "nowrap" }}>لم تنته</span>
+                  ) : (
+                    <span dir="ltr" style={{ fontSize: "12px", fontWeight: 800, color: ptColor, background: boosted ? `${GOLD}18` : theme.bg, border: `1.5px solid ${ptColor}`, borderRadius: "6px", padding: "3px 8px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+                      {pred.pred_home ?? "—"} - {pred.pred_away ?? "—"}
+                    </span>
+                  );
+
                   return (
-                    <div key={m.id} style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "12px", padding: "10px 12px", display: "flex", alignItems: "center", gap: "10px" }}>
-                      {/* Match info */}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        {/* Team names */}
-                        <div style={{ display: "flex", alignItems: "center", gap: "4px", marginBottom: "5px" }}>
-                          <span style={{ flex: 1, fontSize: "12px", fontWeight: 700, color: theme.text, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.home}</span>
-                          <span style={{ fontSize: "10px", color: theme.muted, flexShrink: 0 }}>vs</span>
-                          <span style={{ flex: 1, fontSize: "12px", fontWeight: 700, color: theme.text, textAlign: "left", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.away}</span>
-                        </div>
-                        {/* Prediction pill */}
-                        <div style={{ display: "flex", justifyContent: "center" }}>
-                          {!hasResult ? (
-                            <span style={{ fontSize: "10px", color: theme.muted, background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: "20px", padding: "2px 10px" }}>لم تنته</span>
-                          ) : (
-                            <span dir="ltr" style={{ fontSize: "12px", fontWeight: 800, color: ptColor, background: theme.bg, border: `1.5px solid ${ptColor}`, borderRadius: "20px", padding: "2px 12px", fontVariantNumeric: "tabular-nums" }}>
-                              {pred.pred_home ?? "—"} - {pred.pred_away ?? "—"}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      {/* Points badge */}
-                      <div style={{ minWidth: "36px", textAlign: "center", background: boosted ? `${GOLD}18` : theme.bg, border: `1.5px solid ${ptColor}`, borderRadius: "8px", padding: "4px 6px", flexShrink: 0 }}>
-                        <div style={{ fontSize: "14px", fontWeight: 900, color: ptColor, lineHeight: 1 }}>{pts ?? (hasResult ? "—" : "")}</div>
-                        <div style={{ fontSize: "8px", color: theme.muted, marginTop: "2px" }}>{hasResult ? "نقطة" : "⏳"}</div>
+                    <div key={m.id} style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "10px", padding: "8px 10px", display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span style={{ flex: 1, fontSize: "11px", fontWeight: 700, color: theme.text, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.home}</span>
+                      {predPill}
+                      <span style={{ flex: 1, fontSize: "11px", fontWeight: 700, color: theme.text, textAlign: "left", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.away}</span>
+                      <div style={{ minWidth: "34px", textAlign: "center", background: boosted ? `${GOLD}18` : theme.bg, border: `1.5px solid ${ptColor}`, borderRadius: "7px", padding: "3px 5px", flexShrink: 0 }}>
+                        <div style={{ fontSize: "13px", fontWeight: 900, color: ptColor, lineHeight: 1 }}>{pts ?? (hasResult ? "—" : "⏳")}</div>
+                        {hasResult && <div style={{ fontSize: "7px", color: theme.muted, marginTop: "1px" }}>نقطة</div>}
                       </div>
                     </div>
                   );
