@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Plus, Trash2, ChevronDown, ChevronRight, Search, Palette, Lock, Unlock, Calendar, Clock, Menu, X, Home, Target, Trophy, BarChart3, Zap, Shield, Upload, CircleDot, Users, Copy, Check, Crown, ArrowDown, Award, TrendingUp, User, LogIn, LogOut, Mail, Camera, Eye, EyeOff, Pencil } from "lucide-react";
+import { Plus, Trash2, ChevronDown, ChevronRight, Search, Palette, Lock, Unlock, Calendar, Clock, Menu, X, Home, Target, Trophy, BarChart3, Zap, Shield, Upload, CircleDot, Users, Copy, Check, Crown, ArrowDown, Award, TrendingUp, User, LogIn, LogOut, Mail, Camera, Eye, EyeOff, Pencil, Globe } from "lucide-react";
 import { isUsernameTaken, registerUser, loginUser, logoutUser, deleteAccount, updateProfile, getSessionUser, setBoostsRemaining as setBoostsRemainingDB, requestPasswordReset, updatePassword } from "./auth";
 import { supabase } from "./supabaseClient";
 import {
@@ -4507,14 +4507,14 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
         </p>
 
         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px", marginTop: "4px" }}>
-          <Calendar size={13} color={theme.muted} />
-          <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>الفترة</span>
+          <Globe size={13} color={theme.muted} />
+          <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>الكل</span>
         </div>
         <MonthFilterPicker value={monthFilter} onChange={setMonthFilter} matches={matches} theme={theme} />
 
         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px", marginTop: "10px" }}>
-          <Trophy size={13} color={theme.muted} />
-          <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>البطولات</span>
+          <Globe size={13} color={theme.muted} />
+          <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>الكل</span>
         </div>
         <TournamentFilterPicker
           value={tournamentFilter}
@@ -4705,14 +4705,14 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
         )}
 
         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px", marginTop: "4px" }}>
-          <Calendar size={13} color={theme.muted} />
-          <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>الفترة</span>
+          <Globe size={13} color={theme.muted} />
+          <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>الكل</span>
         </div>
         <MonthFilterPicker value={monthFilter} onChange={setMonthFilter} matches={matches} theme={theme} />
 
         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px", marginTop: "10px" }}>
-          <Trophy size={13} color={theme.muted} />
-          <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>البطولات</span>
+          <Globe size={13} color={theme.muted} />
+          <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: theme.muted }}>الكل</span>
         </div>
         {/* Tournament filter - applies to both الترتيب and التوقعات tabs */}
         <TournamentFilterPicker
