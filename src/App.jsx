@@ -3530,54 +3530,65 @@ function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
           </div>
         </div>
 
-        {/* Last 5 closed predictions */}
+        {/* Last 5 locked predictions */}
         {(() => {
           const userPreds = allPredictionRows.filter((r) => r.user_id === userId);
           const predMap = Object.fromEntries(userPreds.map((r) => [r.match_id, r]));
-          const closedMatches = matches
-            .filter((m) => m.actualHome !== "" && m.actualAway !== "" && predMap[m.id])
+          const lockedMatches = matches
+            .filter((m) => {
+              if (!predMap[m.id]) return false;
+              if (!m.date || !m.time) return m.actualHome !== "";
+              return new Date(`${m.date}T${m.time}:00`).getTime() <= serverNow();
+            })
             .sort((a, b) => {
               const da = (a.date || "") + " " + (a.time || "");
               const db = (b.date || "") + " " + (b.time || "");
               return db.localeCompare(da);
             })
             .slice(0, 5);
-          if (closedMatches.length === 0) return null;
+          if (lockedMatches.length === 0) return null;
+
+          const TIER_COLORS = { 10: theme.accent, 5: theme.navyBlue, 4: theme.sky, 3: theme.primary, 1: theme.muted, 0: theme.danger };
+          const GOLD = "#F59E0B";
+
           return (
             <div style={{ marginBottom: "14px" }}>
               <p style={{ fontSize: "12px", fontWeight: 700, color: theme.muted, marginBottom: "8px" }}>آخر التوقعات</p>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                {closedMatches.map((m) => {
+                {lockedMatches.map((m) => {
                   const pred = predMap[m.id];
+                  const hasResult = m.actualHome !== "" && m.actualAway !== "";
                   const multiplier = pred.user_boost ? 2 : m.doublePoints ? 2 : 1;
-                  const result = calcPoints(pred.pred_home, pred.pred_away, m.actualHome, m.actualAway, multiplier);
+                  const result = hasResult ? calcPoints(pred.pred_home, pred.pred_away, m.actualHome, m.actualAway, multiplier) : null;
                   const pts = result ? result.points : null;
-                  const ptColor = pts === null ? theme.muted : pts >= 8 ? theme.accent : pts >= 4 ? theme.primary : pts >= 1 ? theme.muted : theme.danger;
+                  const boosted = multiplier > 1;
+                  const ptColor = boosted ? GOLD : (pts !== null ? (TIER_COLORS[result.basePoints] || theme.muted) : theme.muted);
+
                   return (
                     <div key={m.id} style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "12px", padding: "10px 12px", display: "flex", alignItems: "center", gap: "10px" }}>
                       {/* Match info */}
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        {/* Team names + actual score */}
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
+                        {/* Team names */}
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px", marginBottom: "5px" }}>
                           <span style={{ flex: 1, fontSize: "12px", fontWeight: 700, color: theme.text, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.home}</span>
-                          <span dir="ltr" style={{ fontSize: "13px", fontWeight: 900, color: theme.text, background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: "6px", padding: "2px 7px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
-                            {m.actualHome} - {m.actualAway}
-                          </span>
+                          <span style={{ fontSize: "10px", color: theme.muted, flexShrink: 0 }}>vs</span>
                           <span style={{ flex: 1, fontSize: "12px", fontWeight: 700, color: theme.text, textAlign: "left", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.away}</span>
                         </div>
-                        {/* Prediction row */}
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
-                          <span style={{ fontSize: "10px", color: theme.muted }}>توقعي</span>
-                          <span dir="ltr" style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, fontVariantNumeric: "tabular-nums" }}>
-                            {pred.pred_home ?? "—"} - {pred.pred_away ?? "—"}
-                          </span>
-                          {m.date && <span style={{ fontSize: "10px", color: theme.inputBorder }}>· {m.date}</span>}
+                        {/* Prediction pill */}
+                        <div style={{ display: "flex", justifyContent: "center" }}>
+                          {!hasResult ? (
+                            <span style={{ fontSize: "10px", color: theme.muted, background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: "20px", padding: "2px 10px" }}>لم تنته</span>
+                          ) : (
+                            <span dir="ltr" style={{ fontSize: "12px", fontWeight: 800, color: ptColor, background: theme.bg, border: `1.5px solid ${ptColor}`, borderRadius: "20px", padding: "2px 12px", fontVariantNumeric: "tabular-nums" }}>
+                              {pred.pred_home ?? "—"} - {pred.pred_away ?? "—"}
+                            </span>
+                          )}
                         </div>
                       </div>
                       {/* Points badge */}
-                      <div style={{ minWidth: "34px", textAlign: "center", background: theme.bg, border: `1.5px solid ${ptColor}`, borderRadius: "8px", padding: "4px 6px", flexShrink: 0 }}>
-                        <div style={{ fontSize: "14px", fontWeight: 900, color: ptColor, lineHeight: 1 }}>{pts ?? "—"}</div>
-                        <div style={{ fontSize: "8px", color: theme.muted, marginTop: "2px" }}>نقطة</div>
+                      <div style={{ minWidth: "36px", textAlign: "center", background: boosted ? `${GOLD}18` : theme.bg, border: `1.5px solid ${ptColor}`, borderRadius: "8px", padding: "4px 6px", flexShrink: 0 }}>
+                        <div style={{ fontSize: "14px", fontWeight: 900, color: ptColor, lineHeight: 1 }}>{pts ?? (hasResult ? "—" : "")}</div>
+                        <div style={{ fontSize: "8px", color: theme.muted, marginTop: "2px" }}>{hasResult ? "نقطة" : "⏳"}</div>
                       </div>
                     </div>
                   );
