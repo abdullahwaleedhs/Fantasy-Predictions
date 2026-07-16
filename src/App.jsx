@@ -6284,14 +6284,18 @@ export default function App() {
     const onTouchStart = (e) => {
       if (window.scrollY === 0) {
         startY = e.touches[0].clientY;
-        active = true;
+        active = false; // wait for clear downward movement before activating
       }
     };
     const onTouchMove = (e) => {
-      if (!active) return;
+      if (startY === 0) return;
       currentY = e.touches[0].clientY;
-      const diff = Math.max(0, Math.min(currentY - startY, THRESHOLD * 1.5));
-      if (diff > 0) setPullY(diff);
+      const diff = currentY - startY;
+      // only activate after a clear downward pull (>10px) to avoid tab taps
+      if (!active && diff > 10 && window.scrollY === 0) active = true;
+      if (!active) return;
+      const clamped = Math.max(0, Math.min(diff, THRESHOLD * 1.5));
+      if (clamped > 0) setPullY(clamped);
     };
     const onTouchEnd = () => {
       if (!active) return;
