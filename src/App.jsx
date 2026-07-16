@@ -4512,8 +4512,10 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
           ترتيب جميع المشاركين حسب إجمالي النقاط
         </p>
 
+        <p style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, marginBottom: "4px" }}>الفترة</p>
         <MonthFilterPicker value={monthFilter} onChange={setMonthFilter} matches={matches} theme={theme} />
 
+        <p style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, marginBottom: "4px", marginTop: "8px" }}>البطولات</p>
         <TournamentFilterPicker
           value={tournamentFilter}
           onChange={setTournamentFilter}
@@ -4702,9 +4704,11 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
           </div>
         )}
 
+        <p style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, marginBottom: "4px" }}>الفترة</p>
         <MonthFilterPicker value={monthFilter} onChange={setMonthFilter} matches={matches} theme={theme} />
 
         {/* Tournament filter - applies to both الترتيب and التوقعات tabs */}
+        <p style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, marginBottom: "4px", marginTop: "8px" }}>البطولات</p>
         <TournamentFilterPicker
           value={tournamentFilter}
           onChange={setTournamentFilter}
@@ -6461,12 +6465,6 @@ export default function App() {
     sessionStorage.setItem("activePage", activePage);
   }, [activePage]);
 
-  // Re-fetch on every page switch, so e.g. a match the admin just added (or
-  // a result they just entered) shows up for participants without needing
-  // a manual page reload.
-  useEffect(() => {
-    refreshData();
-  }, [activePage]);
 
   // Restore the session (if any) when the app first loads, so a refresh
   // doesn't log the user out.
