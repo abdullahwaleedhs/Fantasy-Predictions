@@ -3449,7 +3449,7 @@ function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
   // Always compute global stats so the profile shows the same numbers
   // regardless of whether the user was tapped from the global leaderboard
   // or from inside a private league (which may be filtered to a subset).
-  const userId = user.id || user.userId;
+  const userId = user.userId || user.id;
   const { globalEntry, globalRank } = useMemo(() => {
     const ranked = computeGlobalRanking(matches, allPredictionRows, null);
     const idx = ranked.findIndex((p) => p.id === userId);
