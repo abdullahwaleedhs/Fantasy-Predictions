@@ -199,12 +199,27 @@ export async function upsertPredictionDB(userId, matchId, { predHome, predAway, 
 // Every prediction by every user, with the predicting user's name/username
 // attached, for the real global leaderboard (everyone is scored from their
 // own actual predictions, not simulated).
-export async function fetchAllPredictionsWithProfiles() {
+let _allPredictionsCache = null;
+let _allPredictionsCacheTime = 0;
+const ALL_PREDICTIONS_TTL = 5 * 60 * 1000; // 5 minutes
+
+export async function fetchAllPredictionsWithProfiles({ bust } = {}) {
+  const now = Date.now();
+  if (!bust && _allPredictionsCache && (now - _allPredictionsCacheTime) < ALL_PREDICTIONS_TTL) {
+    return _allPredictionsCache;
+  }
   const { data, error } = await supabase
     .from("predictions")
     .select("match_id, user_id, pred_home, pred_away, user_boost, updated_at, profiles(name, username, avatar)");
   if (error) throw error;
+  _allPredictionsCache = data;
+  _allPredictionsCacheTime = now;
   return data;
+}
+
+export function bustAllPredictionsCache() {
+  _allPredictionsCache = null;
+  _allPredictionsCacheTime = 0;
 }
 
 // ============ LEAGUES ============

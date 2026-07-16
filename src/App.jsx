@@ -27,6 +27,7 @@ import {
   fetchServerTimeOffset,
   bustTournamentsCache,
   bustClubsCache,
+  bustAllPredictionsCache,
 } from "./data";
 
 // Tracks the server's clock relative to a *monotonic* timer (performance.now),
@@ -6743,6 +6744,7 @@ export default function App() {
       }
 
       upsertPredictionDB(currentUser.id, id, predictionFields);
+      bustAllPredictionsCache();
       setPredictionsByMatch((prev) => ({ ...prev, [id]: predictionFields }));
       setAllPredictionRows((prev) => {
         const exists = prev.some((r) => r.match_id === id && r.user_id === currentUser.id);
