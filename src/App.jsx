@@ -6402,7 +6402,9 @@ export default function App() {
   const [profileUser, setProfileUser] = useState(null); // { id, name, username, avatar, points, tierCounts } - when set, show UserProfilePage overlay
   const [viewMode, setViewMode] = usePersistedState("viewMode", "user"); // "admin" | "user" - only admins may switch to "admin"
   const [predictionsTabView, setPredictionsTabView] = usePersistedState("predictionsTabView", "available"); // "available" | "predicted" | "archived" - for the توقع! page's match list
-  const [archivedVisibleCount, setArchivedVisibleCount] = useState(10); // المنتهية loads 10 at a time so the page doesn't slow down as old matches pile up
+  const [archivedVisibleCount, setArchivedVisibleCount] = useState(5);
+  const [availableVisibleCount, setAvailableVisibleCount] = useState(5);
+  const [predictedVisibleCount, setPredictedVisibleCount] = useState(5);
   const [currentUser, setCurrentUser] = useState(null); // null when logged out, { id, name, username, email, avatar } when logged in
   const [authLoading, setAuthLoading] = useState(true);
 
@@ -6412,6 +6414,13 @@ export default function App() {
     // user mode before their session even finishes loading.
     if (!authLoading && viewMode === "admin" && !currentUser?.is_admin) setViewMode("user");
   }, [currentUser, viewMode, authLoading]);
+
+  // Reset visible counts when switching tabs
+  useEffect(() => {
+    setAvailableVisibleCount(5);
+    setPredictedVisibleCount(5);
+    setArchivedVisibleCount(5);
+  }, [predictionsTabView]);
 
   // The organizer doesn't have a تم توقعها tab - bounce back to متاحة if
   // it was left selected before switching into admin mode.
@@ -7031,9 +7040,11 @@ export default function App() {
               };
 
               const sortedTabMatches = [...tabMatches].sort(sortByKickoff);
-              const visibleTabMatches =
-                predictionsTabView === "archived" ? sortedTabMatches.slice(0, archivedVisibleCount) : sortedTabMatches;
-              const hasMoreArchived = predictionsTabView === "archived" && sortedTabMatches.length > archivedVisibleCount;
+              const visibleCount =
+                predictionsTabView === "archived" ? archivedVisibleCount :
+                predictionsTabView === "predicted" ? predictedVisibleCount : availableVisibleCount;
+              const visibleTabMatches = viewMode === "admin" ? sortedTabMatches : sortedTabMatches.slice(0, visibleCount);
+              const hasMore = viewMode !== "admin" && sortedTabMatches.length > visibleCount;
 
               return (
                 <>
@@ -7067,9 +7078,13 @@ export default function App() {
                           predictedTab={predictionsTabView === "predicted"}
                         />
                       ))}
-                  {hasMoreArchived && (
+                  {hasMore && (
                     <button
-                      onClick={() => setArchivedVisibleCount((c) => c + 10)}
+                      onClick={() => {
+                        if (predictionsTabView === "archived") setArchivedVisibleCount((c) => c + 5);
+                        else if (predictionsTabView === "predicted") setPredictedVisibleCount((c) => c + 5);
+                        else setAvailableVisibleCount((c) => c + 5);
+                      }}
                       style={{
                         width: "100%",
                         padding: "12px",
@@ -7084,7 +7099,7 @@ export default function App() {
                         marginTop: "4px",
                       }}
                     >
-                      عرض المزيد
+                      عرض المزيد ({sortedTabMatches.length - visibleCount} متبقية)
                     </button>
                   )}
                 </>
