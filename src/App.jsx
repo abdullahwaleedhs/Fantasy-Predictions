@@ -5034,8 +5034,9 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
   );
 }
 
-function PrivateLeaguesPage({ leagues, matches, allPredictionRows, onCreateLeague, onJoinLeague, tournaments, tournamentLogos, currentUser, onViewProfile, theme }) {
+function PrivateLeaguesPage({ leagues, matches, allPredictionRows, onCreateLeague, onJoinLeague, tournaments, tournamentLogos, currentUser, onViewProfile, initialLeagueId, theme }) {
   const [selectedLeagueId, setSelectedLeagueId] = usePersistedState("leagues.selectedLeagueId", null);
+  useEffect(() => { if (initialLeagueId) setSelectedLeagueId(initialLeagueId); }, [initialLeagueId]);
   const [newLeagueName, setNewLeagueName] = useState("");
   const [joinCodeInput, setJoinCodeInput] = useState("");
   const [joinError, setJoinError] = useState("");
@@ -5263,7 +5264,7 @@ function HomeSectionHeader({ title, onMore, theme }) {
   );
 }
 
-function HomePage({ theme, onNavigate, onGoToPredictions, currentUser, matches, allPredictionRows, leagues, tournamentLogos }) {
+function HomePage({ theme, onNavigate, onGoToPredictions, onOpenLeague, currentUser, matches, allPredictionRows, leagues, tournamentLogos }) {
   const [now, setNow] = useState(() => serverNow());
   useEffect(() => {
     const id = setInterval(() => setNow(serverNow()), 1000);
@@ -5473,7 +5474,7 @@ function HomePage({ theme, onNavigate, onGoToPredictions, currentUser, matches, 
               {myLeagues.map((l, i) => (
                 <div
                   key={l.id}
-                  onClick={() => onNavigate("leagues")}
+                  onClick={() => onOpenLeague ? onOpenLeague(l.id) : onNavigate("leagues")}
                   style={{ display: "grid", gridTemplateColumns: "1fr 60px", borderBottom: i < myLeagues.length - 1 ? `1px solid ${theme.border}` : "none", cursor: "pointer" }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "10px", borderInlineEnd: `1px solid ${theme.border}`, padding: "10px 12px" }}>
@@ -6495,6 +6496,7 @@ export default function App() {
     return sessionStorage.getItem("activePage") || "home";
   });
   const [profileUser, setProfileUser] = useState(null); // { id, name, username, avatar, points, tierCounts } - when set, show UserProfilePage overlay
+  const [openLeagueId, setOpenLeagueId] = useState(null); // when set, leagues page opens directly to this league
   const [viewMode, setViewMode] = usePersistedState("viewMode", "user"); // "admin" | "user" - only admins may switch to "admin"
   const [predictionsTabView, setPredictionsTabView] = usePersistedState("predictionsTabView", "available"); // "available" | "predicted" | "archived" - for the توقع! page's match list
   const [archivedVisibleCount, setArchivedVisibleCount] = useState(5);
@@ -7289,6 +7291,7 @@ export default function App() {
           theme={theme}
           onNavigate={setActivePage}
           onGoToPredictions={() => { setPredictionsTabView("available"); setActivePage("predictions"); }}
+          onOpenLeague={(id) => { setOpenLeagueId(id); setActivePage("leagues"); }}
           currentUser={currentUser}
           matches={matches}
           allPredictionRows={allPredictionRows}
@@ -7329,6 +7332,7 @@ export default function App() {
           tournamentLogos={tournamentLogos}
           currentUser={currentUser}
           onViewProfile={setProfileUser}
+          initialLeagueId={openLeagueId}
           theme={theme}
         />
       )}
