@@ -5203,15 +5203,23 @@ function HomePage({ theme, onNavigate, onGoToPredictions, onOpenLeague, currentU
   const myGlobalRank = currentUser ? globalRanked.findIndex((p) => p.isYou) + 1 : 0;
   const pointsByUserId = useMemo(() => Object.fromEntries(globalRanked.map((p) => [p.id, p.points])), [globalRanked]);
 
-  const nextDayMatches = useMemo(() => {
+  const myPredictedMatchIds = useMemo(() => {
+    if (!currentUser) return new Set();
+    return new Set(
+      allPredictionRows
+        .filter((r) => r.user_id === currentUser.id && r.pred_home !== null && r.pred_away !== null)
+        .map((r) => r.match_id)
+    );
+  }, [allPredictionRows, currentUser]);
+
+  const unpredictedMatches = useMemo(() => {
     const now = serverNow();
-    const DAY_MS = 24 * 60 * 60 * 1000;
     return matches
       .filter((m) => m.date && m.time)
       .map((m) => ({ ...m, kickoff: new Date(`${m.date}T${m.time}:00`).getTime() }))
-      .filter((m) => m.kickoff > now && m.kickoff - now <= DAY_MS)
+      .filter((m) => m.kickoff > now && !myPredictedMatchIds.has(m.id))
       .sort((a, b) => a.kickoff - b.kickoff);
-  }, [matches]);
+  }, [matches, myPredictedMatchIds]);
 
   const myLeagues = useMemo(
     () =>
@@ -5310,12 +5318,12 @@ function HomePage({ theme, onNavigate, onGoToPredictions, onOpenLeague, currentU
         </div>
 
         {/* Next 24h matches */}
-        <HomeSectionHeader title="مباريات الـ24 ساعة القادمة" onMore={() => onGoToPredictions()} theme={theme} />
+        <HomeSectionHeader title="مباريات لم تتوقعها بعد" onMore={() => onGoToPredictions()} theme={theme} />
         <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "14px", padding: "8px", marginBottom: "20px" }}>
-          {nextDayMatches.length === 0 ? (
-            <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "16px 0" }}>لا توجد مباريات خلال الـ24 ساعة القادمة</p>
+          {unpredictedMatches.length === 0 ? (
+            <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "16px 0" }}>أحسنت! توقعت كل المباريات المتاحة</p>
           ) : (
-            nextDayMatches.slice(0, 5).map((m) => {
+            unpredictedMatches.slice(0, 5).map((m) => {
               const msLeft = Math.max(0, m.kickoff - now);
               const h = Math.floor(msLeft / (60 * 60 * 1000));
               const min = Math.floor((msLeft % (60 * 60 * 1000)) / (60 * 1000));
@@ -5483,7 +5491,7 @@ function HomePage({ theme, onNavigate, onGoToPredictions, onOpenLeague, currentU
                 }}
               >
                 <div style={{ width: "86px", height: "86px", borderRadius: "50%", background: theme.surface, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ fontSize: "18px", fontWeight: 900, color: theme.text, lineHeight: 1 }}>{allPredictionRows.filter((r) => r.user_id === currentUser?.id && r.pred_home !== null && r.pred_away !== null).length}</div>
+                  <div style={{ fontSize: "18px", fontWeight: 900, color: theme.text, lineHeight: 1 }}>{(() => { const finishedMatchIds = new Set(matches.filter((m) => m.actualHome !== "" && m.actualHome != null && m.actualAway !== "" && m.actualAway != null).map((m) => m.id)); return allPredictionRows.filter((r) => r.user_id === currentUser?.id && r.pred_home !== null && r.pred_away !== null && finishedMatchIds.has(r.match_id)).length; })()}</div>
                   <div style={{ fontSize: "8px", color: theme.muted, marginTop: "3px" }}>عدد التوقعات</div>
                 </div>
                 {tierColors
