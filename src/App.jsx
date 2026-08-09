@@ -5322,7 +5322,7 @@ function HomePage({ theme, onNavigate, onGoToPredictions, onOpenLeague, currentU
         </div>
 
         {/* Next 24h matches */}
-        <HomeSectionHeader title="مباريات لم تتوقعها بعد" onMore={() => onGoToPredictions()} theme={theme} />
+        <HomeSectionHeader title="مباريات متاحة لم يتم توقعها" onMore={() => onGoToPredictions()} theme={theme} />
         <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "14px", padding: "8px", marginBottom: "20px" }}>
           {unpredictedMatches.length === 0 ? (
             <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "16px 0" }}>أحسنت! توقعت كل المباريات المتاحة</p>
