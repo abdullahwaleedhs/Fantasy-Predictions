@@ -5324,50 +5324,25 @@ function HomePage({ theme, onNavigate, onGoToPredictions, onOpenLeague, currentU
             <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "16px 0" }}>أحسنت! توقعت كل المباريات المتاحة</p>
           ) : (
             unpredictedMatches.slice(0, 5).map((m) => {
-              const msLeft = Math.max(0, m.kickoff - now);
-              const h = Math.floor(msLeft / (60 * 60 * 1000));
-              const min = Math.floor((msLeft % (60 * 60 * 1000)) / (60 * 1000));
-              const sec = Math.floor((msLeft % (60 * 1000)) / 1000);
-              const pad = (n) => String(n).padStart(2, "0");
+              const kickoffISO = `${m.date}T${m.time}:00`;
               return (
                 <div
                   key={m.id}
-                  style={{ padding: "8px 8px", borderBottom: `1px solid ${theme.border}`, fontSize: "12px" }}
+                  style={{ padding: "10px 10px", borderBottom: `1px solid ${theme.border}` }}
                 >
                   {m.tournament && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px", marginBottom: "3px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "4px", marginBottom: "5px" }}>
                       <TournamentIcon name={m.tournament} logo={tournamentLogos?.[m.tournament]} theme={theme} size={9} color={theme.muted} />
                       <span style={{ fontSize: "8px", color: theme.muted, fontWeight: 600 }}>{m.tournament}</span>
                     </div>
                   )}
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px", fontWeight: 700, color: theme.text }}>
-                    <span>{m.home}</span>
-                    <span style={{ color: theme.muted, fontWeight: 400, fontSize: "10px" }}>vs</span>
-                    <span>{m.away}</span>
-                  </div>
-                  <div
-                    dir="ltr"
-                    style={{
-                      display: "flex",
-                      gap: "6px",
-                      background: theme.bg,
-                      border: `1px solid ${theme.border}`,
-                      borderRadius: "8px",
-                      padding: "4px 8px",
-                    }}
-                  >
-                    {[
-                      { value: h, label: "ساعة" },
-                      { value: min, label: "دقيقة" },
-                      { value: sec, label: "ثانية" },
-                    ].map((unit) => (
-                      <div key={unit.label} style={{ textAlign: "center" }}>
-                        <div style={{ fontSize: "12px", color: "#16a34a", fontWeight: 700, fontFamily: "monospace" }}>{pad(unit.value)}</div>
-                        <div style={{ fontSize: "8px", color: theme.muted }}>{unit.label}</div>
-                      </div>
-                    ))}
-                  </div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+                    <div style={{ fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "12px", color: theme.text }}>
+                      {m.home} <span style={{ color: theme.muted, fontWeight: 400, fontSize: "10px" }}>vs</span> {m.away}
+                    </div>
+                    <div style={{ flexShrink: 0 }}>
+                      <CountdownBadge kickoffISO={kickoffISO} theme={theme} small />
+                    </div>
                   </div>
                 </div>
               );
