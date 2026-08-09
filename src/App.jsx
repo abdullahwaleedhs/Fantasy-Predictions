@@ -1091,10 +1091,10 @@ function CountdownBadge({ kickoffISO, theme }) {
 
   const segments = parts
     ? [
-        { value: parts.seconds, label: "ثانية" },
-        { value: parts.minutes, label: "دقيقة" },
-        { value: parts.hours, label: "ساعة" },
         { value: parts.days, label: "يوم" },
+        { value: parts.hours, label: "ساعة" },
+        { value: parts.minutes, label: "دقيقة" },
+        { value: parts.seconds, label: "ثانية" },
       ]
     : null;
 
@@ -1102,7 +1102,7 @@ function CountdownBadge({ kickoffISO, theme }) {
 
   return (
     <div
-      dir="rtl"
+      dir="ltr"
       style={{
         display: "flex",
         flexDirection: "row",
@@ -1111,7 +1111,7 @@ function CountdownBadge({ kickoffISO, theme }) {
         background: theme.surface,
         border: `1px solid ${stateColor}`,
         borderRadius: "6px",
-        padding: "3px 5px",
+        padding: "4px 7px",
       }}
     >
       {locked ? (
@@ -1121,7 +1121,6 @@ function CountdownBadge({ kickoffISO, theme }) {
       )}
       {locked ? (
         <span
-          dir="rtl"
           style={{
             fontFamily: "Cairo, sans-serif",
             fontSize: "10px",
@@ -1134,29 +1133,28 @@ function CountdownBadge({ kickoffISO, theme }) {
         </span>
       ) : (
         segments && (
-          <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
             {segments.map((seg, i) => (
               <div key={seg.label} style={{ display: "flex", alignItems: "center" }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: "22px" }}>
                   <span
                     style={{
-                      fontFamily: "monospace",
-                      fontSize: "10px",
-                      fontWeight: 700,
+                      fontFamily: "Cairo, sans-serif",
+                      fontSize: "11px",
+                      fontWeight: 800,
                       color: stateColor,
                       fontVariantNumeric: "tabular-nums",
-                      lineHeight: "1",
+                      lineHeight: "1.1",
                     }}
                   >
                     {seg.value}
                   </span>
                   <span
                     style={{
-                      fontFamily: "monospace",
-                      fontSize: "5.5px",
+                      fontFamily: "Cairo, sans-serif",
+                      fontSize: "7px",
                       fontWeight: 600,
                       color: stateColor,
-                      letterSpacing: "0.2px",
                       lineHeight: "1",
                     }}
                   >
@@ -1164,7 +1162,7 @@ function CountdownBadge({ kickoffISO, theme }) {
                   </span>
                 </div>
                 {i < segments.length - 1 && (
-                  <span style={{ fontSize: "10px", fontWeight: 700, color: stateColor, margin: "0 1px" }}>:</span>
+                  <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: stateColor, margin: "0 1px", lineHeight: "1", paddingBottom: "6px" }}>:</span>
                 )}
               </div>
             ))}
