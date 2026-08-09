@@ -6980,7 +6980,7 @@ export default function App() {
                 };
                 const isPredictedCount = (m) => !!savedPredictions[m.id];
                 const scheduled = viewMode === "user" ? matches.filter((m) => m.date && m.time) : matches;
-                const availableCount = scheduled.filter((m) => !isLockedCount(m) && !isPredictedCount(m)).length;
+                const availableCount = scheduled.filter((m) => !isLockedCount(m) && (viewMode === "admin" || !isPredictedCount(m))).length;
                 const predictedCount = scheduled.filter((m) => !isLockedCount(m) && isPredictedCount(m)).length;
                 const archivedCount = matches.filter((m) => isLockedCount(m)).length;
                 return (
@@ -7037,6 +7037,7 @@ export default function App() {
 
               let tabMatches = matches.filter((m) => {
                 if (predictionsTabView === "archived") return isLocked(m);
+                if (viewMode === "admin") return !isLocked(m); // admin sees all unlocked matches regardless of predictions
                 if (predictionsTabView === "predicted") return !isLocked(m) && isPredicted(m);
                 return !isLocked(m) && !isPredicted(m);
               });
