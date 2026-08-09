@@ -5389,7 +5389,7 @@ function HomePage({ theme, onNavigate, onGoToPredictions, onOpenLeague, currentU
               cursor: "pointer",
             }}
           >
-            أدخل توقعك
+            {unpredictedMatches.length === 0 ? "شاهد توقعك" : "أدخل توقعك"}
           </button>
         </div>
 
