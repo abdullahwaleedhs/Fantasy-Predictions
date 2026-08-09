@@ -1102,23 +1102,18 @@ function CountdownBadge({ kickoffISO, theme }) {
 
   return (
     <div
-      dir="ltr"
+      dir="rtl"
       style={{
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
-        gap: "4px",
+        gap: "2px",
         background: theme.surface,
         border: `1px solid ${stateColor}`,
         borderRadius: "6px",
         padding: "4px 7px",
       }}
     >
-      {locked ? (
-        <Lock size={11} color={stateColor} style={{ flexShrink: 0 }} />
-      ) : (
-        <Unlock size={11} color={stateColor} style={{ flexShrink: 0 }} />
-      )}
       {locked ? (
         <span
           style={{
@@ -1132,42 +1127,38 @@ function CountdownBadge({ kickoffISO, theme }) {
           مقفل
         </span>
       ) : (
-        segments && (
-          <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
-            {segments.map((seg, i) => (
-              <div key={seg.label} style={{ display: "flex", alignItems: "center" }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: "22px" }}>
-                  <span
-                    style={{
-                      fontFamily: "Cairo, sans-serif",
-                      fontSize: "11px",
-                      fontWeight: 800,
-                      color: stateColor,
-                      fontVariantNumeric: "tabular-nums",
-                      lineHeight: "1.1",
-                    }}
-                  >
-                    {seg.value}
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: "Cairo, sans-serif",
-                      fontSize: "7px",
-                      fontWeight: 600,
-                      color: stateColor,
-                      lineHeight: "1",
-                    }}
-                  >
-                    {seg.label}
-                  </span>
-                </div>
-                {i < segments.length - 1 && (
-                  <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: stateColor, margin: "0 1px", lineHeight: "1", paddingBottom: "6px" }}>:</span>
-                )}
-              </div>
-            ))}
+        segments && segments.map((seg, i) => (
+          <div key={seg.label} style={{ display: "flex", alignItems: "center" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: "22px" }}>
+              <span
+                style={{
+                  fontFamily: "Cairo, sans-serif",
+                  fontSize: "11px",
+                  fontWeight: 800,
+                  color: stateColor,
+                  fontVariantNumeric: "tabular-nums",
+                  lineHeight: "1.1",
+                }}
+              >
+                {seg.value}
+              </span>
+              <span
+                style={{
+                  fontFamily: "Cairo, sans-serif",
+                  fontSize: "7px",
+                  fontWeight: 600,
+                  color: stateColor,
+                  lineHeight: "1",
+                }}
+              >
+                {seg.label}
+              </span>
+            </div>
+            {i < segments.length - 1 && (
+              <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: stateColor, margin: "0 1px", lineHeight: "1", paddingBottom: "6px" }}>:</span>
+            )}
           </div>
-        )
+        ))
       )}
     </div>
   );
