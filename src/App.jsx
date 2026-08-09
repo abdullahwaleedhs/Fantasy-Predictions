@@ -2500,7 +2500,6 @@ function computeGlobalRanking(matches, allPredictionRows, currentUser) {
         id: row.user_id,
         name: row.profiles?.name || "مستخدم",
         username: row.profiles?.username || null,
-        avatar: row.profiles?.avatar || null,
         points: 0,
         tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 },
       };
@@ -2539,7 +2538,6 @@ function computeGlobalRanking(matches, allPredictionRows, currentUser) {
       id: currentUser.id,
       name: currentUser.name,
       username: currentUser.username,
-      avatar: currentUser.avatar,
       points: 0,
       tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: finishedMatchCount },
       isYou: true,
@@ -3363,23 +3361,8 @@ function ClubsManagementPage({ tournaments, onAddTournament, clubsByTournament, 
   );
 }
 
-function PlayerAvatar({ name, avatar, isYou, theme, size = 32 }) {
+function PlayerAvatar({ name, isYou, theme, size = 32 }) {
   const initial = (name || "").trim().charAt(0) || "؟";
-  if (avatar) {
-    return (
-      <div
-        style={{
-          width: size,
-          height: size,
-          borderRadius: "50%",
-          overflow: "hidden",
-          flexShrink: 0,
-        }}
-      >
-        <img src={avatar} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-      </div>
-    );
-  }
   return (
     <div
       style={{
@@ -3402,7 +3385,7 @@ function PlayerAvatar({ name, avatar, isYou, theme, size = 32 }) {
   );
 }
 
-function LeaderboardRow({ rank, name, username, avatar, points, isYou, theme, onViewProfile }) {
+function LeaderboardRow({ rank, name, username, points, isYou, theme, onViewProfile }) {
   return (
     <div
       onClick={onViewProfile}
@@ -3426,7 +3409,7 @@ function LeaderboardRow({ rank, name, username, avatar, points, isYou, theme, on
           </span>
         )}
       </div>
-      <PlayerAvatar name={name} avatar={avatar} isYou={isYou} theme={theme} />
+      <PlayerAvatar name={name} isYou={isYou} theme={theme} />
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
         <span
           style={{
@@ -3490,7 +3473,6 @@ function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
 
   const name = globalEntry?.name || user.name || user.displayName || "؟";
   const username = globalEntry?.username || user.username || null;
-  const avatar = globalEntry?.avatar || user.avatar || null;
   const initial = name.charAt(0).toUpperCase();
 
   return (
@@ -3505,13 +3487,9 @@ function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
 
         {/* Avatar + name */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", marginBottom: "24px" }}>
-          {avatar ? (
-            <img src={avatar} alt={name} style={{ width: "80px", height: "80px", borderRadius: "50%", objectFit: "cover", border: `2px solid ${theme.border}` }} />
-          ) : (
-            <div style={{ width: "80px", height: "80px", borderRadius: "50%", background: theme.violetSoft, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "30px", fontWeight: 800, color: theme.violet }}>
-              {initial}
-            </div>
-          )}
+          <div style={{ width: "80px", height: "80px", borderRadius: "50%", background: theme.violetSoft, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "30px", fontWeight: 800, color: theme.violet }}>
+            {initial}
+          </div>
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: "18px", fontWeight: 800, color: theme.text }}>{name}</div>
             {username && <div dir="ltr" style={{ fontFamily: "system-ui, -apple-system, sans-serif", fontSize: "13px", color: theme.muted, letterSpacing: "0.5px" }}>@{username}</div>}
@@ -4242,7 +4220,6 @@ function LoginGate({ onNavigateToAuth, theme }) {
 function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteAccount, theme }) {
   const [name, setName] = useState(currentUser?.name || "");
   const [username, setUsername] = useState(currentUser?.username || "");
-  const [avatar, setAvatar] = useState(currentUser?.avatar || null);
   const [usernameError, setUsernameError] = useState("");
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -4255,7 +4232,6 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
     if (!currentUser) return;
     setName(currentUser.name || "");
     setUsername(currentUser.username || "");
-    setAvatar(currentUser.avatar || null);
   }, [currentUser]);
 
   if (!currentUser) {
@@ -4285,12 +4261,6 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
     );
   }
 
-  const handleAvatarUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    fileToBase64(file, (dataUrl) => setAvatar(dataUrl));
-  };
-
   const handleSave = async () => {
     const normalized = username.trim().toLowerCase();
     if (normalized && !/^[a-zA-Z0-9]+$/.test(normalized)) {
@@ -4299,7 +4269,7 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
     }
     setUsernameError("");
     setSaving(true);
-    const result = await onUpdateProfile({ name: name.trim(), username: normalized, avatar });
+    const result = await onUpdateProfile({ name: name.trim(), username: normalized });
     setSaving(false);
     if (result?.usernameError) {
       setUsernameError(result.usernameError);
@@ -4327,48 +4297,21 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
         </h2>
 
         <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
-          <div style={{ position: "relative" }}>
-            <div
-              style={{
-                width: "84px",
-                height: "84px",
-                borderRadius: "50%",
-                background: theme.bg,
-                border: "2px solid #000000",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                overflow: "hidden",
-              }}
-            >
-              {avatar ? (
-                <img src={avatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              ) : (
-                <span style={{ fontSize: "32px", fontWeight: 700, color: theme.muted }}>
-                  {(name || "؟").trim().charAt(0)}
-                </span>
-              )}
-            </div>
-            <input type="file" accept="image/*" onChange={handleAvatarUpload} style={{ display: "none" }} id="avatar-upload" />
-            <label
-              htmlFor="avatar-upload"
-              style={{
-                position: "absolute",
-                bottom: "-2px",
-                left: "-2px",
-                width: "30px",
-                height: "30px",
-                borderRadius: "50%",
-                background: theme.violet,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                border: `2px solid ${theme.surface}`,
-              }}
-            >
-              <Camera size={11} color="#FFFFFF" />
-            </label>
+          <div
+            style={{
+              width: "84px",
+              height: "84px",
+              borderRadius: "50%",
+              background: theme.bg,
+              border: "2px solid #000000",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <span style={{ fontSize: "32px", fontWeight: 700, color: theme.muted }}>
+              {(name || "؟").trim().charAt(0)}
+            </span>
           </div>
         </div>
 
@@ -4591,7 +4534,7 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
             {ranked.map((p, i) => (
-              <LeaderboardRow key={p.id} rank={i + 1} name={p.name} username={p.username} avatar={p.avatar} points={p.points} isYou={p.isYou} theme={theme} onViewProfile={() => onViewProfile(p)} />
+              <LeaderboardRow key={p.id} rank={i + 1} name={p.name} username={p.username} points={p.points} isYou={p.isYou} theme={theme} onViewProfile={() => onViewProfile(p)} />
             ))}
           </div>
         )}
@@ -4828,7 +4771,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
           <>
             <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
               {ranked.map((p, i) => (
-                <LeaderboardRow key={p.id} rank={i + 1} name={p.name} username={p.username} avatar={p.avatar} points={p.points} isYou={p.isYou} theme={theme} onViewProfile={onViewProfile ? () => onViewProfile(p) : undefined} />
+                <LeaderboardRow key={p.id} rank={i + 1} name={p.name} username={p.username} points={p.points} isYou={p.isYou} theme={theme} onViewProfile={onViewProfile ? () => onViewProfile(p) : undefined} />
               ))}
             </div>
 
@@ -6646,7 +6589,7 @@ export default function App() {
 
   const USERNAME_COOLDOWN_MS = 6 * 30 * 24 * 60 * 60 * 1000; // ~6 months
 
-  const handleUpdateProfile = async ({ name, username, avatar }) => {
+  const handleUpdateProfile = async ({ name, username }) => {
     try {
       const usernameChanged = username !== currentUser.username;
 
@@ -6664,12 +6607,11 @@ export default function App() {
         return { usernameError: "اسم المستخدم هذا مستخدم من قبل، جرّب واحد ثاني" };
       }
 
-      await updateProfile(currentUser.id, { name, username, avatar, usernameChanged });
+      await updateProfile(currentUser.id, { name, username, usernameChanged });
       setCurrentUser((u) => ({
         ...u,
         name,
         username,
-        avatar,
         username_changed_at: usernameChanged ? new Date().toISOString() : u.username_changed_at,
       }));
       return {};
@@ -6699,7 +6641,6 @@ export default function App() {
           id: m.id,
           userId: m.user_id,
           name: m.profiles?.name || m.display_name,
-          avatar: m.profiles?.avatar || null,
           isYou: currentUser ? m.user_id === currentUser.id : false,
         })),
       })),
