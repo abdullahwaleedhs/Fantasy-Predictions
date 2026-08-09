@@ -2200,216 +2200,204 @@ function MatchResultFooter({ match, theme, hasActual, result, colors, noPredicti
 function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, clubsByTournament, tournamentLogos, allPredictionRows, theme }) {
   const num = (v) => (v === "" ? "" : String(v).replace(/[^0-9]/g, "").slice(0, 2));
 
-  // Local draft: edits accumulate here and only commit to the real match
-  // (via onChange) when "حفظ" is pressed. This matters specifically for the
-  // date field, since changing it could move the match to the "المنتهية"
-  // tab immediately - staging the edit avoids that until the admin is done.
   const [draft, setDraft] = useState(match);
   const [dirty, setDirty] = useState(false);
 
-  // If the match changes from outside (e.g. another tab/sync), and there
-  // are no unsaved local edits, refresh the draft to match it.
   useEffect(() => {
     if (!dirty) setDraft(match);
   }, [match, dirty]);
 
-  const updateDraft = (updated) => {
-    setDraft(updated);
-    setDirty(true);
-  };
-
-  const save = () => {
-    onChange(draft);
-    setDirty(false);
-  };
+  const updateDraft = (updated) => { setDraft(updated); setDirty(true); };
+  const save = () => { onChange(draft); setDirty(false); };
 
   const kickoffISO = draft.date && draft.time ? `${draft.date}T${draft.time}:00` : null;
   const naturallyLocked = kickoffISO ? new Date(kickoffISO).getTime() - serverNow() <= 0 : false;
-
-  // المنظم يقدر يفتح مباراة منتهية للتعديل بعد تأكيد، بدل ما تبقى مقفلة للأبد.
   const [forceUnlocked, setForceUnlocked] = useState(false);
   const isLocked = naturallyLocked && !forceUnlocked;
 
   const clubs = clubsByTournament?.[draft.tournament] || [];
+  const isGold = draft.doublePoints;
 
   return (
     <div style={{ marginBottom: "14px" }}>
       <div
         style={{
           background: theme.surface,
-          border: `1.5px solid ${theme.violet}`,
+          border: isGold ? `2px solid ${theme.yellow}` : `1.5px solid ${theme.violet}`,
           borderRadius: "14px",
           overflow: "hidden",
         }}
       >
-        <TournamentPicker
-          value={draft.tournament}
-          onChange={(t) => updateDraft({ ...draft, tournament: t, home: "", away: "", homeLogo: null, awayLogo: null })}
-          tournaments={tournaments}
-          onAddTournament={onAddTournament}
-          tournamentLogos={tournamentLogos}
-          theme={theme}
-          noMargin
-          topRadius="0"
-        />
-        <div style={{ background: theme.bg }}>
-          <DateTimeRow match={draft} onChange={updateDraft} theme={theme} disabled={isLocked} />
+        {/* Tournament row — picker styled like the participant header */}
+        <div style={{ borderBottom: `1px solid ${theme.border}` }}>
+          <TournamentPicker
+            value={draft.tournament}
+            onChange={(t) => updateDraft({ ...draft, tournament: t, home: "", away: "", homeLogo: null, awayLogo: null })}
+            tournaments={tournaments}
+            onAddTournament={onAddTournament}
+            tournamentLogos={tournamentLogos}
+            theme={theme}
+            noMargin
+            topRadius="0"
+          />
         </div>
+
+        {/* Date/time + countdown */}
+        <DateTimeRow match={draft} onChange={updateDraft} theme={theme} disabled={isLocked} />
+
+        {/* Double-points toggle */}
         <DoublePointsToggle match={draft} onChange={updateDraft} theme={theme} disabled={isLocked} />
+
         <div style={{ padding: "16px 18px 18px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
-            {/* Invisible spacer matching the delete button's width, so the
-                team pair stays visually centered instead of leaning toward
-                the delete button's side. */}
-            <div style={{ width: "24px", flexShrink: 0 }} />
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1, minWidth: 0 }}>
-              <TeamPicker
-                value={draft.home}
+          {/* Teams row — same 3-column layout as UserMatchCard */}
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px", marginBottom: "16px" }}>
+
+            {/* Home column */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", flex: 1 }}>
+              <TeamDisplay
+                name={draft.home || "الفريق الأول"}
                 logo={draft.homeLogo}
-                onChange={(name, logo) => updateDraft({ ...draft, home: name, homeLogo: logo })}
-                clubs={clubs}
-                placeholder="الفريق الأول"
                 theme={theme}
-                disabled={naturallyLocked}
+                venueLabel={draft.venueTeam === "home" ? "المستضيف" : draft.venueTeam === "away" ? "الضيف" : null}
               />
-              <button
-                onClick={() => updateDraft({ ...draft, venueTeam: draft.venueTeam === "home" ? null : "home" })}
-                disabled={naturallyLocked}
-                title="حدد الفريق الأول كصاحب أرض"
-                style={{
-                  alignSelf: "center",
-                  background: draft.venueTeam === "home" ? theme.violetSoft : "transparent",
-                  border: `1px solid ${draft.venueTeam === "home" ? theme.violet : theme.inputBorder}`,
-                  color: draft.venueTeam === "home" ? theme.violet : theme.muted,
-                  borderRadius: "8px",
-                  padding: "3px 10px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: naturallyLocked ? "not-allowed" : "pointer",
-                }}
-              >
-                <Home size={14} />
-              </button>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", marginTop: "4px", width: "100%" }}>
+                <span style={{ fontSize: "10px", color: theme.muted, fontWeight: 600 }}>النتيجة الفعلية</span>
+                <ScoreInput value={draft.actualHome} onChange={(v) => updateDraft({ ...draft, actualHome: num(v) })} actual theme={theme} disabled={isLocked} />
+              </div>
+              {/* Team picker & venue toggle — admin only controls */}
+              <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "4px" }}>
+                <TeamPicker
+                  value={draft.home}
+                  logo={draft.homeLogo}
+                  onChange={(name, logo) => updateDraft({ ...draft, home: name, homeLogo: logo })}
+                  clubs={clubs}
+                  placeholder="الفريق الأول"
+                  theme={theme}
+                  disabled={naturallyLocked}
+                />
+                <button
+                  onClick={() => updateDraft({ ...draft, venueTeam: draft.venueTeam === "home" ? null : "home" })}
+                  disabled={naturallyLocked}
+                  style={{
+                    background: draft.venueTeam === "home" ? theme.violetSoft : "transparent",
+                    border: `1px solid ${draft.venueTeam === "home" ? theme.violet : theme.inputBorder}`,
+                    color: draft.venueTeam === "home" ? theme.violet : theme.muted,
+                    borderRadius: "8px",
+                    padding: "3px 8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "4px",
+                    cursor: naturallyLocked ? "not-allowed" : "pointer",
+                    fontFamily: "Cairo, sans-serif",
+                    fontSize: "10px",
+                    fontWeight: 600,
+                  }}
+                >
+                  <Home size={12} />
+                  مستضيف
+                </button>
+              </div>
             </div>
-            <span style={{ color: theme.muted, fontSize: "12px", fontWeight: 600, flexShrink: 0 }}>ضد</span>
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1, minWidth: 0 }}>
-              <TeamPicker
-                value={draft.away}
-                logo={draft.awayLogo}
-                onChange={(name, logo) => updateDraft({ ...draft, away: name, awayLogo: logo })}
-                clubs={clubs}
-                placeholder="الفريق الثاني"
-                theme={theme}
-                disabled={naturallyLocked}
-              />
+
+            {/* Center column — "ضد" + admin action buttons */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", gap: "8px", paddingTop: "56px", flexShrink: 0 }}>
+              <span style={{ color: theme.muted, fontSize: "13px", fontWeight: 700 }}>ضد</span>
               <button
-                onClick={() => updateDraft({ ...draft, venueTeam: draft.venueTeam === "away" ? null : "away" })}
-                disabled={naturallyLocked}
-                title="حدد الفريق الثاني كصاحب أرض"
-                style={{
-                  alignSelf: "center",
-                  background: draft.venueTeam === "away" ? theme.violetSoft : "transparent",
-                  border: `1px solid ${draft.venueTeam === "away" ? theme.violet : theme.inputBorder}`,
-                  color: draft.venueTeam === "away" ? theme.violet : theme.muted,
-                  borderRadius: "8px",
-                  padding: "3px 10px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: naturallyLocked ? "not-allowed" : "pointer",
-                }}
-              >
-                <Home size={14} />
-              </button>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", flexShrink: 0 }}>
-              <button
-                onClick={() => {
-                  if (window.confirm("حذف هذي المباراة نهائيًا؟")) onRemove();
-                }}
+                onClick={() => { if (window.confirm("حذف هذي المباراة نهائيًا؟")) onRemove(); }}
                 aria-label="حذف المباراة"
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: theme.muted,
-                  cursor: "pointer",
-                  padding: "4px",
-                  width: "24px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
+                style={{ background: "transparent", border: "none", color: theme.muted, cursor: "pointer", padding: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}
               >
                 <Trash2 size={16} />
               </button>
               {naturallyLocked && (
                 <button
-                  onClick={() => {
-                    if (forceUnlocked) {
-                      setForceUnlocked(false);
-                    } else if (window.confirm("تبي تعدل هذي المباراة المنتهية؟")) {
-                      setForceUnlocked(true);
-                    }
-                  }}
+                  onClick={() => { if (forceUnlocked) { setForceUnlocked(false); } else if (window.confirm("تبي تعدل هذي المباراة المنتهية؟")) { setForceUnlocked(true); } }}
                   aria-label="تعديل المباراة"
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    color: forceUnlocked ? theme.primary : theme.muted,
-                    cursor: "pointer",
-                    padding: "4px",
-                    width: "24px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
+                  style={{ background: "transparent", border: "none", color: forceUnlocked ? theme.primary : theme.muted, cursor: "pointer", padding: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}
                 >
                   <Pencil size={16} />
                 </button>
               )}
             </div>
+
+            {/* Away column */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", flex: 1 }}>
+              <TeamDisplay
+                name={draft.away || "الفريق الثاني"}
+                logo={draft.awayLogo}
+                theme={theme}
+                venueLabel={draft.venueTeam === "away" ? "المستضيف" : draft.venueTeam === "home" ? "الضيف" : null}
+              />
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", marginTop: "4px", width: "100%" }}>
+                <span style={{ fontSize: "10px", color: theme.muted, fontWeight: 600 }}>النتيجة الفعلية</span>
+                <ScoreInput value={draft.actualAway} onChange={(v) => updateDraft({ ...draft, actualAway: num(v) })} actual theme={theme} disabled={isLocked} />
+              </div>
+              <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "4px" }}>
+                <TeamPicker
+                  value={draft.away}
+                  logo={draft.awayLogo}
+                  onChange={(name, logo) => updateDraft({ ...draft, away: name, awayLogo: logo })}
+                  clubs={clubs}
+                  placeholder="الفريق الثاني"
+                  theme={theme}
+                  disabled={naturallyLocked}
+                />
+                <button
+                  onClick={() => updateDraft({ ...draft, venueTeam: draft.venueTeam === "away" ? null : "away" })}
+                  disabled={naturallyLocked}
+                  style={{
+                    background: draft.venueTeam === "away" ? theme.violetSoft : "transparent",
+                    border: `1px solid ${draft.venueTeam === "away" ? theme.violet : theme.inputBorder}`,
+                    color: draft.venueTeam === "away" ? theme.violet : theme.muted,
+                    borderRadius: "8px",
+                    padding: "3px 8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "4px",
+                    cursor: naturallyLocked ? "not-allowed" : "pointer",
+                    fontFamily: "Cairo, sans-serif",
+                    fontSize: "10px",
+                    fontWeight: 600,
+                  }}
+                >
+                  <Home size={12} />
+                  مستضيف
+                </button>
+              </div>
+            </div>
           </div>
 
-          {/* Admin only enters the actual result - no predictions, no points */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <div style={{ fontSize: "11px", color: theme.muted, fontWeight: 600, marginBottom: "8px" }}>
-              النتيجة الفعلية
-            </div>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              <ScoreInput value={draft.actualHome} onChange={(v) => updateDraft({ ...draft, actualHome: num(v) })} actual theme={theme} />
-              <span style={{ color: theme.muted, fontWeight: 700 }}>-</span>
-              <ScoreInput value={draft.actualAway} onChange={(v) => updateDraft({ ...draft, actualAway: num(v) })} actual theme={theme} />
-            </div>
+          {/* Save button */}
+          <div style={{ borderTop: `1px solid ${theme.border}`, paddingTop: "12px" }}>
+            <button
+              onClick={save}
+              disabled={!dirty}
+              style={{
+                width: "100%",
+                border: dirty ? `1.5px solid ${theme.violet}` : `1.5px solid ${theme.inputBorder}`,
+                background: dirty ? theme.violet : "transparent",
+                color: dirty ? "#FFFFFF" : theme.muted,
+                borderRadius: "8px",
+                padding: "9px 18px",
+                fontFamily: "Cairo, sans-serif",
+                fontWeight: 800,
+                fontSize: "12px",
+                cursor: dirty ? "pointer" : "not-allowed",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "6px",
+              }}
+            >
+              <Check size={14} />
+              {dirty ? "حفظ التعديلات" : "تم الحفظ"}
+            </button>
           </div>
-
-          {/* Save button - commits all staged edits (tournament, teams,
-              date/time, double-points, actual result) at once. */}
-          <button
-            onClick={save}
-            disabled={!dirty}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "6px",
-              width: "100%",
-              marginTop: "16px",
-              padding: "10px 0",
-              borderRadius: "10px",
-              border: "none",
-              background: dirty ? theme.violet : theme.inputBorder,
-              color: dirty ? "#FFFFFF" : theme.muted,
-              fontFamily: "Cairo, sans-serif",
-              fontWeight: 700,
-              fontSize: "10px",
-              cursor: dirty ? "pointer" : "not-allowed",
-            }}
-          >
-            <Check size={15} />
-            {dirty ? "حفظ التعديلات" : "تم الحفظ"}
-          </button>
         </div>
+
+        {/* Predictions list */}
         {allPredictionRows && (() => {
           const matchPreds = allPredictionRows
             .filter((r) => r.match_id === match.id && r.pred_home !== null && r.pred_away !== null)
