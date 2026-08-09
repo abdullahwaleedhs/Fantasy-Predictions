@@ -1671,18 +1671,15 @@ function DateTimeRow({ match, onChange, theme, disabled }) {
     <div
       style={{
         display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: "6px",
+        flexDirection: "column",
+        gap: "8px",
         padding: "10px 12px",
         background: theme.bg,
         borderBottom: `1px solid ${theme.border}`,
-        flexWrap: "nowrap",
-        overflow: "hidden",
       }}
     >
-      {/* Right side (in RTL, appears first): date + time pickers */}
-      <div style={{ display: "flex", alignItems: "center", gap: "4px", minWidth: 0, flexWrap: "nowrap", flexShrink: 0 }}>
+      {/* Date + time pickers row */}
+      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
           <Calendar size={13} color={theme.muted} />
           <DateCalendarPicker
@@ -1692,7 +1689,6 @@ function DateTimeRow({ match, onChange, theme, disabled }) {
             disabled={isLocked}
           />
         </div>
-
         <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
           <Clock size={13} color={theme.muted} />
           <TimeFlexPicker
@@ -1704,10 +1700,8 @@ function DateTimeRow({ match, onChange, theme, disabled }) {
         </div>
       </div>
 
-      {/* Left side: countdown badge, always stays on this line */}
-      <div style={{ flexShrink: 0 }}>
-        <CountdownBadge kickoffISO={kickoffISO} theme={theme} />
-      </div>
+      {/* Countdown on its own row so it never overflows */}
+      <CountdownBadge kickoffISO={kickoffISO} theme={theme} />
     </div>
   );
 }
