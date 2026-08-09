@@ -1082,7 +1082,7 @@ function useCountdown(kickoffISO) {
 // participant (MatchInfoBar) views. Shows day:hour:minute:second with small
 // labels under each segment, solid violet background, black text, and the
 // lock/unlock icon positioned on the left (reversed from RTL default).
-function CountdownBadge({ kickoffISO, theme }) {
+function CountdownBadge({ kickoffISO, theme, small }) {
   const { locked, parts } = useCountdown(kickoffISO);
 
   if (!kickoffISO) {
@@ -1129,11 +1129,11 @@ function CountdownBadge({ kickoffISO, theme }) {
       ) : (
         segments && segments.map((seg, i) => (
           <div key={seg.label} style={{ display: "flex", alignItems: "center" }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: "22px" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: small ? "16px" : "22px" }}>
               <span
                 style={{
                   fontFamily: "Cairo, sans-serif",
-                  fontSize: "11px",
+                  fontSize: small ? "9px" : "11px",
                   fontWeight: 800,
                   color: stateColor,
                   fontVariantNumeric: "tabular-nums",
@@ -1145,7 +1145,7 @@ function CountdownBadge({ kickoffISO, theme }) {
               <span
                 style={{
                   fontFamily: "Cairo, sans-serif",
-                  fontSize: "7px",
+                  fontSize: small ? "5px" : "7px",
                   fontWeight: 600,
                   color: stateColor,
                   lineHeight: "1",
@@ -1155,7 +1155,7 @@ function CountdownBadge({ kickoffISO, theme }) {
               </span>
             </div>
             {i < segments.length - 1 && (
-              <span style={{ fontFamily: "Cairo, sans-serif", fontSize: "11px", fontWeight: 700, color: stateColor, margin: "0 1px", lineHeight: "1", paddingBottom: "6px" }}>:</span>
+              <span style={{ fontFamily: "Cairo, sans-serif", fontSize: small ? "9px" : "11px", fontWeight: 700, color: stateColor, margin: "0 1px", lineHeight: "1", paddingBottom: small ? "4px" : "6px" }}>:</span>
             )}
           </div>
         ))
@@ -1671,15 +1671,16 @@ function DateTimeRow({ match, onChange, theme, disabled }) {
     <div
       style={{
         display: "flex",
-        flexDirection: "column",
-        gap: "8px",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: "6px",
         padding: "10px 12px",
         background: theme.bg,
         borderBottom: `1px solid ${theme.border}`,
+        overflow: "hidden",
       }}
     >
-      {/* Date + time pickers row */}
-      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
           <Calendar size={13} color={theme.muted} />
           <DateCalendarPicker
@@ -1700,8 +1701,9 @@ function DateTimeRow({ match, onChange, theme, disabled }) {
         </div>
       </div>
 
-      {/* Countdown on its own row so it never overflows */}
-      <CountdownBadge kickoffISO={kickoffISO} theme={theme} />
+      <div style={{ flexShrink: 0 }}>
+        <CountdownBadge kickoffISO={kickoffISO} theme={theme} small />
+      </div>
     </div>
   );
 }
