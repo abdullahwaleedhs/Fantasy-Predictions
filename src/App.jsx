@@ -2413,7 +2413,11 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
           const fmt = (iso) => {
             if (!iso) return "—";
             const d = new Date(iso);
-            return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) + " " + d.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" });
+            const day = d.getDate();
+            const month = d.toLocaleDateString("en-GB", { month: "short" });
+            const year = d.getFullYear();
+            const time = d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+            return `${day} ${month} ${year} ${time}`;
           };
           return (
             <div style={{ borderTop: `1px solid ${theme.border}` }}>
