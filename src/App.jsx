@@ -1091,10 +1091,10 @@ function CountdownBadge({ kickoffISO, theme }) {
 
   const segments = parts
     ? [
-        { value: parts.days, label: "DAY" },
-        { value: parts.hours, label: "HOURS" },
-        { value: parts.minutes, label: "MIN" },
-        { value: parts.seconds, label: "SEC" },
+        { value: parts.seconds, label: "ثانية" },
+        { value: parts.minutes, label: "دقيقة" },
+        { value: parts.hours, label: "ساعة" },
+        { value: parts.days, label: "يوم" },
       ]
     : null;
 
@@ -1102,7 +1102,7 @@ function CountdownBadge({ kickoffISO, theme }) {
 
   return (
     <div
-      dir="ltr"
+      dir="rtl"
       style={{
         display: "flex",
         flexDirection: "row",
@@ -2429,7 +2429,7 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
           const fmt = (iso) => {
             if (!iso) return "—";
             const d = new Date(iso);
-            return d.toLocaleDateString("ar-SA", { day: "numeric", month: "short" }) + " " + d.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" });
+            return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) + " " + d.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" });
           };
           return (
             <div style={{ borderTop: `1px solid ${theme.border}` }}>
