@@ -5921,6 +5921,7 @@ const NAV_ITEMS = [
   { id: "globalLeaderboard", label: "لوحة الترتيب العام", icon: Crown, color: (t) => "#D4AF37" },
   { id: "stats", label: "الإحصائيات", icon: BarChart3, color: (t) => t.accent },
   { id: "pointsSystem", label: "نظام النقاط", icon: Award, color: (t) => t.violet },
+  { id: "prizes", label: "الجوائز", icon: Crown, color: (t) => "#D4AF37" },
   { id: "profile", label: "الملف الشخصي", icon: User, color: (t) => t.blue },
 ];
 
@@ -7193,6 +7194,18 @@ export default function App() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {activePage === "prizes" && (
+        <div style={{ padding: "20px 16px" }}>
+          <div style={{ fontSize: "18px", fontWeight: 800, color: theme.text, marginBottom: "16px", textAlign: "right" }}>الجوائز</div>
+          <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "14px", padding: "20px 18px", textAlign: "center" }}>
+            <Crown size={36} color="#D4AF37" style={{ marginBottom: "12px" }} />
+            <p style={{ fontSize: "14px", color: theme.text, fontWeight: 600, lineHeight: 1.8 }}>
+              سيتم تحديد الجوائز في منتصف الموسم بعد رؤية مستوى الفعالية من قبل المشاركين
+            </p>
           </div>
         </div>
       )}
