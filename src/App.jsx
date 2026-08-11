@@ -6989,12 +6989,14 @@ export default function App() {
                 borderBottom: `1px solid ${theme.border}`,
               }}
             >
-              <span>
-                <strong style={{ color: theme.text }}>• الدبل:</strong> يتم تفعيله من قبل الادمن مباراة واحدة لكل أسبوع وتكون المباراة بالإطار الذهبي
-              </span>
-              <span>
-                <strong style={{ color: theme.text }}>• التربل:</strong> يتم تفعيله من قبل اللاعبين ومتوفر ٣ مرات طوال الموسم ولا يمكن تفعيله على مباراة الدبل
-              </span>
+              <div style={{ display: "flex", gap: "4px", alignItems: "flex-start" }}>
+                <strong style={{ color: theme.text, flexShrink: 0 }}>• الدبل:</strong>
+                <span>يتم تفعيله من قبل الادمن مباراة واحدة لكل أسبوع وتكون المباراة بالإطار الذهبي</span>
+              </div>
+              <div style={{ display: "flex", gap: "4px", alignItems: "flex-start" }}>
+                <strong style={{ color: theme.text, flexShrink: 0 }}>• التربل:</strong>
+                <span>يتم تفعيله من قبل اللاعبين ومتوفر ٣ مرات طوال الموسم ولا يمكن تفعيله على مباراة الدبل</span>
+              </div>
             </div>
 
             {/* Matches */}
