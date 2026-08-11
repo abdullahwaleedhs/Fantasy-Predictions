@@ -2739,14 +2739,12 @@ function monthLabel(ym) {
   return `${AR_MONTHS[parseInt(m, 10) - 1]} ${y}`;
 }
 
-function getFinishedMonths(matches) {
-  const seen = new Set();
-  matches.forEach((m) => {
-    if (m.date && m.actualHome !== "" && m.actualHome != null && m.actualAway !== "" && m.actualAway != null) {
-      seen.add(m.date.slice(0, 7));
-    }
-  });
-  return [...seen].sort();
+function getFinishedMonths() {
+  // Fixed season months: Aug 2026 → Jun 2027
+  return [
+    "2026-08","2026-09","2026-10","2026-11","2026-12",
+    "2027-01","2027-02","2027-03","2027-04","2027-05","2027-06",
+  ];
 }
 
 function filterMatchesByMonth(matches, month) {
@@ -2766,7 +2764,7 @@ function MonthFilterPicker({ value, onChange, matches, theme }) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const months = getFinishedMonths(matches);
+  const months = getFinishedMonths();
   const options = ["الكل", ...months];
 
   return (
