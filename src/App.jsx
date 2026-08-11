@@ -5323,54 +5323,53 @@ function HomePage({ theme, onNavigate, onGoToPredictions, onOpenLeague, currentU
 
         {/* Next 24h matches */}
         <HomeSectionHeader title="مباريات متاحة لم يتم توقعها" onMore={() => onGoToPredictions()} theme={theme} />
-        <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "14px", overflow: "hidden", marginBottom: "20px" }}>
+        <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "14px", padding: "8px", marginBottom: "20px" }}>
           {unpredictedMatches.length === 0 ? (
-            <p style={{ fontSize: "13px", color: theme.muted, textAlign: "center", padding: "20px 0" }}>أحسنت! توقعت كل المباريات المتاحة</p>
+            <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "16px 0" }}>أحسنت! توقعت كل المباريات المتاحة</p>
           ) : (
-            unpredictedMatches.slice(0, 5).map((m, idx) => {
+            unpredictedMatches.slice(0, 5).map((m) => {
               const kickoffISO = `${m.date}T${m.time}:00`;
               return (
                 <div
                   key={m.id}
-                  style={{ padding: "14px 16px", borderBottom: idx < Math.min(unpredictedMatches.length, 5) - 1 ? `1px solid ${theme.border}` : "none" }}
+                  style={{ padding: "10px 10px", borderBottom: `1px solid ${theme.border}` }}
                 >
                   {m.tournament && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "8px" }}>
-                      <TournamentIcon name={m.tournament} logo={tournamentLogos?.[m.tournament]} theme={theme} size={11} color={theme.muted} />
-                      <span style={{ fontSize: "10px", color: theme.muted, fontWeight: 600 }}>{m.tournament}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "4px", marginBottom: "5px" }}>
+                      <TournamentIcon name={m.tournament} logo={tournamentLogos?.[m.tournament]} theme={theme} size={9} color={theme.muted} />
+                      <span style={{ fontSize: "8px", color: theme.muted, fontWeight: 600 }}>{m.tournament}</span>
                     </div>
                   )}
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
-                    <div style={{ flexShrink: 0 }}>
-                      <CountdownBadge kickoffISO={kickoffISO} theme={theme} small />
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+                    <div style={{ fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "12px", color: theme.text }}>
+                      {m.home} <span style={{ color: theme.muted, fontWeight: 400, fontSize: "10px" }}>vs</span> {m.away}
                     </div>
-                    <div style={{ fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "15px", color: theme.text, textAlign: "right" }}>
-                      {m.home} <span style={{ color: theme.muted, fontWeight: 400, fontSize: "12px" }}>vs</span> {m.away}
+                    <div style={{ flexShrink: 0 }}>
+                      <CountdownBadge kickoffISO={kickoffISO} theme={theme} />
                     </div>
                   </div>
                 </div>
               );
             })
           )}
-          <div style={{ padding: "10px 12px", borderTop: unpredictedMatches.length > 0 ? `1px solid ${theme.border}` : "none" }}>
-            <button
-              onClick={() => onGoToPredictions()}
-              style={{
-                width: "100%",
-                background: theme.violet,
-                color: "#fff",
-                border: "none",
-                borderRadius: "10px",
-                padding: "14px",
-                fontFamily: "Cairo, sans-serif",
-                fontWeight: 800,
-                fontSize: "15px",
-                cursor: "pointer",
-              }}
-            >
-              {unpredictedMatches.length === 0 ? "شاهد توقعك" : "أدخل توقعك"}
-            </button>
-          </div>
+          <button
+            onClick={() => onGoToPredictions()}
+            style={{
+              width: "100%",
+              marginTop: "6px",
+              background: theme.violet,
+              color: "#fff",
+              border: "none",
+              borderRadius: "10px",
+              padding: "11px",
+              fontFamily: "Cairo, sans-serif",
+              fontWeight: 800,
+              fontSize: "13px",
+              cursor: "pointer",
+            }}
+          >
+            {unpredictedMatches.length === 0 ? "شاهد توقعك" : "أدخل توقعك"}
+          </button>
         </div>
 
         {/* My leagues */}
