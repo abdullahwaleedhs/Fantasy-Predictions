@@ -5349,7 +5349,7 @@ function HomePage({ theme, onNavigate, onGoToPredictions, onOpenLeague, currentU
             })
           )}
           <button
-            onClick={() => onGoToPredictions()}
+            onClick={() => onGoToPredictions(unpredictedMatches.length === 0 ? "predicted" : "available")}
             style={{
               width: "100%",
               marginTop: "6px",
@@ -7214,7 +7214,7 @@ export default function App() {
         <HomePage
           theme={theme}
           onNavigate={setActivePage}
-          onGoToPredictions={() => { setPredictionsTabView("available"); setActivePage("predictions"); }}
+          onGoToPredictions={(tab) => { setPredictionsTabView(tab || "available"); setActivePage("predictions"); }}
           onOpenLeague={(id) => { setOpenLeagueId(id); setActivePage("leagues"); }}
           currentUser={currentUser}
           matches={matches}
