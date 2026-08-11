@@ -6991,7 +6991,7 @@ export default function App() {
             >
               <div style={{ display: "flex", gap: "4px", alignItems: "flex-start" }}>
                 <strong style={{ color: theme.text, flexShrink: 0 }}>• الدبل:</strong>
-                <span>يتم تفعيله من قبل الادمن مباراة واحدة لكل أسبوع وتكون المباراة بالإطار الذهبي</span>
+                <span>يتم تفعيله من قبل المنظم مباراة واحدة لكل أسبوع وتكون المباراة بالإطار الذهبي</span>
               </div>
               <div style={{ display: "flex", gap: "4px", alignItems: "flex-start" }}>
                 <strong style={{ color: theme.text, flexShrink: 0 }}>• التربل:</strong>
