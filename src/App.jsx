@@ -4763,9 +4763,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
               ))}
             </div>
 
-            <p style={{ fontSize: "11px", color: theme.muted, textAlign: "center", marginTop: "14px" }}>
-              النقاط محسوبة من توقعات تجريبية على مباريات صفحة "توقع!" الحالية
-            </p>
+
           </>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
