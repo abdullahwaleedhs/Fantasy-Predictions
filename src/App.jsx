@@ -2429,7 +2429,7 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
               {matchPreds.map((r) => (
                 <div key={r.user_id} style={{ display: "grid", gridTemplateColumns: "1fr 60px 1fr", alignItems: "center", padding: "7px 12px", borderBottom: `1px solid ${theme.border}` }}>
                   <span style={{ fontSize: "11px", fontWeight: 700, color: theme.text }}>{r.profiles?.name || "—"}</span>
-                  <span style={{ fontSize: "11px", fontWeight: 800, color: theme.violet, textAlign: "center" }}>{r.pred_home}-{r.pred_away}</span>
+                  <span style={{ fontSize: "11px", fontWeight: 800, color: theme.violet, textAlign: "center" }}>{r.pred_away}-{r.pred_home}</span>
                   <span dir="ltr" style={{ fontSize: "9px", color: theme.muted, textAlign: "left", display: "block" }}>{fmt(r.updated_at)}</span>
                 </div>
               ))}
