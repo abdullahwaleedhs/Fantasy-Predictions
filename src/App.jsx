@@ -6747,27 +6747,33 @@ export default function App() {
       }
       const prevBoost = !!prevPred?.userBoost;
       const nextBoost = !!predictionFields.userBoost;
-      if (prevBoost !== nextBoost) {
-        const newBoostsRemaining = boostsRemaining + (nextBoost ? -1 : 1);
-        setBoostsRemainingDB(currentUser.id, newBoostsRemaining);
-        setCurrentUser((u) => ({ ...u, boosts_remaining: newBoostsRemaining }));
-      }
+      const boostChanged = prevBoost !== nextBoost;
 
-      upsertPredictionDB(currentUser.id, id, predictionFields);
-      bustAllPredictionsCache();
-      setPredictionsByMatch((prev) => ({ ...prev, [id]: predictionFields }));
-      setAllPredictionRows((prev) => {
-        const exists = prev.some((r) => r.match_id === id && r.user_id === currentUser.id);
-        const row = {
-          match_id: id,
-          user_id: currentUser.id,
-          pred_home: predictionFields.predHome === "" ? null : Number(predictionFields.predHome),
-          pred_away: predictionFields.predAway === "" ? null : Number(predictionFields.predAway),
-          user_boost: !!predictionFields.userBoost,
-          profiles: { name: currentUser.name, username: currentUser.username },
-        };
-        return exists ? prev.map((r) => (r.match_id === id && r.user_id === currentUser.id ? row : r)) : [...prev, row];
-      });
+      // Only touch the predictions table if the participant's own prediction
+      // or boost actually changed — not when the admin merely edits match
+      // details (home/away teams, actual result, date, etc.).
+      if (scoreChanged || boostChanged) {
+        if (boostChanged) {
+          const newBoostsRemaining = boostsRemaining + (nextBoost ? -1 : 1);
+          setBoostsRemainingDB(currentUser.id, newBoostsRemaining);
+          setCurrentUser((u) => ({ ...u, boosts_remaining: newBoostsRemaining }));
+        }
+        upsertPredictionDB(currentUser.id, id, predictionFields);
+        bustAllPredictionsCache();
+        setPredictionsByMatch((prev) => ({ ...prev, [id]: predictionFields }));
+        setAllPredictionRows((prev) => {
+          const exists = prev.some((r) => r.match_id === id && r.user_id === currentUser.id);
+          const row = {
+            match_id: id,
+            user_id: currentUser.id,
+            pred_home: predictionFields.predHome === "" ? null : Number(predictionFields.predHome),
+            pred_away: predictionFields.predAway === "" ? null : Number(predictionFields.predAway),
+            user_boost: !!predictionFields.userBoost,
+            profiles: { name: currentUser.name, username: currentUser.username },
+          };
+          return exists ? prev.map((r) => (r.match_id === id && r.user_id === currentUser.id ? row : r)) : [...prev, row];
+        });
+      }
     }
   };
 
