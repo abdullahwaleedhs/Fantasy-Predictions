@@ -4519,6 +4519,10 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
   // simulated/fake data for other members anymore.
   const matchById = Object.fromEntries(filteredMatches.map((m) => [m.id, m]));
 
+  const finishedMatchesSorted = filteredMatches.filter(isMatchFinished)
+    .sort((a, b) => new Date(`${b.date}T${b.time}:00+03:00`) - new Date(`${a.date}T${a.time}:00+03:00`));
+  const lastFinishedMatchForLeague = finishedMatchesSorted[0] || null;
+
   const realPointsByUserId = {};
   for (const row of allPredictionRows) {
     const match = matchById[row.match_id];
@@ -4526,9 +4530,13 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
     if (!isMatchFinished(match)) continue;
 
     if (!realPointsByUserId[row.user_id]) {
-      realPointsByUserId[row.user_id] = { points: 0, tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 } };
+      realPointsByUserId[row.user_id] = { points: 0, tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 }, lastMatchPredAt: null };
     }
     const entry = realPointsByUserId[row.user_id];
+
+    if (lastFinishedMatchForLeague && row.match_id === lastFinishedMatchForLeague.id && row.updated_at) {
+      entry.lastMatchPredAt = row.updated_at;
+    }
 
     const adminMultiplier = match.doublePoints ? 2 : 1;
     const userMultiplier = row.user_boost ? 3 : 1;
@@ -4553,9 +4561,18 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
         ...p,
         points: stats ? stats.points : 0,
         tierCounts: stats ? stats.tierCounts : { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 },
+        lastMatchPredAt: stats ? stats.lastMatchPredAt : null,
       };
     })
-    .sort((a, b) => b.points - a.points || compareTierCounts(a.tierCounts, b.tierCounts));
+    .sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      const tierDiff = compareTierCounts(a.tierCounts, b.tierCounts);
+      if (tierDiff !== 0) return tierDiff;
+      if (a.lastMatchPredAt && b.lastMatchPredAt) return new Date(a.lastMatchPredAt) - new Date(b.lastMatchPredAt);
+      if (a.lastMatchPredAt) return -1;
+      if (b.lastMatchPredAt) return 1;
+      return 0;
+    });
 
   // التوقعات tab: every finished match, most recently finished first.
   const predictionRowsByUserId = {};
@@ -6711,6 +6728,7 @@ export default function App() {
             pred_home: predictionFields.predHome === "" ? null : Number(predictionFields.predHome),
             pred_away: predictionFields.predAway === "" ? null : Number(predictionFields.predAway),
             user_boost: !!predictionFields.userBoost,
+            updated_at: new Date().toISOString(),
             profiles: { name: currentUser.name, username: currentUser.username },
           };
           return exists ? prev.map((r) => (r.match_id === id && r.user_id === currentUser.id ? row : r)) : [...prev, row];
