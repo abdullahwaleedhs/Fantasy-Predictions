@@ -4519,7 +4519,7 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
           </p>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            {ranked.map((p, i) => (
+            {ranked.slice(0, 5).map((p, i) => (
               <LeaderboardRow key={p.id} rank={i + 1} name={p.name} username={p.username} points={p.points} isYou={p.isYou} theme={theme} onViewProfile={() => onViewProfile(p)} />
             ))}
           </div>
