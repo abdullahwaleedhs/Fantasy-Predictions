@@ -5206,11 +5206,17 @@ function HomePage({ theme, onNavigate, onGoToPredictions, onOpenLeague, currentU
       leagues
         .filter((l) => l.players.some((p) => p.isYou))
         .map((l) => {
-          const ranked = [...l.players].sort((a, b) => (pointsByUserId[b.userId] || 0) - (pointsByUserId[a.userId] || 0));
+          const globalRankById = Object.fromEntries(globalRanked.map((p, i) => [p.id, i]));
+          const ranked = [...l.players].sort((a, b) => {
+            const pa = pointsByUserId[a.userId] || 0;
+            const pb = pointsByUserId[b.userId] || 0;
+            if (pb !== pa) return pb - pa;
+            return (globalRankById[a.userId] ?? 9999) - (globalRankById[b.userId] ?? 9999);
+          });
           const myRank = ranked.findIndex((p) => p.isYou) + 1;
           return { ...l, myRank, memberCount: l.players.length };
         }),
-    [leagues, pointsByUserId]
+    [leagues, pointsByUserId, globalRanked]
   );
 
   const tierCounts = me?.tierCounts || { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 };
@@ -5394,36 +5400,34 @@ function HomePage({ theme, onNavigate, onGoToPredictions, onOpenLeague, currentU
           {globalRanked.length === 0 ? (
             <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "12px 0" }}>لا يوجد توقعات لمباريات منتهية بعد</p>
           ) : (
-            <>
-              {globalRanked.slice(0, 5).map((p, i) => (
-                <div
-                  key={p.id}
-                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 2px", fontSize: "12px", borderBottom: `1px solid ${theme.border}` }}
-                >
-                  <span style={{ display: "flex", alignItems: "center" }}>
-                    <span style={{ width: "20px", height: "20px", borderRadius: "50%", background: p.isYou ? theme.violet : theme.violetSoft, color: p.isYou ? "#fff" : theme.violet, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "10px", marginLeft: "8px", fontWeight: 700 }}>
-                      {i + 1}
-                    </span>
-                    <span style={{ fontWeight: p.isYou ? 700 : 400, color: p.isYou ? theme.violet : theme.text }}>{p.isYou ? "أنت" : p.name}</span>
+            globalRanked.slice(0, 5).map((p, i) => (
+              <div
+                key={p.id}
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 2px", fontSize: "12px", borderBottom: `1px solid ${theme.border}` }}
+              >
+                <span style={{ display: "flex", alignItems: "center" }}>
+                  <span
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                      borderRadius: "50%",
+                      background: theme.violetSoft,
+                      color: theme.violet,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "10px",
+                      marginLeft: "8px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {i + 1}
                   </span>
-                  <span style={{ color: p.isYou ? theme.violet : theme.text, fontWeight: p.isYou ? 700 : 400 }}>{p.points} نقطة</span>
-                </div>
-              ))}
-              {myGlobalRank > 5 && me && (
-                <>
-                  <div style={{ textAlign: "center", fontSize: "10px", color: theme.muted, padding: "4px 0" }}>•••</div>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 2px", fontSize: "12px", background: theme.violetSoft, borderRadius: "8px" }}>
-                    <span style={{ display: "flex", alignItems: "center" }}>
-                      <span style={{ width: "20px", height: "20px", borderRadius: "50%", background: theme.violet, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "10px", marginLeft: "8px", fontWeight: 700 }}>
-                        {myGlobalRank}
-                      </span>
-                      <span style={{ fontWeight: 700, color: theme.violet }}>أنت</span>
-                    </span>
-                    <span style={{ color: theme.violet, fontWeight: 700 }}>{me.points} نقطة</span>
-                  </div>
-                </>
-              )}
-            </>
+                  {p.isYou ? "أنت" : p.name}
+                </span>
+                <span style={{ color: p.isYou ? theme.violet : theme.text, fontWeight: p.isYou ? 700 : 400 }}>{p.points} نقطة</span>
+              </div>
+            ))
           )}
         </div>
 
