@@ -5394,34 +5394,36 @@ function HomePage({ theme, onNavigate, onGoToPredictions, onOpenLeague, currentU
           {globalRanked.length === 0 ? (
             <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "12px 0" }}>لا يوجد توقعات لمباريات منتهية بعد</p>
           ) : (
-            globalRanked.slice(0, 5).map((p, i) => (
-              <div
-                key={p.id}
-                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 2px", fontSize: "12px", borderBottom: `1px solid ${theme.border}` }}
-              >
-                <span style={{ display: "flex", alignItems: "center" }}>
-                  <span
-                    style={{
-                      width: "20px",
-                      height: "20px",
-                      borderRadius: "50%",
-                      background: theme.violetSoft,
-                      color: theme.violet,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "10px",
-                      marginLeft: "8px",
-                      fontWeight: 700,
-                    }}
-                  >
-                    {i + 1}
+            <>
+              {globalRanked.slice(0, 5).map((p, i) => (
+                <div
+                  key={p.id}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 2px", fontSize: "12px", borderBottom: `1px solid ${theme.border}` }}
+                >
+                  <span style={{ display: "flex", alignItems: "center" }}>
+                    <span style={{ width: "20px", height: "20px", borderRadius: "50%", background: p.isYou ? theme.violet : theme.violetSoft, color: p.isYou ? "#fff" : theme.violet, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "10px", marginLeft: "8px", fontWeight: 700 }}>
+                      {i + 1}
+                    </span>
+                    <span style={{ fontWeight: p.isYou ? 700 : 400, color: p.isYou ? theme.violet : theme.text }}>{p.isYou ? "أنت" : p.name}</span>
                   </span>
-                  {p.isYou ? "أنت" : p.name}
-                </span>
-                <span style={{ color: p.isYou ? theme.violet : theme.text, fontWeight: p.isYou ? 700 : 400 }}>{p.points} نقطة</span>
-              </div>
-            ))
+                  <span style={{ color: p.isYou ? theme.violet : theme.text, fontWeight: p.isYou ? 700 : 400 }}>{p.points} نقطة</span>
+                </div>
+              ))}
+              {myGlobalRank > 5 && me && (
+                <>
+                  <div style={{ textAlign: "center", fontSize: "10px", color: theme.muted, padding: "4px 0" }}>•••</div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 2px", fontSize: "12px", background: theme.violetSoft, borderRadius: "8px" }}>
+                    <span style={{ display: "flex", alignItems: "center" }}>
+                      <span style={{ width: "20px", height: "20px", borderRadius: "50%", background: theme.violet, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "10px", marginLeft: "8px", fontWeight: 700 }}>
+                        {myGlobalRank}
+                      </span>
+                      <span style={{ fontWeight: 700, color: theme.violet }}>أنت</span>
+                    </span>
+                    <span style={{ color: theme.violet, fontWeight: 700 }}>{me.points} نقطة</span>
+                  </div>
+                </>
+              )}
+            </>
           )}
         </div>
 
