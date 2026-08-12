@@ -439,7 +439,7 @@ function isMatchFinished(m) {
   const hasActual = m.actualHome !== "" && m.actualHome != null && m.actualAway !== "" && m.actualAway != null;
   if (!hasActual) return false;
   if (!m.date || !m.time) return true;
-  return new Date(`${m.date}T${m.time}:00`).getTime() - serverNow() <= 0;
+  return new Date(`${m.date}T${m.time}:00+03:00`).getTime() - serverNow() <= 0;
 }
 
 // Kickoff has passed, regardless of whether the admin has entered a result
@@ -447,7 +447,7 @@ function isMatchFinished(m) {
 // "بإنتظار النتيجة") as soon as it locks, not only once it's fully finished.
 function isMatchLocked(m) {
   if (!m.date || !m.time) return false;
-  return new Date(`${m.date}T${m.time}:00`).getTime() - serverNow() <= 0;
+  return new Date(`${m.date}T${m.time}:00+03:00`).getTime() - serverNow() <= 0;
 }
 
 // Computes all statistics shown on the stats page from the current matches.
@@ -1664,7 +1664,7 @@ function TimeFlexPicker({ value, onChange, theme, disabled }) {
 }
 
 function DateTimeRow({ match, onChange, theme, disabled }) {
-  const kickoffISO = match.date && match.time ? `${match.date}T${match.time}:00` : null;
+  const kickoffISO = match.date && match.time ? `${match.date}T${match.time}:00+03:00` : null;
   const isLocked = disabled;
 
   return (
@@ -1774,7 +1774,7 @@ function DoublePointsToggle({ match, onChange, theme, disabled }) {
 // Read-only version of the schedule bar for the restricted user view:
 // shows date/time/countdown/lock as plain text, no editable pickers.
 function MatchInfoBar({ match, theme, dark }) {
-  const kickoffISO = match.date && match.time ? `${match.date}T${match.time}:00` : null;
+  const kickoffISO = match.date && match.time ? `${match.date}T${match.time}:00+03:00` : null;
 
   const dateLabel = match.date
     ? (() => {
@@ -1881,7 +1881,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
 
   const num = (v) => (v === "" ? "" : String(v).replace(/[^0-9]/g, "").slice(0, 2));
 
-  const kickoffISO = match.date && match.time ? `${match.date}T${match.time}:00` : null;
+  const kickoffISO = match.date && match.time ? `${match.date}T${match.time}:00+03:00` : null;
   const isLocked = kickoffISO ? new Date(kickoffISO).getTime() - serverNow() <= 0 : false;
 
   const hasActual = match.actualHome !== "" && match.actualAway !== "" && match.actualHome != null && match.actualAway != null;
@@ -2221,7 +2221,7 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
     setDirty(false);
   };
 
-  const kickoffISO = draft.date && draft.time ? `${draft.date}T${draft.time}:00` : null;
+  const kickoffISO = draft.date && draft.time ? `${draft.date}T${draft.time}:00+03:00` : null;
   const naturallyLocked = kickoffISO ? new Date(kickoffISO).getTime() - serverNow() <= 0 : false;
 
   // المنظم يقدر يفتح مباراة منتهية للتعديل بعد تأكيد، بدل ما تبقى مقفلة للأبد.
@@ -3502,7 +3502,7 @@ function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
             .filter((m) => {
               if (!predMap[m.id]) return false;
               if (!m.date || !m.time) return m.actualHome !== "";
-              return new Date(`${m.date}T${m.time}:00`).getTime() <= serverNow();
+              return new Date(`${m.date}T${m.time}:00+03:00`).getTime() <= serverNow();
             })
             .sort((a, b) => {
               const da = (a.date || "") + " " + (a.time || "");
@@ -5216,7 +5216,7 @@ function HomePage({ theme, onNavigate, onGoToPredictions, onOpenLeague, currentU
     const now = serverNow();
     return matches
       .filter((m) => m.date && m.time)
-      .map((m) => ({ ...m, kickoff: new Date(`${m.date}T${m.time}:00`).getTime() }))
+      .map((m) => ({ ...m, kickoff: new Date(`${m.date}T${m.time}:00+03:00`).getTime() }))
       .filter((m) => m.kickoff > now && !myPredictedMatchIds.has(m.id))
       .sort((a, b) => a.kickoff - b.kickoff);
   }, [matches, myPredictedMatchIds]);
@@ -5324,7 +5324,7 @@ function HomePage({ theme, onNavigate, onGoToPredictions, onOpenLeague, currentU
             <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "16px 0" }}>أحسنت! توقعت كل المباريات المتاحة</p>
           ) : (
             unpredictedMatches.slice(0, 5).map((m) => {
-              const kickoffISO = `${m.date}T${m.time}:00`;
+              const kickoffISO = `${m.date}T${m.time}:00+03:00`;
               return (
                 <div
                   key={m.id}
@@ -6944,7 +6944,7 @@ export default function App() {
               {(() => {
                 const isLockedCount = (m) => {
                   if (!m.date || !m.time) return false;
-                  return new Date(`${m.date}T${m.time}:00`).getTime() - serverNow() <= 0;
+                  return new Date(`${m.date}T${m.time}:00+03:00`).getTime() - serverNow() <= 0;
                 };
                 const isPredictedCount = (m) => !!savedPredictions[m.id];
                 const scheduled = viewMode === "user" ? matches.filter((m) => m.date && m.time) : matches;
@@ -7001,7 +7001,7 @@ export default function App() {
             {(() => {
               const isLocked = (m) => {
                 if (!m.date || !m.time) return false;
-                return new Date(`${m.date}T${m.time}:00`).getTime() - serverNow() <= 0;
+                return new Date(`${m.date}T${m.time}:00+03:00`).getTime() - serverNow() <= 0;
               };
               const isPredicted = (m) => !!savedPredictions[m.id];
 
