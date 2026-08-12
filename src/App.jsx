@@ -3515,64 +3515,6 @@ function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
           </div>
         </div>
 
-        {/* Last 5 locked predictions */}
-        {(() => {
-          const userPreds = allPredictionRows.filter((r) => r.user_id === userId);
-          const predMap = Object.fromEntries(userPreds.map((r) => [r.match_id, r]));
-          const lockedMatches = matches
-            .filter((m) => {
-              if (!predMap[m.id]) return false;
-              if (!m.date || !m.time) return m.actualHome !== "";
-              return new Date(`${m.date}T${m.time}:00+03:00`).getTime() <= serverNow();
-            })
-            .sort((a, b) => {
-              const da = (a.date || "") + " " + (a.time || "");
-              const db = (b.date || "") + " " + (b.time || "");
-              return db.localeCompare(da);
-            })
-            .slice(0, 5);
-          if (lockedMatches.length === 0) return null;
-
-          const TIER_COLORS = { 10: theme.accent, 5: theme.navyBlue, 4: theme.sky, 3: theme.primary, 1: theme.muted, 0: theme.danger };
-          const GOLD = "#F59E0B";
-
-          return (
-            <div style={{ marginBottom: "14px" }}>
-              <p style={{ fontSize: "12px", fontWeight: 700, color: theme.muted, marginBottom: "8px" }}>آخر التوقعات</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                {lockedMatches.map((m) => {
-                  const pred = predMap[m.id];
-                  const hasResult = m.actualHome !== "" && m.actualAway !== "";
-                  const multiplier = pred.user_boost ? 2 : m.doublePoints ? 2 : 1;
-                  const result = hasResult ? calcPoints(pred.pred_home, pred.pred_away, m.actualHome, m.actualAway, multiplier) : null;
-                  const pts = result ? result.points : null;
-                  const boosted = multiplier > 1;
-                  const ptColor = boosted ? GOLD : (pts !== null ? (TIER_COLORS[result.basePoints] || theme.muted) : theme.muted);
-
-                  const predPill = !hasResult ? (
-                    <span style={{ fontSize: "10px", color: theme.muted, background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: "6px", padding: "3px 8px", whiteSpace: "nowrap" }}>لم تنته</span>
-                  ) : (
-                    <span dir="ltr" style={{ fontSize: "12px", fontWeight: 800, color: ptColor, background: boosted ? `${GOLD}18` : theme.bg, border: `1.5px solid ${ptColor}`, borderRadius: "6px", padding: "3px 8px", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
-                      {pred.pred_home ?? "—"} - {pred.pred_away ?? "—"}
-                    </span>
-                  );
-
-                  return (
-                    <div key={m.id} style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "10px", padding: "8px 10px", display: "flex", alignItems: "center", gap: "6px" }}>
-                      <span style={{ flex: 1, fontSize: "11px", fontWeight: 700, color: theme.text, textAlign: "left", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>{m.home}</span>
-                      {predPill}
-                      <span style={{ flex: 1, fontSize: "11px", fontWeight: 700, color: theme.text, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>{m.away}</span>
-                      <div style={{ minWidth: "34px", textAlign: "center", background: boosted ? `${GOLD}18` : theme.bg, border: `1.5px solid ${ptColor}`, borderRadius: "7px", padding: "3px 5px", flexShrink: 0 }}>
-                        <div style={{ fontSize: "13px", fontWeight: 900, color: ptColor, lineHeight: 1 }}>{pts ?? (hasResult ? "—" : "⏳")}</div>
-                        {hasResult && <div style={{ fontSize: "7px", color: theme.muted, marginTop: "1px" }}>نقطة</div>}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })()}
 
         {/* Stats donut */}
         <p style={{ fontSize: "12px", fontWeight: 700, color: theme.muted, marginBottom: "8px" }}>الإحصائيات</p>
@@ -3595,7 +3537,7 @@ function UserProfilePage({ user, matches, allPredictionRows, onBack, theme }) {
                 }}
               >
                 <div style={{ width: "86px", height: "86px", borderRadius: "50%", background: theme.surface, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ fontSize: "18px", fontWeight: 900, color: theme.text, lineHeight: 1 }}>{allPredictionRows.filter((r) => r.user_id === userId && r.pred_home !== null && r.pred_away !== null).length}</div>
+                  <div style={{ fontSize: "18px", fontWeight: 900, color: theme.text, lineHeight: 1 }}>{(() => { const finishedIds = new Set(matches.filter(isMatchFinished).map((m) => m.id)); return allPredictionRows.filter((r) => r.user_id === userId && r.pred_home !== null && r.pred_away !== null && finishedIds.has(r.match_id)).length; })()}</div>
                   <div style={{ fontSize: "8px", color: theme.muted, marginTop: "3px" }}>عدد التوقعات</div>
                 </div>
                 {tierColors
