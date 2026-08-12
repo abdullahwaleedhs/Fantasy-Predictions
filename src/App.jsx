@@ -2476,6 +2476,12 @@ function computeGlobalRanking(matches, allPredictionRows, currentUser) {
   const finishedMatchIds = new Set(matches.filter(isMatchFinished).map((m) => m.id));
   const finishedMatchCount = finishedMatchIds.size;
 
+  // Find the last finished match kickoff time to use for tiebreaker
+  const finishedMatches = matches.filter(isMatchFinished);
+  const lastFinishedMatch = finishedMatches.length > 0
+    ? finishedMatches.reduce((a, b) => new Date(`${a.date}T${a.time}:00+03:00`) > new Date(`${b.date}T${b.time}:00+03:00`) ? a : b)
+    : null;
+
   const byUser = {};
   const predictedMatchIdsByUser = {};
   for (const row of allPredictionRows) {
@@ -2490,10 +2496,16 @@ function computeGlobalRanking(matches, allPredictionRows, currentUser) {
         username: row.profiles?.username || null,
         points: 0,
         tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 },
+        lastMatchPredAt: null,
       };
       predictedMatchIdsByUser[row.user_id] = new Set();
     }
     const entry = byUser[row.user_id];
+
+    // Track when this user submitted their prediction for the last finished match
+    if (lastFinishedMatch && row.match_id === lastFinishedMatch.id && row.updated_at) {
+      entry.lastMatchPredAt = row.updated_at;
+    }
 
     const adminMultiplier = match.doublePoints ? 2 : 1;
     const userMultiplier = row.user_boost ? 3 : 1;
@@ -2532,7 +2544,16 @@ function computeGlobalRanking(matches, allPredictionRows, currentUser) {
     });
   }
 
-  return [...players].sort((a, b) => b.points - a.points || compareTierCounts(a.tierCounts, b.tierCounts));
+  return [...players].sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    const tierDiff = compareTierCounts(a.tierCounts, b.tierCounts);
+    if (tierDiff !== 0) return tierDiff;
+    // Tiebreaker: earliest prediction on last finished match wins
+    if (a.lastMatchPredAt && b.lastMatchPredAt) return new Date(a.lastMatchPredAt) - new Date(b.lastMatchPredAt);
+    if (a.lastMatchPredAt) return -1;
+    if (b.lastMatchPredAt) return 1;
+    return 0;
+  });
 }
 
 // Logos/avatars are stored as base64 directly in the database (no file
@@ -4519,7 +4540,7 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
           </p>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            {ranked.slice(0, 5).map((p, i) => (
+            {ranked.map((p, i) => (
               <LeaderboardRow key={p.id} rank={i + 1} name={p.name} username={p.username} points={p.points} isYou={p.isYou} theme={theme} onViewProfile={() => onViewProfile(p)} />
             ))}
           </div>
@@ -5414,7 +5435,7 @@ function HomePage({ theme, onNavigate, onGoToPredictions, onOpenLeague, currentU
           {globalRanked.length === 0 ? (
             <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "12px 0" }}>لا يوجد توقعات لمباريات منتهية بعد</p>
           ) : (
-            globalRanked.slice(0, 10).map((p, i) => (
+            globalRanked.slice(0, 5).map((p, i) => (
               <div
                 key={p.id}
                 style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 2px", fontSize: "12px", borderBottom: `1px solid ${theme.border}` }}
