@@ -6792,8 +6792,13 @@ export default function App() {
     if (currentUser) {
       const predictionFields = { predHome: updated.predHome, predAway: updated.predAway, userBoost: updated.userBoost };
       const prevPred = predictionsByMatch[id];
+      // Treat a missing previous prediction as empty, so a first-time
+      // prediction (nothing -> a score) still counts as a change and gets
+      // written to the DB. Otherwise the card moves the match to "تم توقعها"
+      // via onConfirm while the score is never actually saved.
       const scoreChanged =
-        prevPred && (String(prevPred.predHome ?? "") !== String(predictionFields.predHome ?? "") || String(prevPred.predAway ?? "") !== String(predictionFields.predAway ?? ""));
+        String(prevPred?.predHome ?? "") !== String(predictionFields.predHome ?? "") ||
+        String(prevPred?.predAway ?? "") !== String(predictionFields.predAway ?? "");
       if (scoreChanged) {
         setConfirmedPredictions((prev) => {
           if (!prev[id]) return prev;
