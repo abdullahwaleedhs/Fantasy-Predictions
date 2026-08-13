@@ -82,22 +82,25 @@ Deno.serve(async () => {
     console.log("subs:", subs?.length ?? 0, "predicted:", predictedUserIds.size);
     if (!subs?.length) continue;
 
-    const targets = subs.filter((s: { user_id: string }) => !predictedUserIds.has(s.user_id));
-    console.log("targets to notify:", targets.length);
+    // Notify everyone before the match, with a different message depending
+    // on whether they already made a prediction.
+    console.log("subscribers to notify:", subs.length);
 
-    const payload = JSON.stringify({
-      title: "⏰ باقي ٣٠ دقيقة!",
-      body: `${match.home} vs ${match.away} — لم تتوقع بعد`,
-      tag: `match-${match.id}`,
-      url: "/",
-    });
-
-    for (const sub of targets) {
+    for (const sub of subs) {
       try {
+        const hasPredicted = predictedUserIds.has(sub.user_id);
+        const payload = JSON.stringify({
+          title: hasPredicted ? "⏰ باقي ٣٠ دقيقة!" : "⚠️ توقّعها ما بقى شي!",
+          body: hasPredicted
+            ? `${match.home} vs ${match.away} — تبي تغيّر توقعك؟`
+            : `${match.home} vs ${match.away} — لم تتوقع بعد`,
+          tag: `match-${match.id}`,
+          url: "/",
+        });
         const subscription = sub.subscription as PushSubscriptionJSON;
         const subscriber = appServer.subscribe(subscription);
         await subscriber.pushTextMessage(payload, {});
-        console.log("push sent for user:", sub.user_id);
+        console.log("push sent for user:", sub.user_id, "predicted:", hasPredicted);
       } catch (e) {
         console.error("push error for user:", sub.user_id, e);
         // Remove dead subscriptions
