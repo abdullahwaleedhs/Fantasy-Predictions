@@ -55,6 +55,17 @@ Deno.serve(async () => {
   if (!upcoming.length) return new Response("no upcoming", { status: 200 });
 
   for (const match of upcoming) {
+    // Claim this match so we notify for it only once, even though the cron
+    // runs every 5 min and the 20-40 min window spans several runs. The
+    // primary-key insert fails if we already sent — then we skip.
+    const { error: claimErr } = await supabase
+      .from("sent_reminders")
+      .insert({ match_id: match.id });
+    if (claimErr) {
+      console.log("already notified, skipping match:", match.id);
+      continue;
+    }
+
     const { data: preds } = await supabase
       .from("predictions")
       .select("user_id")
