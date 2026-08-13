@@ -6340,6 +6340,87 @@ function TopBar({ onMenuClick, onLogoClick, theme }) {
   );
 }
 
+// One-time announcement shown to logged-in users who haven't turned on push
+// notifications yet, pointing them to the profile page to enable them.
+function NotificationUpdateBanner({ currentUser, onGoToProfile, theme }) {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    if (!currentUser) { setShow(false); return; }
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    if (localStorage.getItem("pushBannerDismissed") === "1") return;
+    navigator.serviceWorker.ready
+      .then((reg) => reg.pushManager.getSubscription())
+      .then((sub) => setShow(!sub))
+      .catch(() => {});
+  }, [currentUser?.id]);
+
+  if (!show) return null;
+
+  const dismiss = () => {
+    localStorage.setItem("pushBannerDismissed", "1");
+    setShow(false);
+  };
+
+  return (
+    <div style={{ padding: "10px 12px 0" }}>
+      <div
+        style={{
+          background: theme.surface,
+          border: `1.5px solid ${theme.primary}`,
+          borderRadius: "12px",
+          padding: "12px 14px",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+        }}
+      >
+        <span style={{ fontSize: "22px", flexShrink: 0 }}>🔔</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: "12px", fontWeight: 800, color: theme.text, marginBottom: "2px" }}>
+            جديد: تنبيه قبل المباراة
+          </div>
+          <div style={{ fontSize: "11px", color: theme.muted, lineHeight: 1.6 }}>
+            يوصلك إشعار قبل المباراة بـ٣٠ دقيقة. ادخل الملف الشخصي وفعّل الإشعارات.
+          </div>
+        </div>
+        <button
+          onClick={() => { dismiss(); onGoToProfile(); }}
+          style={{
+            flexShrink: 0,
+            background: theme.primary,
+            color: theme.surface,
+            border: "none",
+            borderRadius: "8px",
+            padding: "8px 12px",
+            fontFamily: "Cairo, sans-serif",
+            fontSize: "12px",
+            fontWeight: 700,
+            cursor: "pointer",
+          }}
+        >
+          فعّل
+        </button>
+        <button
+          onClick={dismiss}
+          aria-label="إغلاق"
+          style={{
+            flexShrink: 0,
+            background: "transparent",
+            color: theme.muted,
+            border: "none",
+            cursor: "pointer",
+            padding: "4px",
+            display: "flex",
+          }}
+        >
+          <X size={16} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [theme, setTheme] = useState(THEMES.find((t) => t.id === "slate-mono"));
 
@@ -6923,6 +7004,12 @@ export default function App() {
         setViewMode={setViewMode}
         currentUser={currentUser}
         onLogout={handleLogout}
+        theme={theme}
+      />
+
+      <NotificationUpdateBanner
+        currentUser={currentUser}
+        onGoToProfile={() => setActivePage("profile")}
         theme={theme}
       />
 
