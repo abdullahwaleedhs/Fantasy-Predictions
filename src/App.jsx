@@ -30,7 +30,7 @@ import {
   bustAllPredictionsCache,
 } from "./data";
 
-const VAPID_PUBLIC_KEY = "BEdYBDu_uNJ9TMfX8vJWnCxtdrQqM1zR64kgBFIsDm4qkkEI36R-zn_Q1zpkfF7jZtfZcBteoOf6ooCA01b-ya4";
+const VAPID_PUBLIC_KEY = "BMI9_xrcnuEuLcAcbO9USRxVmnPL8wF6Y37KyyYQnu4oh5LhD-G5CeUVvZxST7FxMhQn5QH9FDTvSJXX-e53BO4";
 
 async function subscribeToPush(userId) {
   if (!("serviceWorker" in navigator) || !("PushManager" in window)) return null;
