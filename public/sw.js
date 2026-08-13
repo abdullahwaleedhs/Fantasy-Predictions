@@ -1,3 +1,8 @@
+// Activate a new service worker version immediately instead of waiting for
+// all tabs to close — so devices pick up fixes without needing a reinstall.
+self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
+
 self.addEventListener("push", (event) => {
   if (!event.data) return;
   let data;

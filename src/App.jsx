@@ -32,14 +32,26 @@ import {
 
 const VAPID_PUBLIC_KEY = "BMI9_xrcnuEuLcAcbO9USRxVmnPL8wF6Y37KyyYQnu4oh5LhD-G5CeUVvZxST7FxMhQn5QH9FDTvSJXX-e53BO4";
 
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(base64);
+  const out = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
+}
+
 async function subscribeToPush(userId) {
   if (!("serviceWorker" in navigator) || !("PushManager" in window)) return null;
   const reg = await navigator.serviceWorker.ready;
+  // Always drop any existing subscription first: if it was created with an
+  // older VAPID key it is now useless, and iOS won't let us re-subscribe with
+  // a different key otherwise.
   const existing = await reg.pushManager.getSubscription();
   if (existing) await existing.unsubscribe();
   const sub = await reg.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey: VAPID_PUBLIC_KEY,
+    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
   });
   await supabase.from("push_subscriptions").delete().eq("user_id", userId);
   await supabase.from("push_subscriptions").insert({ user_id: userId, subscription: sub.toJSON() });
@@ -6412,10 +6424,15 @@ export default function App() {
     return () => clearInterval(id);
   }, []);
 
-  // Register service worker for push notifications
+  // Register service worker for push notifications, and force it to check
+  // for a newer version on every load so devices never stay on stale JS
+  // (important on iOS PWAs, which cache aggressively).
   useEffect(() => {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then((reg) => reg.update().catch(() => {}))
+        .catch(() => {});
     }
   }, []);
 
