@@ -1,13 +1,16 @@
 self.addEventListener("push", (event) => {
   if (!event.data) return;
-  const data = event.data.json();
+  let data;
+  try {
+    data = event.data.json();
+  } catch {
+    return;
+  }
   event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
+    self.registration.showNotification(data.title || "توقع المباريات", {
+      body: data.body || "",
       icon: "/favicon-192.png",
-      badge: "/favicon-192.png",
       tag: data.tag || "match-reminder",
-      renotify: true,
       data: { url: data.url || "/" },
     })
   );
