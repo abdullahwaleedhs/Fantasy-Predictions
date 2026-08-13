@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const VAPID_PUBLIC_KEY = "BDJ9w3tp08xuagz9B6-Mad-sRNELz6DydU44b07BqbmZjzjp9bQzYijMoKADBeGfeCA4OeEh6LcExrB4bKOQ7Yk";
+const VAPID_PUBLIC_KEY = "BJjfsGqcZlg-qtTIhoTAsdSeof4Q1YbGsjwPU_zooPm5FJ_-_euQn_1ikdIJJgetKdKtxpcAGav8xthuDAUNKkI";
 const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY")!;
 const VAPID_SUBJECT = "mailto:abdullahwaleedhs@gmail.com";
 
