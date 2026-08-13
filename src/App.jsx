@@ -36,15 +36,12 @@ async function subscribeToPush(userId) {
   if (!("serviceWorker" in navigator) || !("PushManager" in window)) return null;
   const reg = await navigator.serviceWorker.ready;
   const existing = await reg.pushManager.getSubscription();
-  if (existing) {
-    await supabase.from("push_subscriptions").upsert({ user_id: userId, subscription: existing.toJSON() }, { onConflict: "user_id,subscription" });
-    return existing;
-  }
+  if (existing) await existing.unsubscribe();
   const sub = await reg.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: VAPID_PUBLIC_KEY,
   });
-  await supabase.from("push_subscriptions").upsert({ user_id: userId, subscription: sub.toJSON() }, { onConflict: "user_id,subscription" });
+  await supabase.from("push_subscriptions").upsert({ user_id: userId, subscription: sub.toJSON() }, { onConflict: "user_id" });
   return sub;
 }
 
