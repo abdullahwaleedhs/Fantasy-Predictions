@@ -41,7 +41,8 @@ async function subscribeToPush(userId) {
     userVisibleOnly: true,
     applicationServerKey: VAPID_PUBLIC_KEY,
   });
-  await supabase.from("push_subscriptions").upsert({ user_id: userId, subscription: sub.toJSON() }, { onConflict: "user_id" });
+  await supabase.from("push_subscriptions").delete().eq("user_id", userId);
+  await supabase.from("push_subscriptions").insert({ user_id: userId, subscription: sub.toJSON() });
   return sub;
 }
 
