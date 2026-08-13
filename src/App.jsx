@@ -5406,9 +5406,9 @@ function HomePage({ theme, onNavigate, onGoToPredictions, onOpenLeague, currentU
                   style={{ padding: "10px 10px", borderBottom: `1px solid ${theme.border}` }}
                 >
                   {m.tournament && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px", marginBottom: "5px" }}>
-                      <TournamentIcon name={m.tournament} logo={tournamentLogos?.[m.tournament]} theme={theme} size={9} color={theme.muted} />
-                      <span style={{ fontSize: "8px", color: theme.muted, fontWeight: 600 }}>{m.tournament}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "5px" }}>
+                      <TournamentIcon name={m.tournament} logo={tournamentLogos?.[m.tournament]} theme={theme} size={12} color={theme.muted} />
+                      <span style={{ fontSize: "11px", color: theme.muted, fontWeight: 600 }}>{m.tournament}</span>
                     </div>
                   )}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
