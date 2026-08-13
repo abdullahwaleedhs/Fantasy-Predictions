@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const VAPID_PUBLIC_KEY = "BJjfsGqcZlg-qtTIhoTAsdSeof4Q1YbGsjwPU_zooPm5FJ_-_euQn_1ikdIJJgetKdKtxpcAGav8xthuDAUNKkI";
+const VAPID_PUBLIC_KEY = "BEdYBDu_uNJ9TMfX8vJWnCxtdrQqM1zR64kgBFIsDm4qkkEI36R-zn_Q1zpkfF7jZtfZcBteoOf6ooCA01b-ya4";
 const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY")!;
 const VAPID_SUBJECT = "mailto:abdullahwaleedhs@gmail.com";
 
@@ -13,19 +13,10 @@ async function buildVapidAuth(endpoint: string) {
   const b64url = (obj: unknown) =>
     btoa(JSON.stringify(obj)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
   const signingInput = `${b64url(header)}.${b64url(payload)}`;
-  const keyBytes = Uint8Array.from(
+  const pkcs8 = Uint8Array.from(
     atob(VAPID_PRIVATE_KEY.replace(/-/g, "+").replace(/_/g, "/")),
     (c) => c.charCodeAt(0)
   );
-  const prefix = new Uint8Array([
-    0x30,0x41,0x02,0x01,0x00,0x30,0x13,0x06,0x07,
-    0x2a,0x86,0x48,0xce,0x3d,0x02,0x01,0x06,0x08,
-    0x2a,0x86,0x48,0xce,0x3d,0x03,0x01,0x07,0x04,
-    0x27,0x30,0x25,0x02,0x01,0x01,0x04,0x20,
-  ]);
-  const pkcs8 = new Uint8Array(prefix.length + keyBytes.length);
-  pkcs8.set(prefix);
-  pkcs8.set(keyBytes, prefix.length);
   const privateKey = await crypto.subtle.importKey(
     "pkcs8",
     pkcs8.buffer,
