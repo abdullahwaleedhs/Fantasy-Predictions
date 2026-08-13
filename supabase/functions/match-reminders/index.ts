@@ -125,8 +125,8 @@ Deno.serve(async () => {
   );
 
   const now = new Date();
-  const windowStart = new Date(now.getTime() + 25 * 60 * 1000);
-  const windowEnd = new Date(now.getTime() + 35 * 60 * 1000);
+  const windowStart = new Date(now.getTime() + 20 * 60 * 1000);
+  const windowEnd = new Date(now.getTime() + 40 * 60 * 1000);
   console.log("now:", now.toISOString(), "window:", windowStart.toISOString(), "-", windowEnd.toISOString());
 
   const { data: matches, error: matchErr } = await supabase
