@@ -130,14 +130,14 @@ Deno.serve(async () => {
 
   const { data: matches } = await supabase
     .from("matches")
-    .select("id, home, away, date, time")
-    .not("date", "is", null)
-    .not("time", "is", null);
+    .select("id, home, away, match_date, match_time")
+    .not("match_date", "is", null)
+    .not("match_time", "is", null);
 
   if (!matches?.length) return new Response("no matches", { status: 200 });
 
   const upcoming = matches.filter((m) => {
-    const kickoff = new Date(`${m.date}T${m.time}:00+03:00`);
+    const kickoff = new Date(`${m.match_date}T${m.match_time.slice(0,5)}:00+03:00`);
     return kickoff >= windowStart && kickoff <= windowEnd;
   });
 
@@ -162,7 +162,7 @@ Deno.serve(async () => {
     const targets = subs.filter((s: { user_id: string }) => !predictedUserIds.has(s.user_id));
 
     const payload = JSON.stringify({
-      title: "⏰ باقي ۳۰ دقيقة!",
+      title: "⏰ باقي ٣٠ دقيقة!",
       body: `${match.home} vs ${match.away} — لم تتوقع بعد`,
       tag: `match-${match.id}`,
       url: "/",
