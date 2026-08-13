@@ -1,20 +1,29 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import * as webpush from "jsr:@negrel/webpush@0.3";
 
-// VAPID keys stored as a JSON string in the VAPID_KEYS secret:
-// {"publicKey":{...jwk...},"privateKey":{...jwk...}}
-const VAPID_KEYS_JSON = Deno.env.get("VAPID_KEYS")!;
 const VAPID_SUBJECT = "mailto:abdullahwaleedhs@gmail.com";
 
-const vapidKeys = await webpush.importVapidKeys(JSON.parse(VAPID_KEYS_JSON), {
-  extractable: false,
-});
-const appServer = await webpush.ApplicationServer.new({
-  contactInformation: VAPID_SUBJECT,
-  vapidKeys,
-});
-
 Deno.serve(async () => {
+  // Read + parse VAPID keys inside the handler so a missing/bad secret
+  // logs a clear message instead of crashing the whole worker at boot.
+  const rawVapid = Deno.env.get("VAPID_KEYS");
+  if (!rawVapid) {
+    const vapidNames = Object.keys(Deno.env.toObject()).filter((k) => /vapid/i.test(k));
+    console.error("VAPID_KEYS secret is missing. Found VAPID-like secrets:", JSON.stringify(vapidNames));
+    return new Response("missing VAPID_KEYS", { status: 500 });
+  }
+  let appServer;
+  try {
+    const vapidKeys = await webpush.importVapidKeys(JSON.parse(rawVapid), { extractable: false });
+    appServer = await webpush.ApplicationServer.new({
+      contactInformation: VAPID_SUBJECT,
+      vapidKeys,
+    });
+  } catch (e) {
+    console.error("failed to load VAPID keys:", e);
+    return new Response("bad VAPID_KEYS", { status: 500 });
+  }
+
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
