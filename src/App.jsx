@@ -30,6 +30,34 @@ import {
   bustAllPredictionsCache,
 } from "./data";
 
+const VAPID_PUBLIC_KEY = "BDJ9w3tp08xuagz9B6-Mad-sRNELz6DydU44b07BqbmZjzjp9bQzYijMoKADBeGfeCA4OeEh6LcExrB4bKOQ7Yk";
+
+async function subscribeToPush(userId) {
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) return null;
+  const reg = await navigator.serviceWorker.ready;
+  const existing = await reg.pushManager.getSubscription();
+  if (existing) {
+    await supabase.from("push_subscriptions").upsert({ user_id: userId, subscription: existing.toJSON() }, { onConflict: "user_id,subscription" });
+    return existing;
+  }
+  const sub = await reg.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: VAPID_PUBLIC_KEY,
+  });
+  await supabase.from("push_subscriptions").upsert({ user_id: userId, subscription: sub.toJSON() }, { onConflict: "user_id,subscription" });
+  return sub;
+}
+
+async function unsubscribeFromPush(userId) {
+  if (!("serviceWorker" in navigator)) return;
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.getSubscription();
+  if (sub) {
+    await sub.unsubscribe();
+    await supabase.from("push_subscriptions").delete().eq("user_id", userId);
+  }
+}
+
 // Tracks the server's clock relative to a *monotonic* timer (performance.now),
 // not the device's wall clock - so that changing the phone's date/time after
 // the app loaded can't move the countdown/lock at all, since performance.now()
@@ -4174,6 +4202,15 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
   const [saving, setSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
+
+  useEffect(() => {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    navigator.serviceWorker.ready.then((reg) =>
+      reg.pushManager.getSubscription().then((sub) => setPushEnabled(!!sub))
+    );
+  }, []);
 
   // currentUser can still be loading (session restore) when this page first
   // mounts, so re-sync the fields once the real profile data arrives.
@@ -4366,6 +4403,48 @@ function ProfilePage({ currentUser, onUpdateProfile, onNavigateToAuth, onDeleteA
             حذف الحساب نهائياً
           </button>
         </div>
+
+        {/* Push notifications toggle */}
+        {"serviceWorker" in navigator && "PushManager" in window && (
+          <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "14px", padding: "16px", marginBottom: "16px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                <div style={{ fontSize: "13px", fontWeight: 700, color: theme.text }}>إشعارات المباريات</div>
+                <div style={{ fontSize: "11px", color: theme.muted, marginTop: "2px" }}>تنبيه قبل ٣٠ دقيقة من بدء مباراة لم تتوقعها</div>
+              </div>
+              <button
+                onClick={async () => {
+                  setPushLoading(true);
+                  try {
+                    if (pushEnabled) {
+                      await unsubscribeFromPush(currentUser.id);
+                      setPushEnabled(false);
+                    } else {
+                      const result = await subscribeToPush(currentUser.id);
+                      setPushEnabled(!!result);
+                    }
+                  } catch (e) {
+                    alert("تعذّر تغيير إعداد الإشعارات");
+                  }
+                  setPushLoading(false);
+                }}
+                disabled={pushLoading}
+                style={{
+                  width: "48px", height: "28px", borderRadius: "14px", border: "none", cursor: "pointer",
+                  background: pushEnabled ? theme.violet : theme.border,
+                  transition: "background 0.2s", flexShrink: 0, position: "relative",
+                }}
+              >
+                <div style={{
+                  width: "22px", height: "22px", borderRadius: "50%", background: "#fff",
+                  position: "absolute", top: "3px",
+                  right: pushEnabled ? "3px" : "23px",
+                  transition: "right 0.2s",
+                }} />
+              </button>
+            </div>
+          </div>
+        )}
 
         {showDeleteConfirm && (
           <div
@@ -6333,6 +6412,13 @@ export default function App() {
     sync();
     const id = setInterval(sync, 2 * 60 * 1000);
     return () => clearInterval(id);
+  }, []);
+
+  // Register service worker for push notifications
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    }
   }, []);
 
   const tournaments = useMemo(() => tournamentRows.map((t) => t.name), [tournamentRows]);
