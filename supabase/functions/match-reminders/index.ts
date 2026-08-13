@@ -127,20 +127,26 @@ Deno.serve(async () => {
   const now = new Date();
   const windowStart = new Date(now.getTime() + 25 * 60 * 1000);
   const windowEnd = new Date(now.getTime() + 35 * 60 * 1000);
+  console.log("now:", now.toISOString(), "window:", windowStart.toISOString(), "-", windowEnd.toISOString());
 
-  const { data: matches } = await supabase
+  const { data: matches, error: matchErr } = await supabase
     .from("matches")
     .select("id, home, away, match_date, match_time")
     .not("match_date", "is", null)
     .not("match_time", "is", null);
 
+  if (matchErr) console.error("matches error:", matchErr.message);
+  console.log("total matches:", matches?.length ?? 0);
+
   if (!matches?.length) return new Response("no matches", { status: 200 });
 
   const upcoming = matches.filter((m) => {
     const kickoff = new Date(`${m.match_date}T${m.match_time.slice(0,5)}:00+03:00`);
+    console.log(`match ${m.home} vs ${m.away}: kickoff=${kickoff.toISOString()}`);
     return kickoff >= windowStart && kickoff <= windowEnd;
   });
 
+  console.log("upcoming:", upcoming.length);
   if (!upcoming.length) return new Response("no upcoming", { status: 200 });
 
   for (const match of upcoming) {
@@ -157,9 +163,11 @@ Deno.serve(async () => {
       .from("push_subscriptions")
       .select("user_id, subscription");
 
+    console.log("subs:", subs?.length ?? 0, "predicted:", predictedUserIds.size);
     if (!subs?.length) continue;
 
     const targets = subs.filter((s: { user_id: string }) => !predictedUserIds.has(s.user_id));
+    console.log("targets to notify:", targets.length);
 
     const payload = JSON.stringify({
       title: "⏰ باقي ٣٠ دقيقة!",
@@ -173,10 +181,11 @@ Deno.serve(async () => {
         const subscription = sub.subscription as { endpoint: string; keys: { p256dh: string; auth: string } };
         const encrypted = await encryptPayload(subscription, payload);
         const status = await sendPush(subscription, encrypted);
+        console.log("push status:", status, "for user:", sub.user_id);
         if (status === 410 || status === 404) {
           await supabase.from("push_subscriptions").delete().eq("user_id", sub.user_id);
         }
-      } catch (_) { /* skip */ }
+      } catch (e) { console.error("push error:", e); }
     }
   }
 
