@@ -29,10 +29,13 @@ Deno.serve(async () => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
+  // Runs every minute. Notify as soon as a match is 30 minutes (or less)
+  // away and still in the future. The sent_reminders table guarantees each
+  // match fires exactly once, so this lands right at the 30-minute mark
+  // instead of drifting with a wide window.
   const now = new Date();
-  const windowStart = new Date(now.getTime() + 20 * 60 * 1000);
-  const windowEnd = new Date(now.getTime() + 40 * 60 * 1000);
-  console.log("now:", now.toISOString(), "window:", windowStart.toISOString(), "-", windowEnd.toISOString());
+  const cutoff = new Date(now.getTime() + 30 * 60 * 1000);
+  console.log("now:", now.toISOString(), "cutoff (30m):", cutoff.toISOString());
 
   const { data: matches, error: matchErr } = await supabase
     .from("matches")
@@ -48,7 +51,7 @@ Deno.serve(async () => {
   const upcoming = matches.filter((m) => {
     const kickoff = new Date(`${m.match_date}T${m.match_time.slice(0, 5)}:00+03:00`);
     console.log(`match ${m.home} vs ${m.away}: kickoff=${kickoff.toISOString()}`);
-    return kickoff >= windowStart && kickoff <= windowEnd;
+    return kickoff > now && kickoff <= cutoff;
   });
 
   console.log("upcoming:", upcoming.length);
