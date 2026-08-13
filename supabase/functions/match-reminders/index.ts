@@ -42,6 +42,7 @@ function concat(...arrays: Uint8Array[]): Uint8Array {
   return out;
 }
 
+// RFC 8291 compliant Web Push encryption
 async function encryptPayload(
   subscription: { keys: { p256dh: string; auth: string } },
   plaintext: string
@@ -54,41 +55,82 @@ async function encryptPayload(
     atob(subscription.keys.auth.replace(/-/g, "+").replace(/_/g, "/")),
     (c) => c.charCodeAt(0)
   );
+
   const serverKeyPair = await crypto.subtle.generateKey(
     { name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]
   );
-  const serverPublicKey = await crypto.subtle.exportKey("raw", serverKeyPair.publicKey);
+  const serverPublicKeyRaw = new Uint8Array(
+    await crypto.subtle.exportKey("raw", serverKeyPair.publicKey)
+  );
   const clientPublicKey = await crypto.subtle.importKey(
     "raw", p256dh, { name: "ECDH", namedCurve: "P-256" }, false, []
   );
-  const sharedSecret = await crypto.subtle.deriveBits(
+  const sharedSecretBits = await crypto.subtle.deriveBits(
     { name: "ECDH", public: clientPublicKey }, serverKeyPair.privateKey, 256
   );
+  const sharedSecret = new Uint8Array(sharedSecretBits);
+
   const salt = crypto.getRandomValues(new Uint8Array(16));
-  const ikm = await crypto.subtle.importKey("raw", sharedSecret, "HKDF", false, ["deriveBits"]);
-  const prk = await crypto.subtle.deriveBits(
-    { name: "HKDF", hash: "SHA-256", salt: authSecret, info: new TextEncoder().encode("Content-Encoding: auth\0") },
-    ikm, 256
+
+  // RFC 8291: PRK = HKDF-SHA-256(salt=auth, IKM=sharedSecret, info="WebPush: info\0" || clientPub || serverPub)
+  const prkInfo = concat(
+    new TextEncoder().encode("WebPush: info\x00"),
+    p256dh,
+    serverPublicKeyRaw
   );
+  const ikmKey = await crypto.subtle.importKey("raw", sharedSecret, "HKDF", false, ["deriveBits"]);
+  const prkBits = await crypto.subtle.deriveBits(
+    { name: "HKDF", hash: "SHA-256", salt: authSecret, info: prkInfo },
+    ikmKey, 256
+  );
+  const prk = new Uint8Array(prkBits);
+
   const prkKey = await crypto.subtle.importKey("raw", prk, "HKDF", false, ["deriveBits"]);
-  const serverPubArr = new Uint8Array(serverPublicKey);
-  const cek = await crypto.subtle.deriveBits(
-    { name: "HKDF", hash: "SHA-256", salt, info: concat(new TextEncoder().encode("Content-Encoding: aes128gcm\0"), new Uint8Array([0]), serverPubArr, p256dh) },
+
+  // RFC 8291: CEK info = "Content-Encoding: aes128gcm\0\x01"
+  const cekInfo = concat(
+    new TextEncoder().encode("Content-Encoding: aes128gcm\x00"),
+    new Uint8Array([1])
+  );
+  const cekBits = await crypto.subtle.deriveBits(
+    { name: "HKDF", hash: "SHA-256", salt, info: cekInfo },
     prkKey, 128
   );
-  const nonce = await crypto.subtle.deriveBits(
-    { name: "HKDF", hash: "SHA-256", salt, info: concat(new TextEncoder().encode("Content-Encoding: nonce\0"), new Uint8Array([0]), serverPubArr, p256dh) },
+
+  // RFC 8291: nonce info = "Content-Encoding: nonce\0\x01"
+  const nonceInfo = concat(
+    new TextEncoder().encode("Content-Encoding: nonce\x00"),
+    new Uint8Array([1])
+  );
+  const nonceBits = await crypto.subtle.deriveBits(
+    { name: "HKDF", hash: "SHA-256", salt, info: nonceInfo },
     prkKey, 96
   );
-  const aesKey = await crypto.subtle.importKey("raw", cek, "AES-GCM", false, ["encrypt"]);
+
+  const aesKey = await crypto.subtle.importKey("raw", cekBits, "AES-GCM", false, ["encrypt"]);
+  const nonce = new Uint8Array(nonceBits);
+
   const data = new TextEncoder().encode(plaintext);
+  // padding delimiter byte = 0x02
   const padded = new Uint8Array(data.length + 1);
   padded.set(data);
   padded[data.length] = 2;
-  const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv: nonce }, aesKey, padded);
+
+  const encrypted = new Uint8Array(
+    await crypto.subtle.encrypt({ name: "AES-GCM", iv: nonce }, aesKey, padded)
+  );
+
+  // RFC 8188 header: salt(16) + rs(4) + idlen(1) + keyid(serverPub)
   const rs = new Uint8Array(4);
   new DataView(rs.buffer).setUint32(0, 4096);
-  return concat(salt, rs, new Uint8Array([serverPubArr.length]), serverPubArr, new Uint8Array(encrypted));
+
+  return concat(
+    salt,
+    rs,
+    new Uint8Array([serverPublicKeyRaw.length]),
+    serverPublicKeyRaw,
+    encrypted
+  );
 }
 
 async function sendPush(
