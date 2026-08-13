@@ -90,10 +90,10 @@ Deno.serve(async () => {
       try {
         const hasPredicted = predictedUserIds.has(sub.user_id);
         const payload = JSON.stringify({
-          title: hasPredicted ? "⏰ باقي ٣٠ دقيقة!" : "⚠️ توقّعها ما بقى شي!",
+          title: "⏰ باقي ٣٠ دقيقة!",
           body: hasPredicted
             ? `${match.home} vs ${match.away} — تبي تغيّر توقعك؟`
-            : `${match.home} vs ${match.away} — لم تتوقع بعد`,
+            : `${match.home} vs ${match.away} — ادخل توقعها!`,
           tag: `match-${match.id}`,
           url: "/",
         });
