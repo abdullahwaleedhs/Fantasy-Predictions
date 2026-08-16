@@ -29,9 +29,14 @@ Deno.serve(async () => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
+  // Kickoffs are always on 5-minute marks and the cron runs every 5 minutes,
+  // so the time-to-kickoff at any run is ~a multiple of 5 (…25, 30, 35…). A
+  // tight 27-33 min window isolates the 30-minute mark (won't catch 25 or 35)
+  // while tolerating a few seconds of cron delay. sent_reminders still
+  // guarantees a single send per match.
   const now = new Date();
-  const windowStart = new Date(now.getTime() + 20 * 60 * 1000);
-  const windowEnd = new Date(now.getTime() + 40 * 60 * 1000);
+  const windowStart = new Date(now.getTime() + 27 * 60 * 1000);
+  const windowEnd = new Date(now.getTime() + 33 * 60 * 1000);
   console.log("now:", now.toISOString(), "window:", windowStart.toISOString(), "-", windowEnd.toISOString());
 
   const { data: matches, error: matchErr } = await supabase
