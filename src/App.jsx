@@ -6859,6 +6859,11 @@ function ChampionshipsPage({
                                   }}
                                 >
                                   <span style={{ fontWeight: 800, color: theme.text }}>{r.profiles?.name || "مستخدم"}</span>
+                                  {r.updated_at && (
+                                    <span style={{ color: theme.muted }}>
+                                      {new Date(r.updated_at).toLocaleString("ar", { dateStyle: "short", timeStyle: "short" })}
+                                    </span>
+                                  )}
                                   <span style={{ display: "inline-flex", gap: "6px", alignItems: "center" }}>
                                     {(isCup ? ["first", "second"] : ["first", "second", "third"]).map((f, i) => {
                                       const medal = ["🥇", "🥈", "🥉"][i];
@@ -6871,11 +6876,6 @@ function ChampionshipsPage({
                                       );
                                     })}
                                   </span>
-                                  {r.updated_at && (
-                                    <span style={{ color: theme.muted }}>
-                                      · {new Date(r.updated_at).toLocaleString("ar", { dateStyle: "short", timeStyle: "short" })}
-                                    </span>
-                                  )}
                                 </div>
                               ))}
                             </div>
