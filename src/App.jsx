@@ -6674,8 +6674,8 @@ function ChampionshipsPage({
           >
             <Trophy size={22} color="#D4AF37" />
             <div style={{ fontSize: "14px", fontWeight: 800, color: theme.text }}>إجمالي نقاطك في البطولات</div>
-            <div style={{ marginInlineStart: "auto", fontSize: "20px", fontWeight: 900, color: "#D4AF37" }}>
-              {total} <span style={{ fontSize: "13px", color: theme.muted, fontWeight: 700 }}>/ {max}</span>
+            <div style={{ marginInlineStart: "auto", fontSize: "18px", fontWeight: 900, color: "#D4AF37" }}>
+              {total} / {max}
             </div>
           </div>
         );
