@@ -6359,6 +6359,32 @@ function TopBar({ onMenuClick, onLogoClick, theme }) {
 // Cup (champion + runner-up only), max 25:
 //   champion exact = 15, predicted champion who became runner-up = 5,
 //   runner-up exact = 10, predicted runner-up who became champion = 5, else 0.
+// Per-team result for one predicted position: how many points it earned and
+// the colour that represents it (green = exact, orange = right team wrong
+// position, red = wrong / outside).
+function champTeamScore(team, posIndex, result, isCup) {
+  const GREEN = "#10B981", ORANGE = "#F59E0B", RED = "#EF4444";
+  if (!team) return { pts: 0, color: null };
+  if (isCup) {
+    const champ = result.first_team, runner = result.second_team;
+    if (posIndex === 0) {
+      if (team === champ) return { pts: 15, color: GREEN };
+      if (team === runner) return { pts: 5, color: ORANGE };
+      return { pts: 0, color: RED };
+    }
+    // runner-up prediction
+    if (team === runner) return { pts: 10, color: GREEN };
+    if (team === champ) return { pts: 5, color: ORANGE };
+    return { pts: 0, color: RED };
+  }
+  const exactPts = [5, 3, 2][posIndex];
+  const actualAtPos = [result.first_team, result.second_team, result.third_team][posIndex];
+  const actualTop3 = [result.first_team, result.second_team, result.third_team].filter(Boolean);
+  if (team === actualAtPos) return { pts: exactPts, color: GREEN };
+  if (actualTop3.includes(team)) return { pts: 1, color: ORANGE };
+  return { pts: 0, color: RED };
+}
+
 function champPoints(pick, result, isCup) {
   if (!result) return null;
   if (isCup) {
@@ -6663,7 +6689,41 @@ function ChampionshipsPage({
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                 {/* Personal top-3 prediction — hidden in the organizer view,
                     which only enters the final results below. */}
-                {!isAdmin && (
+                {!isAdmin && result ? (
+                  /* Results are in: show each pick coloured with points earned. */
+                  <>
+                    {positions.map(({ field, label }, i) => {
+                      const team = pick[field];
+                      const { pts, color } = champTeamScore(team, i, result, isCup);
+                      return (
+                        <div
+                          key={field}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            padding: "9px 11px",
+                            borderRadius: "10px",
+                            border: `1.5px solid ${color || theme.inputBorder}`,
+                            background: color ? `${color}1a` : theme.bg,
+                          }}
+                        >
+                          <span style={{ fontSize: "13px" }}>{label.split(" ")[0]}</span>
+                          <span style={{ fontSize: "13px", fontWeight: 700, color: theme.text }}>{team || "—"}</span>
+                          <span style={{ marginInlineStart: "auto", fontSize: "12px", fontWeight: 900, color: color || theme.muted }}>
+                            {pts > 0 ? `+${pts}` : "٠"} نقطة
+                          </span>
+                        </div>
+                      );
+                    })}
+                    <div style={{ marginTop: "4px", fontSize: "12px", color: theme.muted, lineHeight: 1.8 }}>
+                      <span style={{ fontWeight: 700, color: theme.text }}>الترتيب الفعلي: </span>
+                      {isCup
+                        ? `🥇 ${result.first_team || "—"} · 🥈 ${result.second_team || "—"}`
+                        : `🥇 ${result.first_team || "—"} · 🥈 ${result.second_team || "—"} · 🥉 ${result.third_team || "—"}`}
+                    </div>
+                  </>
+                ) : !isAdmin ? (
                   <>
                     {positions.map(({ field, label, ph }) => (
                       <div key={field}>
@@ -6678,15 +6738,6 @@ function ChampionshipsPage({
                         />
                       </div>
                     ))}
-
-                    {result && (
-                      <div style={{ marginTop: "8px", fontSize: "12px", color: theme.muted, lineHeight: 1.8 }}>
-                        <div style={{ fontWeight: 700, color: theme.text }}>الترتيب الفعلي:</div>
-                        {isCup
-                          ? `🥇 ${result.first_team || "—"} · 🥈 ${result.second_team || "—"}`
-                          : `🥇 ${result.first_team || "—"} · 🥈 ${result.second_team || "—"} · 🥉 ${result.third_team || "—"}`}
-                      </div>
-                    )}
 
                     {canEdit && (
                       <button
@@ -6705,7 +6756,7 @@ function ChampionshipsPage({
                       </button>
                     )}
                   </>
-                )}
+                ) : null}
 
                 {/* Admin: enter final result for this league */}
                 {isAdmin && (
@@ -6775,10 +6826,17 @@ function ChampionshipsPage({
                                   }}
                                 >
                                   <span style={{ fontWeight: 800, color: theme.text }}>{r.profiles?.name || "مستخدم"}</span>
-                                  <span style={{ color: theme.text }}>
-                                    {isCup
-                                      ? `🥇${r.first_team || "—"} 🥈${r.second_team || "—"}`
-                                      : `🥇${r.first_team || "—"} 🥈${r.second_team || "—"} 🥉${r.third_team || "—"}`}
+                                  <span style={{ display: "inline-flex", gap: "6px", alignItems: "center" }}>
+                                    {(isCup ? ["first", "second"] : ["first", "second", "third"]).map((f, i) => {
+                                      const medal = ["🥇", "🥈", "🥉"][i];
+                                      const team = r[f + "_team"];
+                                      const sc = result ? champTeamScore(team, i, result, isCup) : null;
+                                      return (
+                                        <span key={f} style={{ color: sc?.color || theme.text, fontWeight: sc?.color ? 800 : 400 }}>
+                                          {medal}{team || "—"}{sc ? ` (${sc.pts})` : ""}
+                                        </span>
+                                      );
+                                    })}
                                   </span>
                                   {r.updated_at && (
                                     <span style={{ color: theme.muted }}>
