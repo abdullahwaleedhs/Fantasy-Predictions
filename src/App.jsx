@@ -6648,6 +6648,39 @@ function ChampionshipsPage({
         </div>
       )}
 
+      {/* ===== Total points across all leagues (participant view) ===== */}
+      {!isAdmin && (() => {
+        let total = 0, max = 0, anyResult = false;
+        for (const lg of leagues) {
+          const res = resultByTournament[lg.id];
+          if (!res) continue;
+          anyResult = true;
+          total += champPoints(getPick(lg.id), res, !!lg.is_cup) || 0;
+          max += lg.is_cup ? 25 : 10;
+        }
+        if (!anyResult) return null;
+        return (
+          <div
+            style={{
+              background: theme.surface,
+              border: `2px solid #D4AF37`,
+              borderRadius: "14px",
+              padding: "14px 16px",
+              marginBottom: "16px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
+            <Trophy size={22} color="#D4AF37" />
+            <div style={{ fontSize: "14px", fontWeight: 800, color: theme.text }}>إجمالي نقاطك في البطولات</div>
+            <div style={{ marginInlineStart: "auto", fontSize: "20px", fontWeight: 900, color: "#D4AF37" }}>
+              {total} <span style={{ fontSize: "13px", color: theme.muted, fontWeight: 700 }}>/ {max}</span>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* ===== Per-league prediction cards ===== */}
       {leagues.map((league) => {
         const teams = (clubsByTournament[league.name] || []).map((c) => c.name);
