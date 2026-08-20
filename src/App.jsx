@@ -6768,8 +6768,10 @@ function ChampionshipsPage({
                                     display: "flex",
                                     alignItems: "center",
                                     gap: "8px",
-                                    flexWrap: "wrap",
-                                    fontSize: "10.5px",
+                                    flexWrap: "nowrap",
+                                    whiteSpace: "nowrap",
+                                    overflowX: "auto",
+                                    fontSize: "10px",
                                   }}
                                 >
                                   <span style={{ fontWeight: 800, color: theme.text }}>{r.profiles?.name || "مستخدم"}</span>
@@ -6779,8 +6781,8 @@ function ChampionshipsPage({
                                       : `🥇${r.first_team || "—"} 🥈${r.second_team || "—"} 🥉${r.third_team || "—"}`}
                                   </span>
                                   {r.updated_at && (
-                                    <span style={{ marginInlineStart: "auto", color: theme.muted, whiteSpace: "nowrap" }}>
-                                      {new Date(r.updated_at).toLocaleString("ar", { dateStyle: "short", timeStyle: "short" })}
+                                    <span style={{ color: theme.muted }}>
+                                      · {new Date(r.updated_at).toLocaleString("ar", { dateStyle: "short", timeStyle: "short" })}
                                     </span>
                                   )}
                                 </div>
