@@ -62,6 +62,11 @@ export async function setTournamentCupDB(tournamentId, isCup) {
   if (error) throw error;
 }
 
+export async function setTournamentSortOrderDB(tournamentId, sortOrder) {
+  const { error } = await supabase.from("tournaments").update({ sort_order: sortOrder }).eq("id", tournamentId);
+  if (error) throw error;
+}
+
 export async function addTournamentDB(name) {
   const { data, error } = await supabase.from("tournaments").insert({ name }).select().single();
   if (error) throw error;

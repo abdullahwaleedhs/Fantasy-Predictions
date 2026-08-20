@@ -30,6 +30,7 @@ import {
   bustAllPredictionsCache,
   setTournamentChampionshipDB,
   setTournamentCupDB,
+  setTournamentSortOrderDB,
   fetchChampionshipPredictionsForUser,
   upsertChampionshipPredictionDB,
   fetchAllChampionshipPredictions,
@@ -6399,6 +6400,7 @@ function ChampionshipsPage({
   onSaveResult,
   onToggleChampionship,
   onToggleCup,
+  onMoveLeague,
   onSaveLock,
   theme,
 }) {
@@ -6406,7 +6408,9 @@ function ChampionshipsPage({
   const lockAt = championshipSettings?.lock_at ? new Date(championshipSettings.lock_at) : null;
   const locked = lockAt ? serverNow() >= lockAt.getTime() : false;
 
-  const leagues = tournamentRows.filter((t) => t.is_championship);
+  const leagues = tournamentRows
+    .filter((t) => t.is_championship)
+    .sort((a, b) => (a.sort_order ?? 9999) - (b.sort_order ?? 9999));
   const resultByTournament = {};
   for (const r of championshipResults) resultByTournament[r.tournament_id] = r;
 
@@ -6559,6 +6563,35 @@ function ChampionshipsPage({
               </div>
             ))}
           </div>
+
+          {leagues.length > 1 && (
+            <div style={{ marginTop: "16px" }}>
+              <div style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, marginBottom: "8px" }}>
+                ترتيب عرض الدوريات (بالأسهم):
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                {leagues.map((t, i) => (
+                  <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: theme.text }}>
+                    <span style={{ flex: 1 }}>{i + 1}. {t.name}</span>
+                    <button
+                      onClick={() => onMoveLeague(t.id, -1)}
+                      disabled={i === 0}
+                      style={{ background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: "6px", padding: "4px 9px", cursor: i === 0 ? "default" : "pointer", opacity: i === 0 ? 0.4 : 1, color: theme.text, fontSize: "13px" }}
+                    >
+                      ▲
+                    </button>
+                    <button
+                      onClick={() => onMoveLeague(t.id, 1)}
+                      disabled={i === leagues.length - 1}
+                      style={{ background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: "6px", padding: "4px 9px", cursor: i === leagues.length - 1 ? "default" : "pointer", opacity: i === leagues.length - 1 ? 0.4 : 1, color: theme.text, fontSize: "13px" }}
+                    >
+                      ▼
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -7426,6 +7459,23 @@ export default function App() {
     bustTournamentsCache();
   };
 
+  // Reorder a championship league up (-1) or down (+1) in the البطولات list.
+  const moveChampionshipLeague = async (tournamentId, dir) => {
+    const champs = tournamentRows
+      .filter((t) => t.is_championship)
+      .sort((a, b) => (a.sort_order ?? 9999) - (b.sort_order ?? 9999));
+    const idx = champs.findIndex((t) => t.id === tournamentId);
+    const swap = idx + dir;
+    if (idx < 0 || swap < 0 || swap >= champs.length) return;
+    const reordered = [...champs];
+    [reordered[idx], reordered[swap]] = [reordered[swap], reordered[idx]];
+    const orderById = {};
+    reordered.forEach((t, i) => { orderById[t.id] = i; });
+    setTournamentRows((prev) => prev.map((t) => (t.id in orderById ? { ...t, sort_order: orderById[t.id] } : t)));
+    for (const t of reordered) await setTournamentSortOrderDB(t.id, orderById[t.id]).catch(() => {});
+    bustTournamentsCache();
+  };
+
   const saveChampionshipLock = async (lockAt) => {
     setChampionshipSettings({ lock_at: lockAt });
     await updateChampionshipLockDB(lockAt);
@@ -7982,6 +8032,7 @@ export default function App() {
           onSaveResult={saveChampionshipResult}
           onToggleChampionship={toggleChampionshipTournament}
           onToggleCup={toggleChampionshipCup}
+          onMoveLeague={moveChampionshipLeague}
           onSaveLock={saveChampionshipLock}
           theme={theme}
         />
