@@ -292,19 +292,21 @@ export async function fetchChampionshipPredictionsForUser(userId) {
 }
 
 export async function upsertChampionshipPredictionDB(userId, tournamentId, { first, second, third }) {
-  const { error } = await supabase
+  // delete-then-insert instead of upsert(onConflict) so a save works even if
+  // the unique (user_id, tournament_id) constraint isn't recognized.
+  await supabase
     .from("championship_predictions")
-    .upsert(
-      {
-        user_id: userId,
-        tournament_id: tournamentId,
-        first_team: first || null,
-        second_team: second || null,
-        third_team: third || null,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "user_id,tournament_id" }
-    );
+    .delete()
+    .eq("user_id", userId)
+    .eq("tournament_id", tournamentId);
+  const { error } = await supabase.from("championship_predictions").insert({
+    user_id: userId,
+    tournament_id: tournamentId,
+    first_team: first || null,
+    second_team: second || null,
+    third_team: third || null,
+    updated_at: new Date().toISOString(),
+  });
   if (error) throw error;
 }
 

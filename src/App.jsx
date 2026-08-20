@@ -6487,11 +6487,32 @@ function ChampionshipsPage({
         <ListOrdered size={22} color="#D4AF37" />
         <h2 style={{ fontSize: "20px", fontWeight: 900, color: theme.text, margin: 0 }}>البطولات</h2>
       </div>
-      <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", marginBottom: "18px", lineHeight: 1.7 }}>
-        توقّع ترتيب أول ٣ فرق لكل دوري. نقاط منفصلة تماماً عن توقعات المباريات، وتظهر نهاية الموسم.
-        <br />
-        الأول = ٥ نقاط · الوصيف = ٣ · الثالث = ٢ · فريق في مركز مختلف = ١
+      <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", marginBottom: "14px", lineHeight: 1.7 }}>
+        توقّع أبطال الدوريات والكؤوس. نقاط منفصلة تماماً عن توقعات المباريات، وتظهر نهاية الموسم.
       </p>
+
+      {/* Scoring explanation */}
+      <div style={{ background: theme.surface, border: `1.5px solid ${theme.border}`, borderRadius: "14px", padding: "14px 16px", marginBottom: "18px" }}>
+        <div style={{ fontSize: "13px", fontWeight: 800, color: theme.primary, marginBottom: "8px" }}>كيف تُحسب النقاط؟</div>
+
+        <div style={{ fontSize: "12.5px", fontWeight: 800, color: theme.text, marginBottom: "4px" }}>🏆 الدوري (ترتيب أول ٣) — الأقصى ١٠</div>
+        <ul style={{ margin: "0 0 12px", paddingInlineStart: "18px", color: theme.muted, fontSize: "12px", lineHeight: 1.9 }}>
+          <li>المركز الأول صحيح = <b style={{ color: theme.text }}>٥ نقاط</b></li>
+          <li>الوصيف (الثاني) صحيح = <b style={{ color: theme.text }}>٣ نقاط</b></li>
+          <li>المركز الثالث صحيح = <b style={{ color: theme.text }}>نقطتان</b></li>
+          <li>فريق ضمن الأول ٣ لكن بمركز مختلف = <b style={{ color: theme.text }}>نقطة</b></li>
+          <li>فريق خارج الأول ٣ = <b style={{ color: theme.text }}>صفر</b></li>
+        </ul>
+
+        <div style={{ fontSize: "12.5px", fontWeight: 800, color: theme.text, marginBottom: "4px" }}>🥇 الكأس (بطل ووصيف) — الأقصى ٢٥</div>
+        <ul style={{ margin: 0, paddingInlineStart: "18px", color: theme.muted, fontSize: "12px", lineHeight: 1.9 }}>
+          <li>توقّعت البطل صحيح = <b style={{ color: theme.text }}>١٥ نقطة</b></li>
+          <li>توقّعت البطل لكنه صار وصيف = <b style={{ color: theme.text }}>٥ نقاط</b></li>
+          <li>توقّعت الوصيف صحيح = <b style={{ color: theme.text }}>١٠ نقاط</b></li>
+          <li>توقّعت الوصيف لكنه صار بطل = <b style={{ color: theme.text }}>٥ نقاط</b></li>
+          <li>غير ذلك = <b style={{ color: theme.text }}>صفر</b></li>
+        </ul>
+      </div>
 
       {lockAt && (
         <div
