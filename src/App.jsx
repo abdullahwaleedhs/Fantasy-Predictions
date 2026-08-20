@@ -6757,22 +6757,31 @@ function ChampionshipsPage({
                           {subs.length === 0 ? (
                             <div style={{ fontSize: "12px", color: theme.muted }}>لا توجد توقعات بعد.</div>
                           ) : (
-                            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
                               {subs.map((r) => (
-                                <div key={r.user_id} style={{ background: theme.bg, borderRadius: "10px", padding: "8px 10px" }}>
-                                  <div style={{ fontSize: "12.5px", fontWeight: 800, color: theme.text }}>
-                                    {r.profiles?.name || "مستخدم"}
-                                    {r.profiles?.username ? <span style={{ color: theme.muted, fontWeight: 500 }}> @{r.profiles.username}</span> : null}
-                                  </div>
-                                  <div style={{ fontSize: "12px", color: theme.muted, marginTop: "2px", lineHeight: 1.7 }}>
+                                <div
+                                  key={r.user_id}
+                                  style={{
+                                    background: theme.bg,
+                                    borderRadius: "8px",
+                                    padding: "6px 8px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px",
+                                    flexWrap: "wrap",
+                                    fontSize: "10.5px",
+                                  }}
+                                >
+                                  <span style={{ fontWeight: 800, color: theme.text }}>{r.profiles?.name || "مستخدم"}</span>
+                                  <span style={{ color: theme.text }}>
                                     {isCup
-                                      ? `🥇 ${r.first_team || "—"} · 🥈 ${r.second_team || "—"}`
-                                      : `🥇 ${r.first_team || "—"} · 🥈 ${r.second_team || "—"} · 🥉 ${r.third_team || "—"}`}
-                                  </div>
+                                      ? `🥇${r.first_team || "—"} 🥈${r.second_team || "—"}`
+                                      : `🥇${r.first_team || "—"} 🥈${r.second_team || "—"} 🥉${r.third_team || "—"}`}
+                                  </span>
                                   {r.updated_at && (
-                                    <div style={{ fontSize: "10.5px", color: theme.muted, marginTop: "3px" }}>
-                                      {new Date(r.updated_at).toLocaleString("ar", { dateStyle: "medium", timeStyle: "short" })}
-                                    </div>
+                                    <span style={{ marginInlineStart: "auto", color: theme.muted, whiteSpace: "nowrap" }}>
+                                      {new Date(r.updated_at).toLocaleString("ar", { dateStyle: "short", timeStyle: "short" })}
+                                    </span>
                                   )}
                                 </div>
                               ))}
