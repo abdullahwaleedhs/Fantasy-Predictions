@@ -7508,14 +7508,25 @@ export default function App() {
 
   const toggleChampionshipTournament = async (tournamentId, isChampionship) => {
     setTournamentRows((prev) => prev.map((t) => (t.id === tournamentId ? { ...t, is_championship: isChampionship } : t)));
-    await setTournamentChampionshipDB(tournamentId, isChampionship);
-    bustTournamentsCache();
+    try {
+      await setTournamentChampionshipDB(tournamentId, isChampionship);
+      bustTournamentsCache();
+    } catch (e) {
+      // revert the optimistic change so the UI reflects what's really saved
+      setTournamentRows((prev) => prev.map((t) => (t.id === tournamentId ? { ...t, is_championship: !isChampionship } : t)));
+      alert("لم يُحفظ الإعداد في قاعدة البيانات. تأكد أنك شغّلت SQL البطولات كامل.\n" + (e?.message || ""));
+    }
   };
 
   const toggleChampionshipCup = async (tournamentId, isCup) => {
     setTournamentRows((prev) => prev.map((t) => (t.id === tournamentId ? { ...t, is_cup: isCup } : t)));
-    await setTournamentCupDB(tournamentId, isCup);
-    bustTournamentsCache();
+    try {
+      await setTournamentCupDB(tournamentId, isCup);
+      bustTournamentsCache();
+    } catch (e) {
+      setTournamentRows((prev) => prev.map((t) => (t.id === tournamentId ? { ...t, is_cup: !isCup } : t)));
+      alert("لم يُحفظ إعداد الكأس. تأكد أنك شغّلت SQL البطولات كامل.\n" + (e?.message || ""));
+    }
   };
 
   // Reorder a championship league up (-1) or down (+1) in the البطولات list.
@@ -7536,8 +7547,14 @@ export default function App() {
   };
 
   const saveChampionshipLock = async (lockAt) => {
+    const prev = championshipSettings;
     setChampionshipSettings({ lock_at: lockAt });
-    await updateChampionshipLockDB(lockAt);
+    try {
+      await updateChampionshipLockDB(lockAt);
+    } catch (e) {
+      setChampionshipSettings(prev);
+      alert("لم يُحفظ موعد الإقفال. تأكد أنك شغّلت SQL البطولات كامل.\n" + (e?.message || ""));
+    }
   };
 
   const removeMatch = (id) => {
