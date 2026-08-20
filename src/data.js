@@ -313,7 +313,7 @@ export async function upsertChampionshipPredictionDB(userId, tournamentId, { fir
 export async function fetchAllChampionshipPredictions() {
   const { data, error } = await supabase
     .from("championship_predictions")
-    .select("user_id, tournament_id, first_team, second_team, third_team, profiles(name, username)");
+    .select("user_id, tournament_id, first_team, second_team, third_team, updated_at, profiles(name, username)");
   if (error) throw error;
   return data;
 }

@@ -6743,6 +6743,44 @@ function ChampionshipsPage({
                     >
                       {resultFlash[league.id] ? "✓ تم حفظ النتيجة" : "حفظ النتيجة النهائية"}
                     </button>
+
+                    {/* All participants' predictions for this league */}
+                    {(() => {
+                      const subs = allChampionshipPreds
+                        .filter((r) => r.tournament_id === league.id)
+                        .sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
+                      return (
+                        <div style={{ marginTop: "14px", borderTop: `1px dashed ${theme.border}`, paddingTop: "12px" }}>
+                          <div style={{ fontSize: "11px", fontWeight: 800, color: theme.primary, marginBottom: "8px" }}>
+                            توقعات المشاركين ({subs.length})
+                          </div>
+                          {subs.length === 0 ? (
+                            <div style={{ fontSize: "12px", color: theme.muted }}>لا توجد توقعات بعد.</div>
+                          ) : (
+                            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                              {subs.map((r) => (
+                                <div key={r.user_id} style={{ background: theme.bg, borderRadius: "10px", padding: "8px 10px" }}>
+                                  <div style={{ fontSize: "12.5px", fontWeight: 800, color: theme.text }}>
+                                    {r.profiles?.name || "مستخدم"}
+                                    {r.profiles?.username ? <span style={{ color: theme.muted, fontWeight: 500 }}> @{r.profiles.username}</span> : null}
+                                  </div>
+                                  <div style={{ fontSize: "12px", color: theme.muted, marginTop: "2px", lineHeight: 1.7 }}>
+                                    {isCup
+                                      ? `🥇 ${r.first_team || "—"} · 🥈 ${r.second_team || "—"}`
+                                      : `🥇 ${r.first_team || "—"} · 🥈 ${r.second_team || "—"} · 🥉 ${r.third_team || "—"}`}
+                                  </div>
+                                  {r.updated_at && (
+                                    <div style={{ fontSize: "10.5px", color: theme.muted, marginTop: "3px" }}>
+                                      {new Date(r.updated_at).toLocaleString("ar", { dateStyle: "medium", timeStyle: "short" })}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
