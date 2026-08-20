@@ -6553,7 +6553,7 @@ function ChampionshipsPage({
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
               <TournamentIcon name={league.name} logo={tournamentLogos?.[league.name]} theme={theme} size={20} color={theme.primary} />
               <div style={{ fontSize: "15px", fontWeight: 800, color: theme.text }}>{league.name}</div>
-              {points != null && (
+              {points != null && !isAdmin && (
                 <div style={{ marginRight: "auto", fontSize: "13px", fontWeight: 900, color: "#D4AF37" }}>{points} / 10</div>
               )}
             </div>
@@ -6564,42 +6564,48 @@ function ChampionshipsPage({
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                {[
-                  { field: "first", label: "🥇 المركز الأول", ph: "اختر البطل" },
-                  { field: "second", label: "🥈 الوصيف", ph: "اختر الوصيف" },
-                  { field: "third", label: "🥉 المركز الثالث", ph: "اختر الثالث" },
-                ].map(({ field, label, ph }) => (
-                  <div key={field}>
-                    <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "4px" }}>{label}</label>
-                    <PositionSelect
-                      teams={teams}
-                      value={pick[field]}
-                      onChange={(v) => setField(field, v)}
-                      exclude={[pick.first, pick.second, pick.third].filter((x) => x && x !== pick[field])}
-                      placeholder={ph}
-                      disabled={!canEdit}
-                    />
-                  </div>
-                ))}
+                {/* Personal top-3 prediction — hidden in the organizer view,
+                    which only enters the final results below. */}
+                {!isAdmin && (
+                  <>
+                    {[
+                      { field: "first", label: "🥇 المركز الأول", ph: "اختر البطل" },
+                      { field: "second", label: "🥈 الوصيف", ph: "اختر الوصيف" },
+                      { field: "third", label: "🥉 المركز الثالث", ph: "اختر الثالث" },
+                    ].map(({ field, label, ph }) => (
+                      <div key={field}>
+                        <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "4px" }}>{label}</label>
+                        <PositionSelect
+                          teams={teams}
+                          value={pick[field]}
+                          onChange={(v) => setField(field, v)}
+                          exclude={[pick.first, pick.second, pick.third].filter((x) => x && x !== pick[field])}
+                          placeholder={ph}
+                          disabled={!canEdit}
+                        />
+                      </div>
+                    ))}
 
-                {result && (
-                  <div style={{ marginTop: "8px", fontSize: "12px", color: theme.muted, lineHeight: 1.8 }}>
-                    <div style={{ fontWeight: 700, color: theme.text }}>الترتيب الفعلي:</div>
-                    🥇 {result.first_team || "—"} · 🥈 {result.second_team || "—"} · 🥉 {result.third_team || "—"}
-                  </div>
-                )}
+                    {result && (
+                      <div style={{ marginTop: "8px", fontSize: "12px", color: theme.muted, lineHeight: 1.8 }}>
+                        <div style={{ fontWeight: 700, color: theme.text }}>الترتيب الفعلي:</div>
+                        🥇 {result.first_team || "—"} · 🥈 {result.second_team || "—"} · 🥉 {result.third_team || "—"}
+                      </div>
+                    )}
 
-                {canEdit && (
-                  <button
-                    onClick={async () => {
-                      await onSavePick(league.id, getPick(league.id));
-                      setSavedFlash((p) => ({ ...p, [league.id]: true }));
-                      setTimeout(() => setSavedFlash((p) => ({ ...p, [league.id]: false })), 1800);
-                    }}
-                    style={{ marginTop: "8px", width: "100%", background: savedFlash[league.id] ? "#10B981" : theme.primary, color: theme.surface, border: "none", borderRadius: "10px", padding: "11px 0", fontFamily: "Cairo, sans-serif", fontWeight: 800, fontSize: "13px", cursor: "pointer" }}
-                  >
-                    {savedFlash[league.id] ? "✓ تم الحفظ" : "حفظ التوقع"}
-                  </button>
+                    {canEdit && (
+                      <button
+                        onClick={async () => {
+                          await onSavePick(league.id, getPick(league.id));
+                          setSavedFlash((p) => ({ ...p, [league.id]: true }));
+                          setTimeout(() => setSavedFlash((p) => ({ ...p, [league.id]: false })), 1800);
+                        }}
+                        style={{ marginTop: "8px", width: "100%", background: savedFlash[league.id] ? "#10B981" : theme.primary, color: theme.surface, border: "none", borderRadius: "10px", padding: "11px 0", fontFamily: "Cairo, sans-serif", fontWeight: 800, fontSize: "13px", cursor: "pointer" }}
+                      >
+                        {savedFlash[league.id] ? "✓ تم الحفظ" : "حفظ التوقع"}
+                      </button>
+                    )}
+                  </>
                 )}
 
                 {/* Admin: enter final result for this league */}
