@@ -5998,9 +5998,9 @@ function StatsPage({ matches, tournaments, tournamentLogos, theme }) {
 const NAV_ITEMS = [
   { id: "home", label: "الرئيسية", icon: Home, color: (t) => t.violet },
   { id: "predictions", label: "توقع المباريات", icon: Target, color: (t) => t.danger },
+  { id: "championships", label: "البطولات", icon: ListOrdered, color: (t) => "#D4AF37" },
   { id: "leagues", label: "الدوريات", icon: Users, color: (t) => t.blue },
   { id: "globalLeaderboard", label: "لوحة الترتيب العام", icon: Trophy, color: (t) => "#10B981" },
-  { id: "championships", label: "البطولات", icon: ListOrdered, color: (t) => "#D4AF37" },
   { id: "stats", label: "الإحصائيات", icon: BarChart3, color: (t) => "#F59E0B" },
   { id: "pointsSystem", label: "نظام النقاط", icon: Award, color: (t) => t.violet },
   { id: "prizes", label: "الجوائز", icon: Crown, color: (t) => "#D4AF37" },
