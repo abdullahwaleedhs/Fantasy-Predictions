@@ -342,6 +342,11 @@ export async function upsertChampionshipResultDB(tournamentId, { first, second, 
   if (error) throw error;
 }
 
+export async function deleteChampionshipResultDB(tournamentId) {
+  const { error } = await supabase.from("championship_results").delete().eq("tournament_id", tournamentId);
+  if (error) throw error;
+}
+
 export async function fetchChampionshipSettings() {
   const { data, error } = await supabase
     .from("championship_settings")

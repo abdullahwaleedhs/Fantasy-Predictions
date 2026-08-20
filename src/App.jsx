@@ -36,6 +36,7 @@ import {
   fetchAllChampionshipPredictions,
   fetchChampionshipResults,
   upsertChampionshipResultDB,
+  deleteChampionshipResultDB,
   fetchChampionshipSettings,
   updateChampionshipLockDB,
 } from "./data";
@@ -6424,6 +6425,7 @@ function ChampionshipsPage({
   viewMode,
   onSavePick,
   onSaveResult,
+  onClearResult,
   onToggleChampionship,
   onToggleCup,
   onMoveLeague,
@@ -6827,6 +6829,23 @@ function ChampionshipsPage({
                     >
                       {resultFlash[league.id] ? "✓ تم حفظ النتيجة" : "حفظ النتيجة النهائية"}
                     </button>
+
+                    {result && (
+                      <button
+                        onClick={async () => {
+                          if (!confirm("إزالة الترتيب النهائي؟ ترجع البطولة بلا نقاط.")) return;
+                          try {
+                            await onClearResult(league.id);
+                            setAdminResults((prev) => ({ ...prev, [league.id]: { first: "", second: "", third: "" } }));
+                          } catch (e) {
+                            alert("تعذّر إزالة النتيجة: " + (e?.message || "خطأ غير متوقع"));
+                          }
+                        }}
+                        style={{ width: "100%", background: "transparent", color: theme.danger, border: `1.5px solid ${theme.danger}`, borderRadius: "10px", padding: "8px 0", fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "12px", cursor: "pointer", marginTop: "6px" }}
+                      >
+                        إزالة الترتيب النهائي
+                      </button>
+                    )}
 
                     {/* All participants' predictions for this league */}
                     {(() => {
@@ -7608,6 +7627,11 @@ export default function App() {
     });
   };
 
+  const clearChampionshipResult = async (tournamentId) => {
+    await deleteChampionshipResultDB(tournamentId);
+    setChampionshipResults((prev) => prev.filter((r) => r.tournament_id !== tournamentId));
+  };
+
   const toggleChampionshipTournament = async (tournamentId, isChampionship) => {
     setTournamentRows((prev) => prev.map((t) => (t.id === tournamentId ? { ...t, is_championship: isChampionship } : t)));
     try {
@@ -8208,6 +8232,7 @@ export default function App() {
           viewMode={viewMode}
           onSavePick={saveChampionshipPick}
           onSaveResult={saveChampionshipResult}
+          onClearResult={clearChampionshipResult}
           onToggleChampionship={toggleChampionshipTournament}
           onToggleCup={toggleChampionshipCup}
           onMoveLeague={moveChampionshipLeague}
