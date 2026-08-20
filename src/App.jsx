@@ -6948,6 +6948,43 @@ function ChampionshipsPage({
   );
 }
 
+// One-time announcement for the new Championships section, dismissible.
+function ChampionshipsAnnounceBanner({ currentUser, onGo, theme }) {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    if (!currentUser) { setShow(false); return; }
+    if (localStorage.getItem("champBannerDismissed") === "1") return;
+    setShow(true);
+  }, [currentUser?.id]);
+  if (!show) return null;
+  const dismiss = () => {
+    localStorage.setItem("champBannerDismissed", "1");
+    setShow(false);
+  };
+  return (
+    <div style={{ padding: "10px 12px 0" }}>
+      <div style={{ background: theme.surface, border: `1.5px solid #D4AF37`, borderRadius: "12px", padding: "12px 14px", display: "flex", alignItems: "center", gap: "10px" }}>
+        <span style={{ fontSize: "22px", flexShrink: 0 }}>🏆</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: "12px", fontWeight: 800, color: theme.text, marginBottom: "2px" }}>قسم جديد: البطولات</div>
+          <div style={{ fontSize: "11px", color: theme.muted, lineHeight: 1.6 }}>
+            توقّع ترتيب الدوريات وأبطال الكؤوس. اختياري ومنفصل تماماً عن نقاط توقّع المباريات.
+          </div>
+        </div>
+        <button
+          onClick={() => { dismiss(); onGo(); }}
+          style={{ flexShrink: 0, background: "#D4AF37", color: "#1a1a1a", border: "none", borderRadius: "8px", padding: "8px 12px", fontFamily: "Cairo, sans-serif", fontSize: "12px", fontWeight: 800, cursor: "pointer" }}
+        >
+          شوف القسم
+        </button>
+        <button onClick={dismiss} aria-label="إغلاق" style={{ flexShrink: 0, background: "transparent", color: theme.muted, border: "none", cursor: "pointer", padding: "4px", display: "flex" }}>
+          <X size={16} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // One-time announcement shown to logged-in users who haven't turned on push
 // notifications yet, pointing them to the profile page to enable them.
 function NotificationUpdateBanner({ currentUser, onGoToProfile, theme }) {
@@ -7204,6 +7241,8 @@ export default function App() {
     // If the URL contains a Supabase password-recovery token, go straight to
     // the reset form before sessionStorage can push us elsewhere.
     if (window.location.hash.includes("type=recovery")) return "resetPassword";
+    // Deep link from the championships push notification (url = "/#championships").
+    if (window.location.hash.includes("championships")) return "championships";
     return sessionStorage.getItem("activePage") || "home";
   });
   const [profileUser, setProfileUser] = useState(null); // { id, name, username, avatar, points, tierCounts } - when set, show UserProfilePage overlay
@@ -7752,6 +7791,12 @@ export default function App() {
         setViewMode={setViewMode}
         currentUser={currentUser}
         onLogout={handleLogout}
+        theme={theme}
+      />
+
+      <ChampionshipsAnnounceBanner
+        currentUser={currentUser}
+        onGo={() => setActivePage("championships")}
         theme={theme}
       />
 
