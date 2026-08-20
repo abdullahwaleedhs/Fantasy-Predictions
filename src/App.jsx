@@ -29,6 +29,7 @@ import {
   bustClubsCache,
   bustAllPredictionsCache,
   setTournamentChampionshipDB,
+  setTournamentCupDB,
   fetchChampionshipPredictionsForUser,
   upsertChampionshipPredictionDB,
   fetchAllChampionshipPredictions,
@@ -6349,11 +6350,24 @@ function TopBar({ onMenuClick, onLogoClick, theme }) {
   );
 }
 
-// Points for one league's top-3 prediction against the final standings:
-// exact 1st = 5, exact 2nd = 3, exact 3rd = 2, right team but wrong position
-// (still in the actual top 3) = 1, a team outside the top 3 = 0. Max 10.
-function champLeaguePoints(pick, result) {
+// Points for one competition's prediction against the final standings.
+//
+// League (top 3), max 10:  exact 1st = 5, exact 2nd = 3, exact 3rd = 2,
+//   right team but wrong position (still in the actual top 3) = 1, else 0.
+//
+// Cup (champion + runner-up only), max 25:
+//   champion exact = 15, predicted champion who became runner-up = 5,
+//   runner-up exact = 10, predicted runner-up who became champion = 5, else 0.
+function champPoints(pick, result, isCup) {
   if (!result) return null;
+  if (isCup) {
+    const champ = result.first_team;
+    const runner = result.second_team;
+    let pts = 0;
+    if (pick.first) pts += pick.first === champ ? 15 : pick.first === runner ? 5 : 0;
+    if (pick.second) pts += pick.second === runner ? 10 : pick.second === champ ? 5 : 0;
+    return pts;
+  }
   const actualTop3 = [result.first_team, result.second_team, result.third_team].filter(Boolean);
   const scorePos = (team, actualTeam, exactPts) => {
     if (!team) return 0;
@@ -6384,6 +6398,7 @@ function ChampionshipsPage({
   onSavePick,
   onSaveResult,
   onToggleChampionship,
+  onToggleCup,
   onSaveLock,
   theme,
 }) {
@@ -6415,13 +6430,16 @@ function ChampionshipsPage({
   const leaderboard = (() => {
     const hasAnyResult = championshipResults.length > 0;
     if (!hasAnyResult) return null;
+    const cupByTournament = {};
+    for (const t of tournamentRows) cupByTournament[t.id] = !!t.is_cup;
     const byUser = {};
     for (const row of allChampionshipPreds) {
       const result = resultByTournament[row.tournament_id];
       if (!result) continue;
-      const pts = champLeaguePoints(
+      const pts = champPoints(
         { first: row.first_team, second: row.second_team, third: row.third_team },
-        result
+        result,
+        cupByTournament[row.tournament_id]
       );
       if (!byUser[row.user_id]) {
         byUser[row.user_id] = {
@@ -6515,18 +6533,30 @@ function ChampionshipsPage({
           </div>
 
           <div style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, marginBottom: "8px" }}>
-            الدوريات المعروضة في البطولات (فعّلها من قائمة الأندية):
+            الدوريات المعروضة في البطولات — فعّلها، وعلّم "كأس" للبطولات (بطل ووصيف فقط):
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
             {tournamentRows.map((t) => (
-              <label key={t.id} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: theme.text, cursor: "pointer" }}>
-                <input
-                  type="checkbox"
-                  checked={!!t.is_championship}
-                  onChange={(e) => onToggleChampionship(t.id, e.target.checked)}
-                />
-                {t.name}
-              </label>
+              <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "14px", fontSize: "13px", color: theme.text }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", flex: 1 }}>
+                  <input
+                    type="checkbox"
+                    checked={!!t.is_championship}
+                    onChange={(e) => onToggleChampionship(t.id, e.target.checked)}
+                  />
+                  {t.name}
+                </label>
+                {t.is_championship && (
+                  <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", color: theme.muted, fontSize: "12px" }}>
+                    <input
+                      type="checkbox"
+                      checked={!!t.is_cup}
+                      onChange={(e) => onToggleCup(t.id, e.target.checked)}
+                    />
+                    كأس
+                  </label>
+                )}
+              </div>
             ))}
           </div>
         </div>
@@ -6543,7 +6573,19 @@ function ChampionshipsPage({
         const teams = (clubsByTournament[league.name] || []).map((c) => c.name);
         const pick = getPick(league.id);
         const result = resultByTournament[league.id];
-        const points = result ? champLeaguePoints(pick, result) : null;
+        const isCup = !!league.is_cup;
+        const points = result ? champPoints(pick, result, isCup) : null;
+        const maxPts = isCup ? 25 : 10;
+        const positions = isCup
+          ? [
+              { field: "first", label: "🥇 البطل", ph: "اختر البطل" },
+              { field: "second", label: "🥈 الوصيف", ph: "اختر الوصيف" },
+            ]
+          : [
+              { field: "first", label: "🥇 المركز الأول", ph: "اختر البطل" },
+              { field: "second", label: "🥈 الوصيف", ph: "اختر الوصيف" },
+              { field: "third", label: "🥉 المركز الثالث", ph: "اختر الثالث" },
+            ];
         const canEdit = !locked && !!currentUser;
 
         const setField = (field, val) =>
@@ -6555,7 +6597,7 @@ function ChampionshipsPage({
               <TournamentIcon name={league.name} logo={tournamentLogos?.[league.name]} theme={theme} size={20} color={theme.primary} />
               <div style={{ fontSize: "15px", fontWeight: 800, color: theme.text }}>{league.name}</div>
               {points != null && !isAdmin && (
-                <div style={{ marginRight: "auto", fontSize: "13px", fontWeight: 900, color: "#D4AF37" }}>{points} / 10</div>
+                <div style={{ marginRight: "auto", fontSize: "13px", fontWeight: 900, color: "#D4AF37" }}>{points} / {maxPts}</div>
               )}
             </div>
 
@@ -6569,18 +6611,14 @@ function ChampionshipsPage({
                     which only enters the final results below. */}
                 {!isAdmin && (
                   <>
-                    {[
-                      { field: "first", label: "🥇 المركز الأول", ph: "اختر البطل" },
-                      { field: "second", label: "🥈 الوصيف", ph: "اختر الوصيف" },
-                      { field: "third", label: "🥉 المركز الثالث", ph: "اختر الثالث" },
-                    ].map(({ field, label, ph }) => (
+                    {positions.map(({ field, label, ph }) => (
                       <div key={field}>
                         <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "4px" }}>{label}</label>
                         <PositionSelect
                           teams={teams}
                           value={pick[field]}
                           onChange={(v) => setField(field, v)}
-                          exclude={[pick.first, pick.second, pick.third].filter((x) => x && x !== pick[field])}
+                          exclude={positions.map((p) => pick[p.field]).filter((x) => x && x !== pick[field])}
                           placeholder={ph}
                           disabled={!canEdit}
                         />
@@ -6590,7 +6628,9 @@ function ChampionshipsPage({
                     {result && (
                       <div style={{ marginTop: "8px", fontSize: "12px", color: theme.muted, lineHeight: 1.8 }}>
                         <div style={{ fontWeight: 700, color: theme.text }}>الترتيب الفعلي:</div>
-                        🥇 {result.first_team || "—"} · 🥈 {result.second_team || "—"} · 🥉 {result.third_team || "—"}
+                        {isCup
+                          ? `🥇 ${result.first_team || "—"} · 🥈 ${result.second_team || "—"}`
+                          : `🥇 ${result.first_team || "—"} · 🥈 ${result.second_team || "—"} · 🥉 ${result.third_team || "—"}`}
                       </div>
                     )}
 
@@ -6616,17 +6656,20 @@ function ChampionshipsPage({
                 {/* Admin: enter final result for this league */}
                 {isAdmin && (
                   <div style={{ marginTop: "12px", borderTop: `1px dashed ${theme.border}`, paddingTop: "12px" }}>
-                    <div style={{ fontSize: "11px", fontWeight: 800, color: theme.primary, marginBottom: "6px" }}>الترتيب النهائي الفعلي (المنظم)</div>
-                    {["first", "second", "third"].map((field, i) => {
+                    <div style={{ fontSize: "11px", fontWeight: 800, color: theme.primary, marginBottom: "6px" }}>
+                      {isCup ? "البطل والوصيف (المنظم)" : "الترتيب النهائي الفعلي (المنظم)"}
+                    </div>
+                    {positions.map(({ field }, i) => {
                       const ar = getAdminResult(league.id);
+                      const ph = isCup ? ["البطل", "الوصيف"][i] : ["المركز الأول", "الوصيف", "الثالث"][i];
                       return (
                         <div key={field} style={{ marginBottom: "6px" }}>
                           <PositionSelect
                             teams={teams}
                             value={ar[field]}
                             onChange={(v) => setAdminResults((prev) => ({ ...prev, [league.id]: { ...getAdminResult(league.id), [field]: v } }))}
-                            exclude={[ar.first, ar.second, ar.third].filter((x) => x && x !== ar[field])}
-                            placeholder={["المركز الأول", "الوصيف", "الثالث"][i]}
+                            exclude={positions.map((p) => ar[p.field]).filter((x) => x && x !== ar[field])}
+                            placeholder={ph}
                             disabled={false}
                           />
                         </div>
@@ -7377,6 +7420,12 @@ export default function App() {
     bustTournamentsCache();
   };
 
+  const toggleChampionshipCup = async (tournamentId, isCup) => {
+    setTournamentRows((prev) => prev.map((t) => (t.id === tournamentId ? { ...t, is_cup: isCup } : t)));
+    await setTournamentCupDB(tournamentId, isCup);
+    bustTournamentsCache();
+  };
+
   const saveChampionshipLock = async (lockAt) => {
     setChampionshipSettings({ lock_at: lockAt });
     await updateChampionshipLockDB(lockAt);
@@ -7932,6 +7981,7 @@ export default function App() {
           onSavePick={saveChampionshipPick}
           onSaveResult={saveChampionshipResult}
           onToggleChampionship={toggleChampionshipTournament}
+          onToggleCup={toggleChampionshipCup}
           onSaveLock={saveChampionshipLock}
           theme={theme}
         />
