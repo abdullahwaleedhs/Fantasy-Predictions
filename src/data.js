@@ -42,7 +42,10 @@ export async function fetchAllProfiles() {
 let _tournamentsCache = null;
 export async function fetchTournaments({ bust } = {}) {
   if (!bust && _tournamentsCache) return _tournamentsCache;
-  const { data, error } = await supabase.from("tournaments").select("id, name, logo, is_championship").order("created_at");
+  // select("*") so the app keeps working whether or not the is_championship
+  // column has been added yet (a fixed column list errors on a missing column
+  // and would break the whole initial data load).
+  const { data, error } = await supabase.from("tournaments").select("*").order("created_at");
   if (error) throw error;
   _tournamentsCache = data;
   return data;
