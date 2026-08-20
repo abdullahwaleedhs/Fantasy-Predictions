@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Plus, Trash2, ChevronDown, ChevronRight, Search, Palette, Lock, Unlock, Calendar, Clock, Menu, X, Home, Target, Trophy, BarChart3, Zap, Shield, Upload, CircleDot, Users, Copy, Check, Crown, ArrowDown, Award, TrendingUp, User, LogIn, LogOut, Mail, Camera, Eye, EyeOff, Pencil, Globe } from "lucide-react";
+import { Plus, Trash2, ChevronDown, ChevronRight, Search, Palette, Lock, Unlock, Calendar, Clock, Menu, X, Home, Target, Trophy, BarChart3, Zap, Shield, Upload, CircleDot, Users, Copy, Check, Crown, ArrowDown, Award, TrendingUp, User, LogIn, LogOut, Mail, Camera, Eye, EyeOff, Pencil, Globe, ListOrdered } from "lucide-react";
 import { isUsernameTaken, registerUser, loginUser, logoutUser, deleteAccount, updateProfile, fetchProfile, getSessionUser, setBoostsRemaining as setBoostsRemainingDB, requestPasswordReset, updatePassword } from "./auth";
 import { supabase } from "./supabaseClient";
 import {
@@ -6000,7 +6000,7 @@ const NAV_ITEMS = [
   { id: "predictions", label: "توقع المباريات", icon: Target, color: (t) => t.danger },
   { id: "leagues", label: "الدوريات", icon: Users, color: (t) => t.blue },
   { id: "globalLeaderboard", label: "لوحة الترتيب العام", icon: Trophy, color: (t) => "#10B981" },
-  { id: "championships", label: "البطولات", icon: Crown, color: (t) => "#D4AF37" },
+  { id: "championships", label: "البطولات", icon: ListOrdered, color: (t) => "#D4AF37" },
   { id: "stats", label: "الإحصائيات", icon: BarChart3, color: (t) => "#F59E0B" },
   { id: "pointsSystem", label: "نظام النقاط", icon: Award, color: (t) => t.violet },
   { id: "prizes", label: "الجوائز", icon: Crown, color: (t) => "#D4AF37" },
@@ -6461,7 +6461,7 @@ function ChampionshipsPage({
   return (
     <div style={{ padding: "20px 16px 60px", maxWidth: "560px", margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px", justifyContent: "center" }}>
-        <Crown size={22} color="#D4AF37" />
+        <ListOrdered size={22} color="#D4AF37" />
         <h2 style={{ fontSize: "20px", fontWeight: 900, color: theme.text, margin: 0 }}>البطولات</h2>
       </div>
       <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", marginBottom: "18px", lineHeight: 1.7 }}>
