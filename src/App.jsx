@@ -6397,6 +6397,7 @@ function ChampionshipsPage({
 
   const [drafts, setDrafts] = useState({}); // tournamentId -> {first, second, third}
   const [savedFlash, setSavedFlash] = useState({});
+  const [resultFlash, setResultFlash] = useState({});
   const [adminResults, setAdminResults] = useState({});
   const [lockInput, setLockInput] = useState(
     championshipSettings?.lock_at ? new Date(championshipSettings.lock_at).toISOString().slice(0, 16) : ""
@@ -6596,9 +6597,13 @@ function ChampionshipsPage({
                     {canEdit && (
                       <button
                         onClick={async () => {
-                          await onSavePick(league.id, getPick(league.id));
-                          setSavedFlash((p) => ({ ...p, [league.id]: true }));
-                          setTimeout(() => setSavedFlash((p) => ({ ...p, [league.id]: false })), 1800);
+                          try {
+                            await onSavePick(league.id, getPick(league.id));
+                            setSavedFlash((p) => ({ ...p, [league.id]: true }));
+                            setTimeout(() => setSavedFlash((p) => ({ ...p, [league.id]: false })), 1800);
+                          } catch (e) {
+                            alert("تعذّر حفظ التوقع: " + (e?.message || "خطأ غير متوقع"));
+                          }
                         }}
                         style={{ marginTop: "8px", width: "100%", background: savedFlash[league.id] ? "#10B981" : theme.primary, color: theme.surface, border: "none", borderRadius: "10px", padding: "11px 0", fontFamily: "Cairo, sans-serif", fontWeight: 800, fontSize: "13px", cursor: "pointer" }}
                       >
@@ -6628,10 +6633,18 @@ function ChampionshipsPage({
                       );
                     })}
                     <button
-                      onClick={() => onSaveResult(league.id, getAdminResult(league.id))}
-                      style={{ width: "100%", background: theme.text, color: theme.surface, border: "none", borderRadius: "10px", padding: "9px 0", fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "12px", cursor: "pointer", marginTop: "2px" }}
+                      onClick={async () => {
+                        try {
+                          await onSaveResult(league.id, getAdminResult(league.id));
+                          setResultFlash((p) => ({ ...p, [league.id]: true }));
+                          setTimeout(() => setResultFlash((p) => ({ ...p, [league.id]: false })), 1800);
+                        } catch (e) {
+                          alert("تعذّر حفظ النتيجة: " + (e?.message || "خطأ غير متوقع"));
+                        }
+                      }}
+                      style={{ width: "100%", background: resultFlash[league.id] ? "#10B981" : theme.text, color: theme.surface, border: "none", borderRadius: "10px", padding: "9px 0", fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "12px", cursor: "pointer", marginTop: "2px" }}
                     >
-                      حفظ النتيجة النهائية
+                      {resultFlash[league.id] ? "✓ تم حفظ النتيجة" : "حفظ النتيجة النهائية"}
                     </button>
                   </div>
                 )}
