@@ -42,12 +42,17 @@ export async function fetchAllProfiles() {
 let _tournamentsCache = null;
 export async function fetchTournaments({ bust } = {}) {
   if (!bust && _tournamentsCache) return _tournamentsCache;
-  const { data, error } = await supabase.from("tournaments").select("id, name, logo").order("created_at");
+  const { data, error } = await supabase.from("tournaments").select("id, name, logo, is_championship").order("created_at");
   if (error) throw error;
   _tournamentsCache = data;
   return data;
 }
 export function bustTournamentsCache() { _tournamentsCache = null; }
+
+export async function setTournamentChampionshipDB(tournamentId, isChampionship) {
+  const { error } = await supabase.from("tournaments").update({ is_championship: isChampionship }).eq("id", tournamentId);
+  if (error) throw error;
+}
 
 export async function addTournamentDB(name) {
   const { data, error } = await supabase.from("tournaments").insert({ name }).select().single();
@@ -258,4 +263,83 @@ export async function joinLeagueDB(leagueId, userId, displayName) {
     .single();
   if (error) throw error;
   return data;
+}
+
+// ============ CHAMPIONSHIPS (end-of-season top-3 predictions) ============
+// Separate from match predictions: users predict the final top 3 of chosen
+// leagues, scored independently and shown in the البطولات section.
+
+export async function fetchChampionshipPredictionsForUser(userId) {
+  const { data, error } = await supabase
+    .from("championship_predictions")
+    .select("tournament_id, first_team, second_team, third_team")
+    .eq("user_id", userId);
+  if (error) throw error;
+  return data;
+}
+
+export async function upsertChampionshipPredictionDB(userId, tournamentId, { first, second, third }) {
+  const { error } = await supabase
+    .from("championship_predictions")
+    .upsert(
+      {
+        user_id: userId,
+        tournament_id: tournamentId,
+        first_team: first || null,
+        second_team: second || null,
+        third_team: third || null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,tournament_id" }
+    );
+  if (error) throw error;
+}
+
+export async function fetchAllChampionshipPredictions() {
+  const { data, error } = await supabase
+    .from("championship_predictions")
+    .select("user_id, tournament_id, first_team, second_team, third_team, profiles(name, username)");
+  if (error) throw error;
+  return data;
+}
+
+export async function fetchChampionshipResults() {
+  const { data, error } = await supabase
+    .from("championship_results")
+    .select("tournament_id, first_team, second_team, third_team");
+  if (error) throw error;
+  return data;
+}
+
+export async function upsertChampionshipResultDB(tournamentId, { first, second, third }) {
+  const { error } = await supabase
+    .from("championship_results")
+    .upsert(
+      {
+        tournament_id: tournamentId,
+        first_team: first || null,
+        second_team: second || null,
+        third_team: third || null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "tournament_id" }
+    );
+  if (error) throw error;
+}
+
+export async function fetchChampionshipSettings() {
+  const { data, error } = await supabase
+    .from("championship_settings")
+    .select("lock_at")
+    .eq("id", 1)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateChampionshipLockDB(lockAt) {
+  const { error } = await supabase
+    .from("championship_settings")
+    .upsert({ id: 1, lock_at: lockAt || null }, { onConflict: "id" });
+  if (error) throw error;
 }

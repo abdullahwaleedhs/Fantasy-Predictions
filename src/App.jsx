@@ -28,6 +28,14 @@ import {
   bustTournamentsCache,
   bustClubsCache,
   bustAllPredictionsCache,
+  setTournamentChampionshipDB,
+  fetchChampionshipPredictionsForUser,
+  upsertChampionshipPredictionDB,
+  fetchAllChampionshipPredictions,
+  fetchChampionshipResults,
+  upsertChampionshipResultDB,
+  fetchChampionshipSettings,
+  updateChampionshipLockDB,
 } from "./data";
 
 const VAPID_PUBLIC_KEY = "BMI9_xrcnuEuLcAcbO9USRxVmnPL8wF6Y37KyyYQnu4oh5LhD-G5CeUVvZxST7FxMhQn5QH9FDTvSJXX-e53BO4";
@@ -5992,6 +6000,7 @@ const NAV_ITEMS = [
   { id: "predictions", label: "توقع المباريات", icon: Target, color: (t) => t.danger },
   { id: "leagues", label: "الدوريات", icon: Users, color: (t) => t.blue },
   { id: "globalLeaderboard", label: "لوحة الترتيب العام", icon: Trophy, color: (t) => "#10B981" },
+  { id: "championships", label: "البطولات", icon: Crown, color: (t) => "#D4AF37" },
   { id: "stats", label: "الإحصائيات", icon: BarChart3, color: (t) => "#F59E0B" },
   { id: "pointsSystem", label: "نظام النقاط", icon: Award, color: (t) => t.violet },
   { id: "prizes", label: "الجوائز", icon: Crown, color: (t) => "#D4AF37" },
@@ -6340,6 +6349,330 @@ function TopBar({ onMenuClick, onLogoClick, theme }) {
   );
 }
 
+// Points for one league's top-3 prediction against the final standings:
+// exact 1st = 5, exact 2nd = 3, exact 3rd = 2, right team but wrong position
+// (still in the actual top 3) = 1, a team outside the top 3 = 0. Max 10.
+function champLeaguePoints(pick, result) {
+  if (!result) return null;
+  const actualTop3 = [result.first_team, result.second_team, result.third_team].filter(Boolean);
+  const scorePos = (team, actualTeam, exactPts) => {
+    if (!team) return 0;
+    if (actualTeam && actualTeam === team) return exactPts;
+    if (actualTop3.includes(team)) return 1;
+    return 0;
+  };
+  return (
+    scorePos(pick.first, result.first_team, 5) +
+    scorePos(pick.second, result.second_team, 3) +
+    scorePos(pick.third, result.third_team, 2)
+  );
+}
+
+// Championships section: predict the final top 3 of chosen leagues. Scored
+// separately from match predictions; standings are revealed once the organizer
+// enters the final results at the end of the season.
+function ChampionshipsPage({
+  tournamentRows,
+  clubsByTournament,
+  tournamentLogos,
+  championshipPredsByTournament,
+  championshipResults,
+  championshipSettings,
+  allChampionshipPreds,
+  currentUser,
+  viewMode,
+  onSavePick,
+  onSaveResult,
+  onToggleChampionship,
+  onSaveLock,
+  theme,
+}) {
+  const isAdmin = viewMode === "admin";
+  const lockAt = championshipSettings?.lock_at ? new Date(championshipSettings.lock_at) : null;
+  const locked = lockAt ? serverNow() >= lockAt.getTime() : false;
+
+  const leagues = tournamentRows.filter((t) => t.is_championship);
+  const resultByTournament = {};
+  for (const r of championshipResults) resultByTournament[r.tournament_id] = r;
+
+  const [drafts, setDrafts] = useState({}); // tournamentId -> {first, second, third}
+  const [savedFlash, setSavedFlash] = useState({});
+  const [adminResults, setAdminResults] = useState({});
+  const [lockInput, setLockInput] = useState(
+    championshipSettings?.lock_at ? new Date(championshipSettings.lock_at).toISOString().slice(0, 16) : ""
+  );
+
+  const getPick = (tid) => drafts[tid] || championshipPredsByTournament[tid] || { first: "", second: "", third: "" };
+  const getAdminResult = (tid) => adminResults[tid] || resultByTournament[tid] ? {
+    first: (adminResults[tid]?.first ?? resultByTournament[tid]?.first_team) || "",
+    second: (adminResults[tid]?.second ?? resultByTournament[tid]?.second_team) || "",
+    third: (adminResults[tid]?.third ?? resultByTournament[tid]?.third_team) || "",
+  } : { first: "", second: "", third: "" };
+
+  // Championship leaderboard: total points across all leagues that have a
+  // final result entered.
+  const leaderboard = (() => {
+    const hasAnyResult = championshipResults.length > 0;
+    if (!hasAnyResult) return null;
+    const byUser = {};
+    for (const row of allChampionshipPreds) {
+      const result = resultByTournament[row.tournament_id];
+      if (!result) continue;
+      const pts = champLeaguePoints(
+        { first: row.first_team, second: row.second_team, third: row.third_team },
+        result
+      );
+      if (!byUser[row.user_id]) {
+        byUser[row.user_id] = {
+          userId: row.user_id,
+          name: row.profiles?.name || "مستخدم",
+          username: row.profiles?.username || "",
+          points: 0,
+        };
+      }
+      byUser[row.user_id].points += pts || 0;
+    }
+    return Object.values(byUser).sort((a, b) => b.points - a.points);
+  })();
+
+  const selectStyle = {
+    width: "100%",
+    border: `1.5px solid ${theme.inputBorder}`,
+    borderRadius: "10px",
+    padding: "10px 12px",
+    fontFamily: "Cairo, sans-serif",
+    fontSize: "14px",
+    color: theme.text,
+    background: theme.surface,
+    outline: "none",
+  };
+
+  const PositionSelect = ({ teams, value, onChange, exclude, placeholder, disabled }) => (
+    <select style={{ ...selectStyle, opacity: disabled ? 0.6 : 1 }} value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled}>
+      <option value="">{placeholder}</option>
+      {teams
+        .filter((name) => name === value || !exclude.includes(name))
+        .map((name) => (
+          <option key={name} value={name}>{name}</option>
+        ))}
+    </select>
+  );
+
+  return (
+    <div style={{ padding: "20px 16px 60px", maxWidth: "560px", margin: "0 auto" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px", justifyContent: "center" }}>
+        <Crown size={22} color="#D4AF37" />
+        <h2 style={{ fontSize: "20px", fontWeight: 900, color: theme.text, margin: 0 }}>البطولات</h2>
+      </div>
+      <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", marginBottom: "18px", lineHeight: 1.7 }}>
+        توقّع ترتيب أول ٣ فرق لكل دوري. نقاط منفصلة تماماً عن توقعات المباريات، وتظهر نهاية الموسم.
+        <br />
+        الأول = ٥ نقاط · الوصيف = ٣ · الثالث = ٢ · فريق في مركز مختلف = ١
+      </p>
+
+      {lockAt && (
+        <div
+          style={{
+            background: locked ? theme.dangerSoft || theme.surface : theme.surface,
+            border: `1.5px solid ${locked ? theme.danger : theme.primary}`,
+            borderRadius: "12px",
+            padding: "10px 14px",
+            marginBottom: "16px",
+            textAlign: "center",
+            fontSize: "12px",
+            fontWeight: 700,
+            color: locked ? theme.danger : theme.text,
+          }}
+        >
+          {locked
+            ? "🔒 أُقفلت توقعات البطولات"
+            : `⏳ تُقفل التوقعات: ${lockAt.toLocaleString("ar", { dateStyle: "medium", timeStyle: "short" })}`}
+        </div>
+      )}
+
+      {/* ===== Admin controls ===== */}
+      {isAdmin && (
+        <div style={{ background: theme.surface, border: `1.5px solid ${theme.border}`, borderRadius: "14px", padding: "16px", marginBottom: "20px" }}>
+          <div style={{ fontSize: "13px", fontWeight: 800, color: theme.primary, marginBottom: "12px" }}>⚙️ إعدادات المنظم</div>
+
+          <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>
+            موعد إقفال التوقعات
+          </label>
+          <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+            <input
+              type="datetime-local"
+              value={lockInput}
+              onChange={(e) => setLockInput(e.target.value)}
+              style={{ ...selectStyle, flex: 1 }}
+            />
+            <button
+              onClick={() => onSaveLock(lockInput ? new Date(lockInput).toISOString() : null)}
+              style={{ background: theme.primary, color: theme.surface, border: "none", borderRadius: "10px", padding: "0 16px", fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "13px", cursor: "pointer" }}
+            >
+              حفظ
+            </button>
+          </div>
+
+          <div style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, marginBottom: "8px" }}>
+            الدوريات المعروضة في البطولات (فعّلها من قائمة الأندية):
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            {tournamentRows.map((t) => (
+              <label key={t.id} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: theme.text, cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={!!t.is_championship}
+                  onChange={(e) => onToggleChampionship(t.id, e.target.checked)}
+                />
+                {t.name}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {leagues.length === 0 && (
+        <div style={{ textAlign: "center", color: theme.muted, fontSize: "13px", padding: "30px 0" }}>
+          {isAdmin ? "فعّل دوري أو أكثر من الإعدادات فوق لبدء البطولات." : "لم تُفتح البطولات بعد."}
+        </div>
+      )}
+
+      {/* ===== Per-league prediction cards ===== */}
+      {leagues.map((league) => {
+        const teams = (clubsByTournament[league.name] || []).map((c) => c.name);
+        const pick = getPick(league.id);
+        const result = resultByTournament[league.id];
+        const points = result ? champLeaguePoints(pick, result) : null;
+        const canEdit = !locked && !!currentUser;
+
+        const setField = (field, val) =>
+          setDrafts((prev) => ({ ...prev, [league.id]: { ...getPick(league.id), [field]: val } }));
+
+        return (
+          <div key={league.id} style={{ background: theme.surface, border: `1.5px solid ${theme.violet}`, borderRadius: "14px", padding: "16px", marginBottom: "14px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+              <TournamentIcon name={league.name} logo={tournamentLogos?.[league.name]} theme={theme} size={20} color={theme.primary} />
+              <div style={{ fontSize: "15px", fontWeight: 800, color: theme.text }}>{league.name}</div>
+              {points != null && (
+                <div style={{ marginRight: "auto", fontSize: "13px", fontWeight: 900, color: "#D4AF37" }}>{points} / 10</div>
+              )}
+            </div>
+
+            {teams.length === 0 ? (
+              <div style={{ fontSize: "12px", color: theme.muted }}>
+                لا توجد فرق لهذا الدوري بعد. أضِف الفرق من صفحة إدارة الأندية.
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {[
+                  { field: "first", label: "🥇 المركز الأول", ph: "اختر البطل" },
+                  { field: "second", label: "🥈 الوصيف", ph: "اختر الوصيف" },
+                  { field: "third", label: "🥉 المركز الثالث", ph: "اختر الثالث" },
+                ].map(({ field, label, ph }) => (
+                  <div key={field}>
+                    <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "4px" }}>{label}</label>
+                    <PositionSelect
+                      teams={teams}
+                      value={pick[field]}
+                      onChange={(v) => setField(field, v)}
+                      exclude={[pick.first, pick.second, pick.third].filter((x) => x && x !== pick[field])}
+                      placeholder={ph}
+                      disabled={!canEdit}
+                    />
+                  </div>
+                ))}
+
+                {result && (
+                  <div style={{ marginTop: "8px", fontSize: "12px", color: theme.muted, lineHeight: 1.8 }}>
+                    <div style={{ fontWeight: 700, color: theme.text }}>الترتيب الفعلي:</div>
+                    🥇 {result.first_team || "—"} · 🥈 {result.second_team || "—"} · 🥉 {result.third_team || "—"}
+                  </div>
+                )}
+
+                {canEdit && (
+                  <button
+                    onClick={async () => {
+                      await onSavePick(league.id, getPick(league.id));
+                      setSavedFlash((p) => ({ ...p, [league.id]: true }));
+                      setTimeout(() => setSavedFlash((p) => ({ ...p, [league.id]: false })), 1800);
+                    }}
+                    style={{ marginTop: "8px", width: "100%", background: savedFlash[league.id] ? "#10B981" : theme.primary, color: theme.surface, border: "none", borderRadius: "10px", padding: "11px 0", fontFamily: "Cairo, sans-serif", fontWeight: 800, fontSize: "13px", cursor: "pointer" }}
+                  >
+                    {savedFlash[league.id] ? "✓ تم الحفظ" : "حفظ التوقع"}
+                  </button>
+                )}
+
+                {/* Admin: enter final result for this league */}
+                {isAdmin && (
+                  <div style={{ marginTop: "12px", borderTop: `1px dashed ${theme.border}`, paddingTop: "12px" }}>
+                    <div style={{ fontSize: "11px", fontWeight: 800, color: theme.primary, marginBottom: "6px" }}>الترتيب النهائي الفعلي (المنظم)</div>
+                    {["first", "second", "third"].map((field, i) => {
+                      const ar = getAdminResult(league.id);
+                      return (
+                        <div key={field} style={{ marginBottom: "6px" }}>
+                          <PositionSelect
+                            teams={teams}
+                            value={ar[field]}
+                            onChange={(v) => setAdminResults((prev) => ({ ...prev, [league.id]: { ...getAdminResult(league.id), [field]: v } }))}
+                            exclude={[ar.first, ar.second, ar.third].filter((x) => x && x !== ar[field])}
+                            placeholder={["المركز الأول", "الوصيف", "الثالث"][i]}
+                            disabled={false}
+                          />
+                        </div>
+                      );
+                    })}
+                    <button
+                      onClick={() => onSaveResult(league.id, getAdminResult(league.id))}
+                      style={{ width: "100%", background: theme.text, color: theme.surface, border: "none", borderRadius: "10px", padding: "9px 0", fontFamily: "Cairo, sans-serif", fontWeight: 700, fontSize: "12px", cursor: "pointer", marginTop: "2px" }}
+                    >
+                      حفظ النتيجة النهائية
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+
+      {/* ===== Championship leaderboard ===== */}
+      {leagues.length > 0 && (
+        <div style={{ background: theme.surface, border: `1.5px solid ${theme.border}`, borderRadius: "14px", padding: "16px", marginTop: "8px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+            <Trophy size={18} color="#D4AF37" />
+            <div style={{ fontSize: "14px", fontWeight: 800, color: theme.text }}>ترتيب البطولات</div>
+          </div>
+          {!leaderboard ? (
+            <div style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "12px 0" }}>
+              تظهر النقاط بعد إدخال النتائج النهائية.
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              {leaderboard.map((u, i) => (
+                <div
+                  key={u.userId}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "8px 10px",
+                    borderRadius: "10px",
+                    background: u.userId === currentUser?.id ? theme.bg : "transparent",
+                  }}
+                >
+                  <div style={{ width: "22px", fontSize: "13px", fontWeight: 900, color: i < 3 ? "#D4AF37" : theme.muted }}>{i + 1}</div>
+                  <div style={{ flex: 1, fontSize: "13px", fontWeight: 700, color: theme.text }}>{u.name}</div>
+                  <div style={{ fontSize: "14px", fontWeight: 900, color: "#D4AF37" }}>{u.points}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // One-time announcement shown to logged-in users who haven't turned on push
 // notifications yet, pointing them to the profile page to enable them.
 function NotificationUpdateBanner({ currentUser, onGoToProfile, theme }) {
@@ -6435,16 +6768,41 @@ export default function App() {
   const [confirmedPredictions, setConfirmedPredictions] = usePersistedState("confirmedPredictions", {}); // matchId -> true while the save button is in its "تم الحفظ" state; cleared by any edit (score or boost) so the button re-opens
   const [savedPredictions, setSavedPredictions] = usePersistedState("savedPredictions", {}); // matchId -> true once a full prediction has been saved at least once; controls تم توقعها tab placement, only cleared when the prediction is fully cleared
   const [allPredictionRows, setAllPredictionRows] = useState([]); // every user's predictions, for the global leaderboard
+  const [championshipResults, setChampionshipResults] = useState([]); // [{tournament_id, first_team, second_team, third_team}]
+  const [championshipSettings, setChampionshipSettings] = useState(null); // {lock_at}
+  const [allChampionshipPreds, setAllChampionshipPreds] = useState([]); // every user's top-3 picks, for the championship leaderboard
+  const [championshipPredsByTournament, setChampionshipPredsByTournament] = useState({}); // tournamentId -> {first, second, third}, current user only
   const [dataLoading, setDataLoading] = useState(true);
   const [pullRefreshing, setPullRefreshing] = useState(false);
   const [pullY, setPullY] = useState(0);
 
   const refreshData = () => {
-    return Promise.all([fetchTournaments(), fetchClubs(), fetchMatches(), fetchAllPredictionsWithProfiles()]).then(([t, c, m, p]) => {
+    return Promise.all([
+      fetchTournaments(),
+      fetchClubs(),
+      fetchMatches(),
+      fetchAllPredictionsWithProfiles(),
+      fetchChampionshipResults().catch(() => []),
+      fetchChampionshipSettings().catch(() => null),
+      fetchAllChampionshipPredictions().catch(() => []),
+    ]).then(([t, c, m, p, cr, cs, cp]) => {
       setTournamentRows(t);
       setClubRows(c);
       setMatchRows(m);
       setAllPredictionRows(p);
+      setChampionshipResults(cr || []);
+      setChampionshipSettings(cs);
+      setAllChampionshipPreds(cp || []);
+    });
+  };
+
+  const refreshChampionshipData = () => {
+    return Promise.all([
+      fetchChampionshipResults().catch(() => []),
+      fetchAllChampionshipPredictions().catch(() => []),
+    ]).then(([cr, cp]) => {
+      setChampionshipResults(cr || []);
+      setAllChampionshipPreds(cp || []);
     });
   };
 
@@ -6656,6 +7014,25 @@ export default function App() {
       setConfirmedPredictions(confirmed);
       setSavedPredictions(confirmed);
     });
+  }, [currentUser?.id]);
+
+  // Load this user's own championship (top-3) picks on login.
+  useEffect(() => {
+    if (!currentUser) {
+      setChampionshipPredsByTournament({});
+      return;
+    }
+    fetchChampionshipPredictionsForUser(currentUser.id).then((rows) => {
+      const byTournament = {};
+      for (const row of rows) {
+        byTournament[row.tournament_id] = {
+          first: row.first_team || "",
+          second: row.second_team || "",
+          third: row.third_team || "",
+        };
+      }
+      setChampionshipPredsByTournament(byTournament);
+    }).catch(() => {});
   }, [currentUser?.id]);
 
   const handleRegister = async ({ name, username, email, password }) => {
@@ -6933,6 +7310,48 @@ export default function App() {
   const confirmPrediction = (id) => {
     setConfirmedPredictions((prev) => ({ ...prev, [id]: true }));
     setSavedPredictions((prev) => ({ ...prev, [id]: true }));
+  };
+
+  // ===== Championship (top-3) handlers =====
+  const saveChampionshipPick = async (tournamentId, pick) => {
+    if (!currentUser) return;
+    setChampionshipPredsByTournament((prev) => ({ ...prev, [tournamentId]: pick }));
+    await upsertChampionshipPredictionDB(currentUser.id, tournamentId, pick);
+    // reflect in the all-preds list used by the leaderboard
+    setAllChampionshipPreds((prev) => {
+      const exists = prev.some((r) => r.tournament_id === tournamentId && r.user_id === currentUser.id);
+      const row = {
+        user_id: currentUser.id,
+        tournament_id: tournamentId,
+        first_team: pick.first || null,
+        second_team: pick.second || null,
+        third_team: pick.third || null,
+        profiles: { name: currentUser.name, username: currentUser.username },
+      };
+      return exists
+        ? prev.map((r) => (r.tournament_id === tournamentId && r.user_id === currentUser.id ? row : r))
+        : [...prev, row];
+    });
+  };
+
+  const saveChampionshipResult = async (tournamentId, result) => {
+    await upsertChampionshipResultDB(tournamentId, result);
+    setChampionshipResults((prev) => {
+      const exists = prev.some((r) => r.tournament_id === tournamentId);
+      const row = { tournament_id: tournamentId, first_team: result.first || null, second_team: result.second || null, third_team: result.third || null };
+      return exists ? prev.map((r) => (r.tournament_id === tournamentId ? row : r)) : [...prev, row];
+    });
+  };
+
+  const toggleChampionshipTournament = async (tournamentId, isChampionship) => {
+    setTournamentRows((prev) => prev.map((t) => (t.id === tournamentId ? { ...t, is_championship: isChampionship } : t)));
+    await setTournamentChampionshipDB(tournamentId, isChampionship);
+    bustTournamentsCache();
+  };
+
+  const saveChampionshipLock = async (lockAt) => {
+    setChampionshipSettings({ lock_at: lockAt });
+    await updateChampionshipLockDB(lockAt);
   };
 
   const removeMatch = (id) => {
@@ -7470,6 +7889,25 @@ export default function App() {
       )}
 
       {activePage === "pointsSystem" && <PointsSystemPage theme={theme} />}
+
+      {activePage === "championships" && (
+        <ChampionshipsPage
+          tournamentRows={tournamentRows}
+          clubsByTournament={clubsByTournament}
+          tournamentLogos={tournamentLogos}
+          championshipPredsByTournament={championshipPredsByTournament}
+          championshipResults={championshipResults}
+          championshipSettings={championshipSettings}
+          allChampionshipPreds={allChampionshipPreds}
+          currentUser={currentUser}
+          viewMode={viewMode}
+          onSavePick={saveChampionshipPick}
+          onSaveResult={saveChampionshipResult}
+          onToggleChampionship={toggleChampionshipTournament}
+          onSaveLock={saveChampionshipLock}
+          theme={theme}
+        />
+      )}
 
       {activePage === "stats" && !authLoading && !currentUser && <LoginGate onNavigateToAuth={() => setActivePage("auth")} theme={theme} />}
 
