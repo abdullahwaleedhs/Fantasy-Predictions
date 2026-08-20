@@ -7649,6 +7649,7 @@ export default function App() {
         first_team: pick.first || null,
         second_team: pick.second || null,
         third_team: pick.third || null,
+        updated_at: new Date().toISOString(),
         profiles: { name: currentUser.name, username: currentUser.username },
       };
       return exists
