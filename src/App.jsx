@@ -6782,26 +6782,25 @@ export default function App() {
       fetchClubs(),
       fetchMatches(),
       fetchAllPredictionsWithProfiles(),
-      fetchChampionshipResults().catch(() => []),
-      fetchChampionshipSettings().catch(() => null),
-      fetchAllChampionshipPredictions().catch(() => []),
-    ]).then(([t, c, m, p, cr, cs, cp]) => {
+    ]).then(([t, c, m, p]) => {
       setTournamentRows(t);
       setClubRows(c);
       setMatchRows(m);
       setAllPredictionRows(p);
-      setChampionshipResults(cr || []);
-      setChampionshipSettings(cs);
-      setAllChampionshipPreds(cp || []);
     });
   };
 
+  // Championship data is only needed on the البطولات page, so it's loaded
+  // lazily when that page opens (keeps normal app loads / refreshes light on
+  // egress) rather than on every refreshData().
   const refreshChampionshipData = () => {
     return Promise.all([
       fetchChampionshipResults().catch(() => []),
+      fetchChampionshipSettings().catch(() => null),
       fetchAllChampionshipPredictions().catch(() => []),
-    ]).then(([cr, cp]) => {
+    ]).then(([cr, cs, cp]) => {
       setChampionshipResults(cr || []);
+      setChampionshipSettings(cs);
       setAllChampionshipPreds(cp || []);
     });
   };
@@ -7015,6 +7014,16 @@ export default function App() {
       setSavedPredictions(confirmed);
     });
   }, [currentUser?.id]);
+
+  // Load championship results/settings/leaderboard data only when the user
+  // actually opens the البطولات page — not on every app load.
+  const championshipLoadedRef = useRef(false);
+  useEffect(() => {
+    if (activePage === "championships" && !championshipLoadedRef.current) {
+      championshipLoadedRef.current = true;
+      refreshChampionshipData();
+    }
+  }, [activePage]);
 
   // Load this user's own championship (top-3) picks on login.
   useEffect(() => {
