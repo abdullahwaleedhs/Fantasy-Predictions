@@ -4106,6 +4106,76 @@ function ResetPasswordPage({ onUpdatePassword, theme }) {
 // requires admin-level access we don't expose in the browser), so this
 // page just helps the organizer find the right person and explains the
 // one extra step.
+// Admin: log of perk usage. Currently only the triple/boost (x3). Built
+// entirely from already-loaded data (no extra fetch / egress).
+function AdminPerksPage({ matches, allPredictionRows, theme }) {
+  const matchById = Object.fromEntries(matches.map((m) => [m.id, m]));
+  const boosts = allPredictionRows
+    .filter((r) => r.user_boost)
+    .map((r) => {
+      const m = matchById[r.match_id];
+      const finished = m ? isMatchFinished(m) : false;
+      let pts = null;
+      if (m && finished) {
+        const mult = m.doublePoints ? 2 : 3;
+        const res = calcPoints(r.pred_home, r.pred_away, m.actualHome, m.actualAway, mult);
+        pts = res ? res.points : 0;
+      }
+      return {
+        key: `${r.user_id}-${r.match_id}`,
+        name: r.profiles?.name || "مستخدم",
+        username: r.profiles?.username || "",
+        match: m,
+        when: r.updated_at,
+        pts,
+        finished,
+      };
+    })
+    .sort((a, b) => new Date(b.when || 0) - new Date(a.when || 0));
+
+  return (
+    <div style={{ padding: "24px 18px 60px" }}>
+      <div style={{ maxWidth: "560px", margin: "0 auto" }}>
+        <h2 style={{ fontSize: "16px", fontWeight: 800, color: theme.primary, marginBottom: "6px", textAlign: "center" }}>المزايا</h2>
+        <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", marginBottom: "18px" }}>
+          سجل استخدام التربل (×٣) — من استخدمه، متى، على أي مباراة، وكم جاب فيها
+        </p>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+          <Zap size={16} color="#F59E0B" />
+          <div style={{ fontSize: "13px", fontWeight: 800, color: theme.text }}>التربل ×٣ ({boosts.length})</div>
+        </div>
+
+        {boosts.length === 0 ? (
+          <div style={{ textAlign: "center", color: theme.muted, fontSize: "13px", padding: "30px 0" }}>ما استخدم أحد التربل بعد.</div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            {boosts.map((b) => (
+              <div key={b.key} style={{ background: theme.surface, border: `1.5px solid ${theme.border}`, borderRadius: "12px", padding: "12px 14px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                  <div style={{ fontSize: "14px", fontWeight: 800, color: theme.text }}>{b.name}</div>
+                  {b.username && <span style={{ fontSize: "11px", color: theme.muted }}>@{b.username}</span>}
+                  <div style={{ marginInlineStart: "auto", fontSize: "13px", fontWeight: 900, color: b.finished ? "#F59E0B" : theme.muted }}>
+                    {b.finished ? `${b.pts} نقطة` : "لم تنته"}
+                  </div>
+                </div>
+                <div style={{ fontSize: "12px", color: theme.text, marginBottom: "2px" }}>
+                  ⚽ {b.match ? `${b.match.home || "—"} × ${b.match.away || "—"}` : "مباراة محذوفة"}
+                </div>
+                {b.when && (
+                  <div style={{ fontSize: "11px", color: theme.muted }}>
+                    🕒 {new Date(b.when).toLocaleString("ar", { dateStyle: "medium", timeStyle: "short" })}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // Admin: every private league on the site — founder, members, created date.
 function AdminLeaguesPage({ theme }) {
   const [leagues, setLeagues] = useState([]);
@@ -6117,6 +6187,7 @@ const NAV_ITEMS = [
 const ADMIN_NAV_ITEMS = [
   { id: "clubs", label: "إدارة الأندية", icon: Shield, color: (t) => t.muted },
   { id: "adminLeagues", label: "كل الدوريات", icon: Users, color: (t) => t.muted },
+  { id: "adminPerks", label: "المزايا", icon: Zap, color: (t) => t.muted },
   { id: "users", label: "المستخدمون", icon: Users, color: (t) => t.muted },
 ];
 
@@ -8338,6 +8409,8 @@ export default function App() {
       {activePage === "users" && <UsersAdminPage theme={theme} />}
 
       {activePage === "adminLeagues" && <AdminLeaguesPage theme={theme} />}
+
+      {activePage === "adminPerks" && <AdminPerksPage matches={matches} allPredictionRows={allPredictionRows} theme={theme} />}
 
       {activePage === "leagues" && !authLoading && !currentUser && (
         <LoginGate onNavigateToAuth={() => setActivePage("auth")} theme={theme} />
