@@ -4117,8 +4117,7 @@ function AdminPerksPage({ matches, allPredictionRows, theme }) {
       const finished = m ? isMatchFinished(m) : false;
       let pts = null;
       if (m && finished) {
-        const mult = m.doublePoints ? 2 : 3;
-        const res = calcPoints(r.pred_home, r.pred_away, m.actualHome, m.actualAway, mult);
+        const res = calcPoints(r.pred_home, r.pred_away, m.actualHome, m.actualAway, 3);
         pts = res ? res.points : 0;
       }
       return {
