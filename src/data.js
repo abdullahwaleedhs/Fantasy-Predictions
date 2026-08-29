@@ -258,6 +258,17 @@ export async function fetchLeaguesWithMembers() {
   return data;
 }
 
+// Admin view: every private league on the site, with its members and each
+// member's profile name, ordered newest first.
+export async function fetchAllLeaguesAdmin() {
+  const { data, error } = await supabase
+    .from("leagues")
+    .select("id, code, name, created_at, created_by, league_members(user_id, display_name, profiles(name, username))")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
 export async function createLeagueDB(name, createdBy) {
   const { data, error } = await supabase
     .from("leagues")

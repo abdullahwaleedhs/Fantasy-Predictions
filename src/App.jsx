@@ -20,6 +20,7 @@ import {
   fetchPredictionsForUser,
   upsertPredictionDB,
   fetchLeaguesWithMembers,
+  fetchAllLeaguesAdmin,
   createLeagueDB,
   joinLeagueDB,
   fetchAllProfiles,
@@ -4104,6 +4105,71 @@ function ResetPasswordPage({ onUpdatePassword, theme }) {
 // requires admin-level access we don't expose in the browser), so this
 // page just helps the organizer find the right person and explains the
 // one extra step.
+// Admin: every private league on the site — founder, members, created date.
+function AdminLeaguesPage({ theme }) {
+  const [leagues, setLeagues] = useState([]);
+  const [profilesById, setProfilesById] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([fetchAllLeaguesAdmin(), fetchAllProfiles()])
+      .then(([lgs, profiles]) => {
+        setLeagues(lgs || []);
+        setProfilesById(Object.fromEntries((profiles || []).map((p) => [p.id, p])));
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <div style={{ padding: "24px 18px 60px" }}>
+      <div style={{ maxWidth: "560px", margin: "0 auto" }}>
+        <h2 style={{ fontSize: "16px", fontWeight: 800, color: theme.primary, marginBottom: "6px", textAlign: "center" }}>
+          كل الدوريات ({leagues.length})
+        </h2>
+        <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", marginBottom: "18px" }}>
+          كل الدوريات الخاصة المُنشأة على الموقع
+        </p>
+
+        {loading ? (
+          <div style={{ textAlign: "center", color: theme.muted, fontSize: "13px", padding: "30px 0" }}>جارِ التحميل...</div>
+        ) : leagues.length === 0 ? (
+          <div style={{ textAlign: "center", color: theme.muted, fontSize: "13px", padding: "30px 0" }}>لا توجد دوريات بعد.</div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            {leagues.map((lg) => {
+              const founder = profilesById[lg.created_by];
+              const members = lg.league_members || [];
+              return (
+                <div key={lg.id} style={{ background: theme.surface, border: `1.5px solid ${theme.border}`, borderRadius: "14px", padding: "14px 16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+                    <div style={{ fontSize: "15px", fontWeight: 800, color: theme.text }}>{lg.name}</div>
+                    <span style={{ marginInlineStart: "auto", fontSize: "11px", fontWeight: 700, color: theme.muted, letterSpacing: "1px" }}>{lg.code}</span>
+                  </div>
+                  <div style={{ fontSize: "12px", color: theme.muted, lineHeight: 1.9 }}>
+                    <div>👑 المؤسس: <b style={{ color: theme.text }}>{founder?.name || "—"}</b>{founder?.username ? ` @${founder.username}` : ""}</div>
+                    <div>📅 أُنشئ: <b style={{ color: theme.text }}>{lg.created_at ? new Date(lg.created_at).toLocaleString("ar", { dateStyle: "medium", timeStyle: "short" }) : "—"}</b></div>
+                    <div>👥 الأعضاء: <b style={{ color: theme.text }}>{members.length}</b></div>
+                  </div>
+                  {members.length > 0 && (
+                    <div style={{ marginTop: "8px", borderTop: `1px dashed ${theme.border}`, paddingTop: "8px", display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                      {members.map((m, i) => (
+                        <span key={i} style={{ fontSize: "11px", background: theme.bg, borderRadius: "8px", padding: "3px 8px", color: theme.text }}>
+                          {m.display_name || m.profiles?.name || "عضو"}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function UsersAdminPage({ theme }) {
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -6014,6 +6080,7 @@ const NAV_ITEMS = [
 // items (only visible when viewMode === "admin").
 const ADMIN_NAV_ITEMS = [
   { id: "clubs", label: "إدارة الأندية", icon: Shield, color: (t) => t.muted },
+  { id: "adminLeagues", label: "كل الدوريات", icon: Users, color: (t) => t.muted },
   { id: "users", label: "المستخدمون", icon: Users, color: (t) => t.muted },
 ];
 
@@ -8220,6 +8287,8 @@ export default function App() {
       )}
 
       {activePage === "users" && <UsersAdminPage theme={theme} />}
+
+      {activePage === "adminLeagues" && <AdminLeaguesPage theme={theme} />}
 
       {activePage === "leagues" && !authLoading && !currentUser && (
         <LoginGate onNavigateToAuth={() => setActivePage("auth")} theme={theme} />
