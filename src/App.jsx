@@ -21,6 +21,7 @@ import {
   upsertPredictionDB,
   fetchLeaguesWithMembers,
   fetchAllLeaguesAdmin,
+  setLeagueCountModeDB,
   createLeagueDB,
   joinLeagueDB,
   fetchAllProfiles,
@@ -4662,7 +4663,7 @@ function GlobalLeaderboardPage({ matches, allPredictionRows, tournaments, tourna
   );
 }
 
-function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBack, tournaments, tournamentLogos, currentUser, onViewProfile, theme }) {
+function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onSetCountMode, onBack, tournaments, tournamentLogos, currentUser, onViewProfile, theme }) {
   const [codeCopied, setCodeCopied] = useState(false);
   const [activeTab, setActiveTab] = usePersistedState("leagueDetail.activeTab", "ranking"); // "ranking" | "predictions"
   const [tournamentFilter, setTournamentFilter] = usePersistedState("leagueDetail.tournamentFilter", "الكل");
@@ -4689,11 +4690,20 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
     .sort((a, b) => new Date(`${b.date}T${b.time}:00+03:00`) - new Date(`${a.date}T${a.time}:00+03:00`));
   const lastFinishedMatchForLeague = finishedMatchesSorted[0] || null;
 
+  // When the creator turns on "count from creation", only matches that kicked
+  // off after the league was created count toward THIS league's standings.
+  // Members' global totals are untouched — this is a league-local view only.
+  const creationCutoff = league.countFromCreation && league.createdAt ? new Date(league.createdAt).getTime() : null;
+
   const realPointsByUserId = {};
   for (const row of allPredictionRows) {
     const match = matchById[row.match_id];
     if (!match) continue;
     if (!isMatchFinished(match)) continue;
+    if (creationCutoff != null && match.date && match.time) {
+      const kickoff = new Date(`${match.date}T${match.time}:00+03:00`).getTime();
+      if (kickoff < creationCutoff) continue;
+    }
 
     if (!realPointsByUserId[row.user_id]) {
       realPointsByUserId[row.user_id] = { points: 0, tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 }, lastMatchPredAt: null };
@@ -4821,6 +4831,31 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onBac
             {codeCopied ? <Check size={11} /> : <Copy size={11} />}
           </button>
         </div>
+
+        {/* Creator-only: count points only from the league's creation date */}
+        {currentUser && league.createdBy === currentUser.id && (
+          <div style={{ background: theme.surface, border: `1.5px solid ${theme.border}`, borderRadius: "12px", padding: "12px 14px", marginBottom: "14px" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                checked={!!league.countFromCreation}
+                onChange={(e) => onSetCountMode(league.id, e.target.checked)}
+              />
+              <div>
+                <div style={{ fontSize: "13px", fontWeight: 800, color: theme.text }}>احتساب النقاط من إنشاء الدوري</div>
+                <div style={{ fontSize: "11px", color: theme.muted, lineHeight: 1.6, marginTop: "2px" }}>
+                  لو فعّلته، الترتيب داخل هذا الدوري يبدأ من الصفر ويحسب المباريات بعد تاريخ الإنشاء فقط. النقاط الإجمالية لكل عضو في باقي الموقع لا تتأثر.
+                </div>
+              </div>
+            </label>
+          </div>
+        )}
+
+        {league.countFromCreation && league.createdAt && (
+          <div style={{ fontSize: "11px", color: theme.muted, marginBottom: "12px", textAlign: "center" }}>
+            📅 النقاط محسوبة من إنشاء الدوري: {new Date(league.createdAt).toLocaleDateString("ar", { dateStyle: "medium" })}
+          </div>
+        )}
 
         {!youPlayer && !currentUser && (
           <div
@@ -5107,7 +5142,7 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
   );
 }
 
-function PrivateLeaguesPage({ leagues, matches, allPredictionRows, onCreateLeague, onJoinLeague, tournaments, tournamentLogos, currentUser, onViewProfile, initialLeagueId, theme }) {
+function PrivateLeaguesPage({ leagues, matches, allPredictionRows, onCreateLeague, onJoinLeague, onSetCountMode, tournaments, tournamentLogos, currentUser, onViewProfile, initialLeagueId, theme }) {
   const [selectedLeagueId, setSelectedLeagueId] = usePersistedState("leagues.selectedLeagueId", null);
   useEffect(() => { if (initialLeagueId) setSelectedLeagueId(initialLeagueId); }, [initialLeagueId]);
   const [newLeagueName, setNewLeagueName] = useState("");
@@ -5123,6 +5158,7 @@ function PrivateLeaguesPage({ leagues, matches, allPredictionRows, onCreateLeagu
         matches={matches}
         allPredictionRows={allPredictionRows}
         onJoin={onJoinLeague}
+        onSetCountMode={onSetCountMode}
         onBack={() => setSelectedLeagueId(null)}
         tournaments={tournaments}
         tournamentLogos={tournamentLogos}
@@ -7540,6 +7576,9 @@ export default function App() {
         id: l.id,
         code: l.code,
         name: l.name,
+        createdBy: l.created_by,
+        createdAt: l.created_at,
+        countFromCreation: !!l.count_from_creation,
         players: (l.league_members || []).map((m) => ({
           id: m.id,
           userId: m.user_id,
@@ -7555,6 +7594,16 @@ export default function App() {
     const row = await createLeagueDB(name, currentUser.id);
     setLeagueRows((prev) => [...prev, { ...row, league_members: [] }]);
     return row.id;
+  };
+
+  const setLeagueCountMode = async (leagueId, countFromCreation) => {
+    setLeagueRows((prev) => prev.map((l) => (l.id === leagueId ? { ...l, count_from_creation: countFromCreation } : l)));
+    try {
+      await setLeagueCountModeDB(leagueId, countFromCreation);
+    } catch (e) {
+      setLeagueRows((prev) => prev.map((l) => (l.id === leagueId ? { ...l, count_from_creation: !countFromCreation } : l)));
+      alert("لم يُحفظ الإعداد. تأكد من تشغيل SQL الدوريات.\n" + (e?.message || ""));
+    }
   };
 
   const joinLeague = (leagueId, playerName) => {
@@ -8301,6 +8350,7 @@ export default function App() {
           allPredictionRows={allPredictionRows}
           onCreateLeague={createLeague}
           onJoinLeague={joinLeague}
+          onSetCountMode={setLeagueCountMode}
           tournaments={tournaments}
           tournamentLogos={tournamentLogos}
           currentUser={currentUser}

@@ -252,10 +252,15 @@ function generateLeagueCode() {
 export async function fetchLeaguesWithMembers() {
   const { data, error } = await supabase
     .from("leagues")
-    .select("id, code, name, created_by, league_members(id, user_id, display_name, profiles(name))")
+    .select("id, code, name, created_by, created_at, count_from_creation, league_members(id, user_id, display_name, profiles(name))")
     .order("created_at");
   if (error) throw error;
   return data;
+}
+
+export async function setLeagueCountModeDB(leagueId, countFromCreation) {
+  const { error } = await supabase.from("leagues").update({ count_from_creation: countFromCreation }).eq("id", leagueId);
+  if (error) throw error;
 }
 
 // Admin view: every private league on the site, with its members and each
