@@ -8161,8 +8161,8 @@ export default function App() {
               </div>
               {/* one bordered row per perk, coloured by feature */}
               {[
-                { name: "الدبل", color: "#D4AF37", desc: "يتم تفعيله من قبل المنظم مباراة واحدة لكل أسبوع وتكون المباراة بالإطار الذهبي" },
-                { name: "التربل", color: "#10B981", desc: "يتم تفعيله من قبل اللاعبين ومتوفر ٣ مرات طوال الموسم ولا يمكن تفعيله على مباراة الدبل" },
+                { name: "دبل", color: "#D4AF37", desc: "يتم تفعيله من قبل المنظم مباراة واحدة لكل أسبوع وتكون المباراة بالإطار الذهبي" },
+                { name: "تربل", color: "#10B981", desc: "يتم تفعيله من قبل اللاعبين ومتوفر ٣ مرات طوال الموسم ولا يمكن تفعيله على مباراة الدبل" },
                 { name: "توقعين", color: "#3B82F6", desc: "قريباً" },
               ].map((p) => (
                 <div key={p.name} style={{ display: "flex", alignItems: "stretch", border: `2px solid ${p.color}`, borderRadius: "8px", overflow: "hidden", marginBottom: "8px" }}>
