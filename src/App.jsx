@@ -8160,18 +8160,20 @@ export default function App() {
             <div style={{ border: `1.5px solid #000000`, borderRadius: "10px", overflow: "hidden", background: "#ffffff", marginBottom: "16px", padding: "8px" }}>
               {/* header */}
               <div style={{ display: "flex", marginBottom: "8px" }}>
-                <div style={{ width: "68px", flexShrink: 0, padding: "4px 8px", fontSize: "12px", fontWeight: 700, color: "#000000", textAlign: "center" }}>الميزة</div>
-                <div style={{ flex: 1, padding: "4px 8px", fontSize: "12px", fontWeight: 700, color: "#000000", textAlign: "center" }}>إيضاح</div>
+                <div style={{ width: "58px", flexShrink: 0, padding: "4px 6px", fontSize: "12px", fontWeight: 700, color: "#000000", textAlign: "center" }}>الميزة</div>
+                <div style={{ flex: 1, padding: "4px 6px", fontSize: "12px", fontWeight: 700, color: "#000000", textAlign: "center" }}>إيضاح</div>
+                <div style={{ width: "48px", flexShrink: 0, padding: "4px 6px", fontSize: "12px", fontWeight: 700, color: "#000000", textAlign: "center" }}>العدد</div>
               </div>
               {/* one bordered row per perk, coloured by feature */}
               {[
-                { name: "دبل", color: "#D4AF37", desc: "يتم تفعيله من قبل المنظم مباراة واحدة لكل أسبوع وتكون المباراة بالإطار الذهبي" },
-                { name: "تربل", color: "#10B981", desc: "يتم تفعيله من قبل اللاعبين ومتوفر ٣ مرات طوال الموسم ولا يمكن تفعيله على مباراة الدبل" },
-                { name: "توقعين", color: "#3B82F6", desc: "قريباً" },
+                { name: "دبل", color: "#D4AF37", desc: "النقاط مضروبة بـ (2) لمباريات عشوائية من اختيار المنظم وتكون بإطار باللون الذهبي", count: "∞" },
+                { name: "تربل", color: "#10B981", desc: "النقاط مضروبة بـ 3 ولا يمكن استخدامها مع ميزة أخرى", count: "٣" },
+                { name: "توقعين", color: "#3B82F6", desc: "ادخال توقعين لمباراة واحدة والتوقع الأكثر نقاط يحسب لك ولا يمكن استخدامه مع ميزة أخرى", count: "٣" },
               ].map((p) => (
                 <div key={p.name} style={{ display: "flex", alignItems: "stretch", border: `2px solid ${p.color}`, borderRadius: "8px", overflow: "hidden", marginBottom: "8px" }}>
-                  <div style={{ width: "64px", flexShrink: 0, padding: "9px 6px", fontSize: "12px", fontWeight: 700, color: "#000000", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", borderInlineEnd: `2px solid ${p.color}` }}>{p.name}</div>
-                  <div style={{ flex: 1, padding: "9px 10px", fontSize: "12px", color: "#333333", lineHeight: 1.7, textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center" }}>{p.desc}</div>
+                  <div style={{ width: "54px", flexShrink: 0, padding: "9px 4px", fontSize: "12px", fontWeight: 700, color: "#000000", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", borderInlineEnd: `2px solid ${p.color}` }}>{p.name}</div>
+                  <div style={{ flex: 1, padding: "9px 8px", fontSize: "12px", color: "#333333", lineHeight: 1.7, textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center" }}>{p.desc}</div>
+                  <div style={{ width: "44px", flexShrink: 0, padding: "9px 4px", fontSize: "13px", fontWeight: 800, color: "#000000", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", borderInlineStart: `2px solid ${p.color}` }}>{p.count}</div>
                 </div>
               ))}
             </div>
