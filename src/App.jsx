@@ -1949,7 +1949,11 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
 
   const boostDisabled = match.doublePoints || isLocked || noPredictionDraft || (!draftBoost && boostsRemaining <= 0);
 
-  const isGold = match.doublePoints || draftBoost || match.userBoost;
+  // Accent colour of the card: gold for the admin دبل, green when the user's
+  // تربل is active. (توقعين will use blue when implemented.)
+  const boostActive = draftBoost || match.userBoost;
+  const accent = match.doublePoints ? theme.yellow : boostActive ? "#10B981" : null;
+  const isGold = !!accent;
 
   const saveDraft = () => {
     onChange({ ...match, predHome: draftHome, predAway: draftAway, userBoost: draftBoost });
@@ -1961,7 +1965,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
       <div
         style={{
           background: theme.surface,
-          border: isGold ? `2px solid ${theme.yellow}` : `1.5px solid ${theme.violet}`,
+          border: accent ? `2px solid ${accent}` : `1.5px solid ${theme.violet}`,
           borderRadius: "14px",
           overflow: "hidden",
         }}
@@ -1973,7 +1977,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
             fontFamily: "Cairo, sans-serif",
             fontWeight: 700,
             fontSize: "10px",
-            color: isGold ? theme.yellow : theme.primary,
+            color: accent || theme.primary,
             textAlign: "center",
             display: "flex",
             alignItems: "center",
@@ -1983,7 +1987,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
           }}
         >
           {match.tournament && (
-            <TournamentIcon name={match.tournament} logo={tournamentLogos?.[match.tournament]} theme={theme} color={isGold ? theme.yellow : theme.primary} />
+            <TournamentIcon name={match.tournament} logo={tournamentLogos?.[match.tournament]} theme={theme} color={accent || theme.primary} />
           )}
           {match.tournament || "بطولة غير محددة"}
         </div>
