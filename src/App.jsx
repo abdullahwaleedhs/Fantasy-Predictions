@@ -8153,25 +8153,26 @@ export default function App() {
               })()}
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "6px",
-                padding: "10px 12px",
-                fontFamily: "Cairo, sans-serif",
-                fontSize: "12px",
-                color: theme.muted,
-                borderBottom: `1px solid ${theme.border}`,
-              }}
-            >
-              <div style={{ display: "flex", gap: "4px", alignItems: "flex-start" }}>
-                <strong style={{ color: theme.text, flexShrink: 0 }}>• الدبل:</strong>
-                <span>يتم تفعيله من قبل المنظم مباراة واحدة لكل أسبوع وتكون المباراة بالإطار الذهبي</span>
-              </div>
-              <div style={{ display: "flex", gap: "4px", alignItems: "flex-start" }}>
-                <strong style={{ color: theme.text, flexShrink: 0 }}>• التربل:</strong>
-                <span>يتم تفعيله من قبل اللاعبين ومتوفر ٣ مرات طوال الموسم ولا يمكن تفعيله على مباراة الدبل</span>
+            <div style={{ padding: "12px 12px 16px" }}>
+              <div style={{ border: `2px solid #000000`, borderRadius: "12px", overflow: "hidden", background: theme.surface }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "Cairo, sans-serif" }}>
+                  <thead>
+                    <tr style={{ background: "#000000" }}>
+                      <th style={{ padding: "9px 12px", fontSize: "12px", fontWeight: 800, color: "#ffffff", textAlign: "right", width: "30%", whiteSpace: "nowrap" }}>الميزة</th>
+                      <th style={{ padding: "9px 12px", fontSize: "12px", fontWeight: 800, color: "#ffffff", textAlign: "right" }}>إيضاح</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style={{ borderTop: `1.5px solid #000000` }}>
+                      <td style={{ padding: "9px 12px", fontSize: "12px", fontWeight: 800, color: theme.text, verticalAlign: "top", whiteSpace: "nowrap" }}>الدبل</td>
+                      <td style={{ padding: "9px 12px", fontSize: "12px", color: theme.muted, lineHeight: 1.7 }}>يتم تفعيله من قبل المنظم مباراة واحدة لكل أسبوع وتكون المباراة بالإطار الذهبي</td>
+                    </tr>
+                    <tr style={{ borderTop: `1.5px solid #000000` }}>
+                      <td style={{ padding: "9px 12px", fontSize: "12px", fontWeight: 800, color: theme.text, verticalAlign: "top", whiteSpace: "nowrap" }}>التربل</td>
+                      <td style={{ padding: "9px 12px", fontSize: "12px", color: theme.muted, lineHeight: 1.7 }}>يتم تفعيله من قبل اللاعبين ومتوفر ٣ مرات طوال الموسم ولا يمكن تفعيله على مباراة الدبل</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
 
