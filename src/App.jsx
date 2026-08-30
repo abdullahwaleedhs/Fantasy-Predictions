@@ -2074,9 +2074,10 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, doublePredsRem
             ) : (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", paddingTop: "62px", width: "76px" }}>
                 {(() => {
-                  const chip = (color, active, disabled) => ({
-                    display: "inline-flex", alignItems: "center", justifyContent: "center",
-                    width: "76px", boxSizing: "border-box", borderRadius: "7px", padding: "5px 4px",
+                  const TOTAL = 3;
+                  const chip = (color, active, disabled, column) => ({
+                    display: "inline-flex", flexDirection: column ? "column" : "row", alignItems: "center", justifyContent: "center", gap: column ? "1px" : "0",
+                    width: "76px", boxSizing: "border-box", borderRadius: "7px", padding: "4px 3px",
                     fontSize: "10.5px", fontFamily: "Cairo, sans-serif", fontWeight: 800,
                     border: `1.5px solid ${color}`,
                     background: active ? `${color}1a` : "transparent",
@@ -2084,24 +2085,29 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, doublePredsRem
                     cursor: disabled ? "not-allowed" : "pointer",
                     opacity: disabled ? 0.45 : 1, whiteSpace: "nowrap", marginBottom: "2px",
                   });
+                  const option = (label, color, active, remaining, onClick) => {
+                    const used = Math.max(0, TOTAL - remaining);
+                    const disabled = remaining <= 0 && !active;
+                    return (
+                      <button onClick={onClick} disabled={disabled} style={chip(color, active, disabled, true)}>
+                        <span>{label}</span>
+                        <span style={{ fontSize: "7.5px", fontWeight: 700 }}>{used} من {TOTAL} مستخدم</span>
+                      </button>
+                    );
+                  };
                   const currentColor = draftBoost ? "#10B981" : draftDouble ? "#3B82F6" : theme.text;
                   if (!perkMenuOpen) {
                     return (
-                      <>
-                        <button onClick={() => setPerkMenuOpen(true)} disabled={isLocked || noPredictionDraft} style={chip(currentColor, draftBoost || draftDouble, isLocked || noPredictionDraft)}>
-                          {draftBoost ? "تربل" : draftDouble ? "توقعين" : "المزايا"}
-                        </button>
-                        <span style={{ fontSize: "9px", color: theme.muted, fontWeight: 600, textAlign: "center" }}>
-                          {draftBoost || draftDouble ? "اضغط للتغيير" : "اختر ميزة"}
-                        </span>
-                      </>
+                      <button onClick={() => setPerkMenuOpen(true)} disabled={isLocked || noPredictionDraft} style={chip(currentColor, draftBoost || draftDouble, isLocked || noPredictionDraft, false)}>
+                        {draftBoost ? "تربل" : draftDouble ? "توقعين" : "المزايا"}
+                      </button>
                     );
                   }
                   return (
                     <>
-                      <button onClick={selectTriple} disabled={boostsRemaining <= 0 && !draftBoost} style={chip("#10B981", draftBoost, boostsRemaining <= 0 && !draftBoost)}>تربل ({boostsRemaining})</button>
-                      <button onClick={selectDouble} disabled={doublePredsRemaining <= 0 && !draftDouble} style={chip("#3B82F6", draftDouble, doublePredsRemaining <= 0 && !draftDouble)}>توقعين ({doublePredsRemaining})</button>
-                      <button onClick={clearPerk} style={chip(theme.muted, false, false)}>بدون</button>
+                      {option("تربل", "#10B981", draftBoost, boostsRemaining, selectTriple)}
+                      {option("توقعين", "#3B82F6", draftDouble, doublePredsRemaining, selectDouble)}
+                      <button onClick={clearPerk} style={chip(theme.muted, false, false, false)}>بدون</button>
                     </>
                   );
                 })()}
