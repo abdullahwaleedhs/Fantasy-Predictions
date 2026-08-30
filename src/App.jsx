@@ -8153,25 +8153,23 @@ export default function App() {
               })()}
             </div>
 
-            <div style={{ border: `1.5px solid #000000`, borderRadius: "10px", overflow: "hidden", background: "#ffffff", marginBottom: "16px" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "Cairo, sans-serif", textAlign: "center" }}>
-                  <thead>
-                    <tr>
-                      <th style={{ padding: "9px 10px", fontSize: "12px", fontWeight: 600, color: "#000000", textAlign: "center", width: "1%", whiteSpace: "nowrap", borderInlineEnd: `1px solid #000000` }}>الميزة</th>
-                      <th style={{ padding: "9px 12px", fontSize: "12px", fontWeight: 600, color: "#000000", textAlign: "center" }}>إيضاح</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr style={{ borderTop: `1px solid #000000` }}>
-                      <td style={{ padding: "9px 12px", fontSize: "12px", fontWeight: 600, color: "#000000", verticalAlign: "middle", whiteSpace: "nowrap", borderInlineEnd: `1px solid #000000` }}>الدبل</td>
-                      <td style={{ padding: "9px 12px", fontSize: "12px", color: "#333333", lineHeight: 1.7, textAlign: "center" }}>يتم تفعيله من قبل المنظم مباراة واحدة لكل أسبوع وتكون المباراة بالإطار الذهبي</td>
-                    </tr>
-                    <tr style={{ borderTop: `1px solid #000000` }}>
-                      <td style={{ padding: "9px 12px", fontSize: "12px", fontWeight: 600, color: "#000000", verticalAlign: "middle", whiteSpace: "nowrap", borderInlineEnd: `1px solid #000000` }}>التربل</td>
-                      <td style={{ padding: "9px 12px", fontSize: "12px", color: "#333333", lineHeight: 1.7, textAlign: "center" }}>يتم تفعيله من قبل اللاعبين ومتوفر ٣ مرات طوال الموسم ولا يمكن تفعيله على مباراة الدبل</td>
-                    </tr>
-                  </tbody>
-                </table>
+            <div style={{ border: `1.5px solid #000000`, borderRadius: "10px", overflow: "hidden", background: "#ffffff", marginBottom: "16px", padding: "8px" }}>
+              {/* header */}
+              <div style={{ display: "flex", marginBottom: "8px" }}>
+                <div style={{ width: "68px", flexShrink: 0, padding: "4px 8px", fontSize: "12px", fontWeight: 700, color: "#000000", textAlign: "center" }}>الميزة</div>
+                <div style={{ flex: 1, padding: "4px 8px", fontSize: "12px", fontWeight: 700, color: "#000000", textAlign: "center" }}>إيضاح</div>
+              </div>
+              {/* one bordered row per perk, coloured by feature */}
+              {[
+                { name: "الدبل", color: "#D4AF37", desc: "يتم تفعيله من قبل المنظم مباراة واحدة لكل أسبوع وتكون المباراة بالإطار الذهبي" },
+                { name: "التربل", color: "#10B981", desc: "يتم تفعيله من قبل اللاعبين ومتوفر ٣ مرات طوال الموسم ولا يمكن تفعيله على مباراة الدبل" },
+                { name: "توقعين", color: "#3B82F6", desc: "قريباً" },
+              ].map((p) => (
+                <div key={p.name} style={{ display: "flex", alignItems: "stretch", border: `2px solid ${p.color}`, borderRadius: "8px", overflow: "hidden", marginBottom: "8px" }}>
+                  <div style={{ width: "64px", flexShrink: 0, padding: "9px 6px", fontSize: "12px", fontWeight: 700, color: "#000000", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", borderInlineEnd: `2px solid ${p.color}` }}>{p.name}</div>
+                  <div style={{ flex: 1, padding: "9px 10px", fontSize: "12px", color: "#333333", lineHeight: 1.7, textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center" }}>{p.desc}</div>
+                </div>
+              ))}
             </div>
 
             {/* Matches */}
