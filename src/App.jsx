@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Plus, Trash2, ChevronDown, ChevronRight, Search, Palette, Lock, Unlock, Calendar, Clock, Menu, X, Home, Target, Trophy, BarChart3, Zap, Shield, Upload, CircleDot, Users, Copy, Check, Crown, ArrowDown, Award, TrendingUp, User, LogIn, LogOut, Mail, Camera, Eye, EyeOff, Pencil, Globe, ListOrdered } from "lucide-react";
-import { isUsernameTaken, registerUser, loginUser, logoutUser, deleteAccount, updateProfile, fetchProfile, getSessionUser, setBoostsRemaining as setBoostsRemainingDB, requestPasswordReset, updatePassword } from "./auth";
+import { isUsernameTaken, registerUser, loginUser, logoutUser, deleteAccount, updateProfile, fetchProfile, getSessionUser, setBoostsRemaining as setBoostsRemainingDB, setDoublePredsRemaining as setDoublePredsRemainingDB, requestPasswordReset, updatePassword } from "./auth";
 import { supabase } from "./supabaseClient";
 import {
   fetchTournaments,
@@ -16,7 +16,9 @@ import {
   updateMatchDB,
   removeMatchDB,
   fetchBoostedUserIdsForMatch,
+  fetchDoublePredUserIdsForMatch,
   refundBoostDB,
+  refundDoublePredDB,
   fetchPredictionsForUser,
   upsertPredictionDB,
   fetchLeaguesWithMembers,
@@ -483,6 +485,35 @@ function calcPoints(predHome, predAway, actualHome, actualAway, multiplier = 1) 
   return withMultiplier(0, TIERS_META[5].label);
 }
 
+// Central scoring for one prediction against one match, accounting for all
+// perks. Accepts either DB-row shape (pred_home, user_boost, double_pred,
+// pred_home_2…) or mapped-match shape (predHome, userBoost, doublePred,
+// predHome2…). Returns the same shape as calcPoints ({points, basePoints}) or
+// null. Perks are mutually exclusive per match:
+//   - admin دبل (doublePoints) → ×2
+//   - تربل (user boost) → ×3
+//   - توقعين (double_pred) → best of the two predictions (with the ×2 only if
+//     the admin also doubled the match)
+function matchPointsForRow(row, match) {
+  const doubled = !!match.doublePoints;
+  const isDoublePred = row.double_pred ?? row.doublePred;
+  const h1 = row.pred_home ?? row.predHome;
+  const a1 = row.pred_away ?? row.predAway;
+  if (isDoublePred) {
+    const m = doubled ? 2 : 1;
+    const h2 = row.pred_home_2 ?? row.predHome2;
+    const a2 = row.pred_away_2 ?? row.predAway2;
+    const r1 = calcPoints(h1, a1, match.actualHome, match.actualAway, m);
+    const r2 = calcPoints(h2, a2, match.actualHome, match.actualAway, m);
+    if (!r1) return r2;
+    if (!r2) return r1;
+    return r2.points > r1.points ? r2 : r1;
+  }
+  const boost = row.user_boost ?? row.userBoost;
+  const m = doubled ? 2 : boost ? 3 : 1;
+  return calcPoints(h1, a1, match.actualHome, match.actualAway, m);
+}
+
 // A match only counts toward stats/leaderboard/tournament points once it has
 // an actual result AND its kickoff time has actually passed (i.e. it's truly
 // finished and locked) - entering a result early as admin must not award
@@ -520,19 +551,13 @@ function computeStats(matches) {
     totalFinished += 1;
 
     const hasPrediction = m.predHome !== "" && m.predHome != null && m.predAway !== "" && m.predAway != null;
-    // Same effective-multiplier logic as UserMatchCard: the admin's "مباراة
-    // الدبل" (x2) takes priority and blocks the personal boost; otherwise
-    // the participant's own "التربل" (x3) applies if they activated it.
-    const adminMultiplier = m.doublePoints ? 2 : 1;
-    const userMultiplier = m.userBoost ? 3 : 1;
-    const multiplier = m.doublePoints ? adminMultiplier : userMultiplier;
 
     let points = 0;
     if (!hasPrediction) {
       tierCounts.none += 1;
     } else {
       totalPredicted += 1;
-      const result = calcPoints(m.predHome, m.predAway, m.actualHome, m.actualAway, multiplier);
+      const result = matchPointsForRow(m, m);
       if (result) {
         tierCounts[result.basePoints] = (tierCounts[result.basePoints] || 0) + 1;
         points = result.points;
@@ -1912,19 +1937,19 @@ function TeamDisplay({ name, logo, theme, logoSize = 48, venueLabel }) {
 // Restricted match card for regular participants: everything is read-only
 // (tournament, teams, schedule, actual result) except the prediction inputs.
 // Also supports the personal "double points" boost (limited uses per season).
-function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogos, hideResult, confirmed, onConfirm, predictedTab }) {
+function UserMatchCard({ match, onChange, theme, boostsRemaining, doublePredsRemaining, tournamentLogos, hideResult, confirmed, onConfirm, predictedTab }) {
   // Score edits stay local (draft) until "حفظ التوقع" is pressed - nothing
   // is written to the DB on keystroke, so an unsaved edit doesn't survive
   // a page refresh.
   const [draftHome, setDraftHome] = useState(match.predHome);
   const [draftAway, setDraftAway] = useState(match.predAway);
   const [draftBoost, setDraftBoost] = useState(!!match.userBoost);
+  const [draftDouble, setDraftDouble] = useState(!!match.doublePred);
+  const [draftHome2, setDraftHome2] = useState(match.predHome2);
+  const [draftAway2, setDraftAway2] = useState(match.predAway2);
+  const [perkMenuOpen, setPerkMenuOpen] = useState(false);
 
-  const userMultiplier = match.userBoost ? 3 : 1;
-  const adminMultiplier = match.doublePoints ? 2 : 1;
-  const effectiveMultiplier = match.doublePoints ? adminMultiplier : userMultiplier;
-
-  const result = calcPoints(match.predHome, match.predAway, match.actualHome, match.actualAway, effectiveMultiplier);
+  const result = matchPointsForRow(match, match);
   const colors = result
     ? match.userBoost
       ? { bg: theme.yellowSoft, text: theme.yellow, ring: theme.yellow }
@@ -1943,20 +1968,34 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
   const isDirty =
     String(draftHome ?? "") !== String(match.predHome ?? "") ||
     String(draftAway ?? "") !== String(match.predAway ?? "") ||
-    draftBoost !== !!match.userBoost;
+    draftBoost !== !!match.userBoost ||
+    draftDouble !== !!match.doublePred ||
+    String(draftHome2 ?? "") !== String(match.predHome2 ?? "") ||
+    String(draftAway2 ?? "") !== String(match.predAway2 ?? "");
   const showSaved = confirmed && !isDirty && !noPredictionDraft;
   const saveDisabled = !isDirty;
 
   const boostDisabled = match.doublePoints || isLocked || noPredictionDraft || (!draftBoost && boostsRemaining <= 0);
+  const doubleDisabled = match.doublePoints || isLocked || noPredictionDraft || (!draftDouble && doublePredsRemaining <= 0);
 
-  // Accent colour of the card: gold for the admin دبل, green when the user's
-  // تربل is active. (توقعين will use blue when implemented.)
-  const boostActive = draftBoost || match.userBoost;
-  const accent = match.doublePoints ? theme.yellow : boostActive ? "#10B981" : null;
+  // Accent colour of the card: gold = admin دبل, green = تربل, blue = توقعين.
+  const accent = match.doublePoints ? theme.yellow : draftBoost ? "#10B981" : draftDouble ? "#3B82F6" : null;
   const isGold = !!accent;
 
+  const selectTriple = () => { setDraftBoost(true); setDraftDouble(false); setPerkMenuOpen(false); };
+  const selectDouble = () => { setDraftDouble(true); setDraftBoost(false); setPerkMenuOpen(false); };
+  const clearPerk = () => { setDraftBoost(false); setDraftDouble(false); setPerkMenuOpen(false); };
+
   const saveDraft = () => {
-    onChange({ ...match, predHome: draftHome, predAway: draftAway, userBoost: draftBoost });
+    onChange({
+      ...match,
+      predHome: draftHome,
+      predAway: draftAway,
+      userBoost: draftBoost,
+      doublePred: draftDouble,
+      predHome2: draftDouble ? draftHome2 : "",
+      predAway2: draftDouble ? draftAway2 : "",
+    });
     if (!noPredictionDraft) onConfirm();
   };
 
@@ -2014,7 +2053,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
                     value={draftHome}
                     onChange={(v) => {
                       const newHome = num(v);
-                      if (newHome === "" && draftBoost) setDraftBoost(false);
+                      if (newHome === "") { setDraftBoost(false); setDraftDouble(false); }
                       setDraftHome(newHome);
                     }}
                     theme={theme}
@@ -2033,43 +2072,39 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
                 <span style={{ color: theme.muted, fontSize: "12px", fontWeight: 700 }}>ضد</span>
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "5px", paddingTop: "62px" }}>
-                <button
-                  onClick={() => setDraftBoost((b) => !b)}
-                  disabled={boostDisabled}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "64px",
-                    boxSizing: "border-box",
-                    borderRadius: "7px",
-                    padding: "5px 6px",
-                    fontSize: "11px",
-                    fontFamily: "Cairo, sans-serif",
-                    fontWeight: 800,
-                    border: `1.5px solid #10B981`,
-                    background: draftBoost ? "#10B9811a" : "transparent",
-                    color: draftBoost ? "#10B981" : theme.text,
-                    cursor: boostDisabled ? "not-allowed" : "pointer",
-                    opacity: boostDisabled && !draftBoost ? 0.5 : 1,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  تربل
-                </button>
-                <span
-                  style={{
-                    fontSize: "9px",
-                    color: theme.muted,
-                    fontWeight: 600,
-                    whiteSpace: "nowrap",
-                    width: "100%",
-                    textAlign: "center",
-                  }}
-                >
-                  ({boostsRemaining} متبقية)
-                </span>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", paddingTop: "62px", width: "76px" }}>
+                {(() => {
+                  const chip = (color, active, disabled) => ({
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                    width: "76px", boxSizing: "border-box", borderRadius: "7px", padding: "5px 4px",
+                    fontSize: "10.5px", fontFamily: "Cairo, sans-serif", fontWeight: 800,
+                    border: `1.5px solid ${color}`,
+                    background: active ? `${color}1a` : "transparent",
+                    color: active ? color : theme.text,
+                    cursor: disabled ? "not-allowed" : "pointer",
+                    opacity: disabled ? 0.45 : 1, whiteSpace: "nowrap", marginBottom: "2px",
+                  });
+                  const currentColor = draftBoost ? "#10B981" : draftDouble ? "#3B82F6" : theme.text;
+                  if (!perkMenuOpen) {
+                    return (
+                      <>
+                        <button onClick={() => setPerkMenuOpen(true)} disabled={isLocked || noPredictionDraft} style={chip(currentColor, draftBoost || draftDouble, isLocked || noPredictionDraft)}>
+                          {draftBoost ? "تربل" : draftDouble ? "توقعين" : "المزايا"}
+                        </button>
+                        <span style={{ fontSize: "9px", color: theme.muted, fontWeight: 600, textAlign: "center" }}>
+                          {draftBoost || draftDouble ? "اضغط للتغيير" : "اختر ميزة"}
+                        </span>
+                      </>
+                    );
+                  }
+                  return (
+                    <>
+                      <button onClick={selectTriple} disabled={boostsRemaining <= 0 && !draftBoost} style={chip("#10B981", draftBoost, boostsRemaining <= 0 && !draftBoost)}>تربل ({boostsRemaining})</button>
+                      <button onClick={selectDouble} disabled={doublePredsRemaining <= 0 && !draftDouble} style={chip("#3B82F6", draftDouble, doublePredsRemaining <= 0 && !draftDouble)}>توقعين ({doublePredsRemaining})</button>
+                      <button onClick={clearPerk} style={chip(theme.muted, false, false)}>بدون</button>
+                    </>
+                  );
+                })()}
               </div>
             )}
 
@@ -2084,7 +2119,7 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
                     value={draftAway}
                     onChange={(v) => {
                       const newAway = num(v);
-                      if (newAway === "" && draftBoost) setDraftBoost(false);
+                      if (newAway === "") { setDraftBoost(false); setDraftDouble(false); }
                       setDraftAway(newAway);
                     }}
                     theme={theme}
@@ -2094,6 +2129,19 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, tournamentLogo
               </div>
             </div>
           </div>
+
+          {!isLocked && draftDouble && (
+            <div style={{ borderTop: `1px dashed #3B82F6`, paddingTop: "12px", marginTop: "12px" }}>
+              <div style={{ fontSize: "11px", fontWeight: 800, color: "#3B82F6", textAlign: "center", marginBottom: "8px" }}>
+                التوقع الثاني (يُحسب الأعلى نقاطاً)
+              </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px" }}>
+                <ScoreInput value={draftHome2} onChange={(v) => setDraftHome2(num(v))} theme={theme} disabled={isLocked} />
+                <span style={{ color: theme.muted, fontWeight: 700 }}>-</span>
+                <ScoreInput value={draftAway2} onChange={(v) => setDraftAway2(num(v))} theme={theme} disabled={isLocked} />
+              </div>
+            </div>
+          )}
 
           {!isLocked && (
             <div style={{ borderTop: `1px solid ${theme.border}`, padding: "10px 14px", marginTop: "10px" }}>
@@ -2213,8 +2261,12 @@ function MatchResultFooter({ match, theme, hasActual, result, colors, noPredicti
             دبل
           </ResultPill>
         ) : match.userBoost ? (
-          <ResultPill theme={theme} border={theme.yellow} bg={theme.yellowSoft} color={theme.yellow} bold>
+          <ResultPill theme={theme} border="#10B981" bg="#10B9811a" color="#10B981" bold>
             تربل
+          </ResultPill>
+        ) : match.doublePred ? (
+          <ResultPill theme={theme} border="#3B82F6" bg="#3B82F61a" color="#3B82F6" bold>
+            توقعين
           </ResultPill>
         ) : (
           <ResultPill theme={theme} border={theme.inputBorder} bg={theme.bg} color={theme.muted} bold>
@@ -2563,10 +2615,6 @@ function computeGlobalRanking(matches, allPredictionRows, currentUser) {
       entry.lastMatchPredAt = row.updated_at;
     }
 
-    const adminMultiplier = match.doublePoints ? 2 : 1;
-    const userMultiplier = row.user_boost ? 3 : 1;
-    const multiplier = match.doublePoints ? adminMultiplier : userMultiplier;
-
     const hasPrediction = row.pred_home !== null && row.pred_home !== undefined && row.pred_away !== null && row.pred_away !== undefined;
     if (!hasPrediction) {
       entry.tierCounts.none += 1;
@@ -2574,7 +2622,7 @@ function computeGlobalRanking(matches, allPredictionRows, currentUser) {
       continue;
     }
     predictedMatchIdsByUser[row.user_id].add(row.match_id);
-    const result = calcPoints(row.pred_home, row.pred_away, match.actualHome, match.actualAway, multiplier);
+    const result = matchPointsForRow(row, match);
     if (result) {
       entry.tierCounts[result.basePoints] = (entry.tierCounts[result.basePoints] || 0) + 1;
       entry.points += result.points;
@@ -4788,16 +4836,12 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onSet
       entry.lastMatchPredAt = row.updated_at;
     }
 
-    const adminMultiplier = match.doublePoints ? 2 : 1;
-    const userMultiplier = row.user_boost ? 3 : 1;
-    const multiplier = match.doublePoints ? adminMultiplier : userMultiplier;
-
     const hasPrediction = row.pred_home !== null && row.pred_home !== undefined && row.pred_away !== null && row.pred_away !== undefined;
     if (!hasPrediction) {
       entry.tierCounts.none += 1;
       continue;
     }
-    const result = calcPoints(row.pred_home, row.pred_away, match.actualHome, match.actualAway, multiplier);
+    const result = matchPointsForRow(row, match);
     if (result) {
       entry.tierCounts[result.basePoints] = (entry.tierCounts[result.basePoints] || 0) + 1;
       entry.points += result.points;
@@ -4830,7 +4874,7 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onSet
     if (!predictionRowsByUserId[row.user_id]) predictionRowsByUserId[row.user_id] = {};
     const hasPrediction = row.pred_home !== null && row.pred_home !== undefined && row.pred_away !== null && row.pred_away !== undefined;
     if (hasPrediction) {
-      predictionRowsByUserId[row.user_id][row.match_id] = { predHome: row.pred_home, predAway: row.pred_away, userBoost: !!row.user_boost };
+      predictionRowsByUserId[row.user_id][row.match_id] = { predHome: row.pred_home, predAway: row.pred_away, userBoost: !!row.user_boost, predHome2: row.pred_home_2, predAway2: row.pred_away_2, doublePred: !!row.double_pred };
     }
   }
   const playerPredictionsById = {};
@@ -5158,8 +5202,7 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
       >
         {league.players.map((p, idx) => {
           const pred = playerPredictionsById[p.id]?.[match.id];
-          const multiplier = match.doublePoints ? 2 : pred?.userBoost ? 3 : 1;
-          const result = pred ? calcPoints(pred.predHome, pred.predAway, match.actualHome, match.actualAway, multiplier) : null;
+          const result = pred ? matchPointsForRow(pred, match) : null;
           const colors = result
             ? pred?.userBoost
               ? { bg: theme.yellowSoft, text: theme.yellow, ring: theme.yellow }
@@ -7409,6 +7452,9 @@ export default function App() {
           predHome: pred?.predHome != null ? String(pred.predHome) : "",
           predAway: pred?.predAway != null ? String(pred.predAway) : "",
           userBoost: pred?.userBoost || false,
+          predHome2: pred?.predHome2 != null ? String(pred.predHome2) : "",
+          predAway2: pred?.predAway2 != null ? String(pred.predAway2) : "",
+          doublePred: pred?.doublePred || false,
         };
       }),
     [matchRows, tournamentNameById, predictionsByMatch]
@@ -7498,7 +7544,7 @@ export default function App() {
       const byMatch = {};
       const confirmed = {};
       for (const row of rows) {
-        byMatch[row.match_id] = { predHome: row.pred_home, predAway: row.pred_away, userBoost: row.user_boost };
+        byMatch[row.match_id] = { predHome: row.pred_home, predAway: row.pred_away, userBoost: row.user_boost, predHome2: row.pred_home_2, predAway2: row.pred_away_2, doublePred: row.double_pred };
         if (row.pred_home != null && row.pred_away != null) confirmed[row.match_id] = true;
       }
       setPredictionsByMatch(byMatch);
@@ -7646,6 +7692,7 @@ export default function App() {
   };
 
   const boostsRemaining = currentUser?.boosts_remaining ?? 3;
+  const doublePredsRemaining = currentUser?.double_preds_remaining ?? 3;
 
   // Leagues are loaded from Supabase (leagues + league_members), and
   // re-shaped into the {id, code, name, players:[{id, name, isYou}]} form
@@ -7773,7 +7820,7 @@ export default function App() {
     setMatchRows((prev) => prev.map((x) => (x.id === id ? { ...x, ...matchFields } : x)));
 
     if (currentUser) {
-      const predictionFields = { predHome: updated.predHome, predAway: updated.predAway, userBoost: updated.userBoost };
+      const predictionFields = { predHome: updated.predHome, predAway: updated.predAway, userBoost: updated.userBoost, predHome2: updated.predHome2, predAway2: updated.predAway2, doublePred: updated.doublePred };
       const prevPred = predictionsByMatch[id];
       // Treat a missing previous prediction as empty, so a first-time
       // prediction (nothing -> a score) still counts as a change and gets
@@ -7803,14 +7850,26 @@ export default function App() {
       const nextBoost = !!predictionFields.userBoost;
       const boostChanged = prevBoost !== nextBoost;
 
+      const prevDouble = !!prevPred?.doublePred;
+      const nextDouble = !!predictionFields.doublePred;
+      const doubleChanged = prevDouble !== nextDouble;
+      const pred2Changed =
+        String(prevPred?.predHome2 ?? "") !== String(predictionFields.predHome2 ?? "") ||
+        String(prevPred?.predAway2 ?? "") !== String(predictionFields.predAway2 ?? "");
+
       // Only touch the predictions table if the participant's own prediction
-      // or boost actually changed — not when the admin merely edits match
+      // or a perk actually changed — not when the admin merely edits match
       // details (home/away teams, actual result, date, etc.).
-      if (scoreChanged || boostChanged) {
+      if (scoreChanged || boostChanged || doubleChanged || pred2Changed) {
         if (boostChanged) {
           const newBoostsRemaining = boostsRemaining + (nextBoost ? -1 : 1);
           setBoostsRemainingDB(currentUser.id, newBoostsRemaining);
           setCurrentUser((u) => ({ ...u, boosts_remaining: newBoostsRemaining }));
+        }
+        if (doubleChanged) {
+          const newDoubleRemaining = doublePredsRemaining + (nextDouble ? -1 : 1);
+          setDoublePredsRemainingDB(currentUser.id, newDoubleRemaining);
+          setCurrentUser((u) => ({ ...u, double_preds_remaining: newDoubleRemaining }));
         }
         upsertPredictionDB(currentUser.id, id, predictionFields);
         bustAllPredictionsCache();
@@ -7823,6 +7882,9 @@ export default function App() {
             pred_home: predictionFields.predHome === "" ? null : Number(predictionFields.predHome),
             pred_away: predictionFields.predAway === "" ? null : Number(predictionFields.predAway),
             user_boost: !!predictionFields.userBoost,
+            pred_home_2: nextDouble && predictionFields.predHome2 !== "" && predictionFields.predHome2 != null ? Number(predictionFields.predHome2) : null,
+            pred_away_2: nextDouble && predictionFields.predAway2 !== "" && predictionFields.predAway2 != null ? Number(predictionFields.predAway2) : null,
+            double_pred: nextDouble,
             updated_at: new Date().toISOString(),
             profiles: { name: currentUser.name, username: currentUser.username },
           };
@@ -7931,6 +7993,15 @@ export default function App() {
         refundBoostDB(uid);
         if (uid === currentUser?.id) {
           setCurrentUser((u) => ({ ...u, boosts_remaining: (u?.boosts_remaining ?? 3) + 1 }));
+        }
+      });
+    });
+    // Refund توقعين to anyone who used it on this match.
+    fetchDoublePredUserIdsForMatch(id).then((userIds) => {
+      userIds.forEach((uid) => {
+        refundDoublePredDB(uid);
+        if (uid === currentUser?.id) {
+          setCurrentUser((u) => ({ ...u, double_preds_remaining: (u?.double_preds_remaining ?? 3) + 1 }));
         }
       });
       removeMatchDB(id);
@@ -8272,6 +8343,7 @@ export default function App() {
                           onChange={(updated) => updateMatch(match.id, updated)}
                           theme={theme}
                           boostsRemaining={boostsRemaining}
+                          doublePredsRemaining={doublePredsRemaining}
                           tournamentLogos={tournamentLogos}
                           hideResult={predictionsTabView !== "archived"}
                           confirmed={!!confirmedPredictions[match.id]}

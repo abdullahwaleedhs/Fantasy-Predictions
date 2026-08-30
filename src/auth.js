@@ -82,7 +82,7 @@ export async function updatePassword(newPassword) {
 export async function fetchProfile(userId) {
   const { data, error } = await supabase
     .from("profiles")
-    .select("name, username, boosts_remaining, is_admin, username_changed_at")
+    .select("name, username, boosts_remaining, double_preds_remaining, is_admin, username_changed_at")
     .eq("id", userId)
     .single();
   if (error) throw error;
@@ -91,6 +91,11 @@ export async function fetchProfile(userId) {
 
 export async function setBoostsRemaining(userId, boostsRemaining) {
   const { error } = await supabase.from("profiles").update({ boosts_remaining: boostsRemaining }).eq("id", userId);
+  if (error) throw error;
+}
+
+export async function setDoublePredsRemaining(userId, remaining) {
+  const { error } = await supabase.from("profiles").update({ double_preds_remaining: remaining }).eq("id", userId);
   if (error) throw error;
 }
 

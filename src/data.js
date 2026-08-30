@@ -195,25 +195,44 @@ export async function fetchBoostedUserIdsForMatch(matchId) {
   return data.map((r) => r.user_id);
 }
 
+export async function fetchDoublePredUserIdsForMatch(matchId) {
+  const { data, error } = await supabase
+    .from("predictions")
+    .select("user_id")
+    .eq("match_id", matchId)
+    .eq("double_pred", true);
+  if (error) throw error;
+  return data.map((r) => r.user_id);
+}
+
+export async function refundDoublePredDB(userId) {
+  const { error } = await supabase.rpc("refund_double_pred", { uid: userId });
+  if (error) throw error;
+}
+
 // ============ PREDICTIONS ============
 
 export async function fetchPredictionsForUser(userId) {
   const { data, error } = await supabase
     .from("predictions")
-    .select("match_id, pred_home, pred_away, user_boost")
+    .select("match_id, pred_home, pred_away, user_boost, pred_home_2, pred_away_2, double_pred")
     .eq("user_id", userId);
   if (error) throw error;
   return data;
 }
 
-export async function upsertPredictionDB(userId, matchId, { predHome, predAway, userBoost }) {
+export async function upsertPredictionDB(userId, matchId, { predHome, predAway, userBoost, predHome2, predAway2, doublePred }) {
+  const num = (v) => (v === "" || v === undefined || v === null ? null : Number(v));
   const { error } = await supabase.from("predictions").upsert(
     {
       user_id: userId,
       match_id: matchId,
-      pred_home: predHome === "" || predHome === undefined ? null : Number(predHome),
-      pred_away: predAway === "" || predAway === undefined ? null : Number(predAway),
+      pred_home: num(predHome),
+      pred_away: num(predAway),
       user_boost: !!userBoost,
+      pred_home_2: doublePred ? num(predHome2) : null,
+      pred_away_2: doublePred ? num(predAway2) : null,
+      double_pred: !!doublePred,
       updated_at: new Date().toISOString(),
     },
     { onConflict: "match_id,user_id" }
@@ -235,7 +254,7 @@ export async function fetchAllPredictionsWithProfiles({ bust } = {}) {
   }
   const { data, error } = await supabase
     .from("predictions")
-    .select("match_id, user_id, pred_home, pred_away, user_boost, updated_at, profiles(name, username)");
+    .select("match_id, user_id, pred_home, pred_away, user_boost, pred_home_2, pred_away_2, double_pred, updated_at, profiles(name, username)");
   if (error) throw error;
   _allPredictionsCache = data;
   _allPredictionsCacheTime = now;
