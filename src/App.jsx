@@ -2311,6 +2311,7 @@ function MatchResultFooter({ match, theme, hasActual, result, colors, noPredicti
 
 function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, clubsByTournament, tournamentLogos, allPredictionRows, theme }) {
   const num = (v) => (v === "" ? "" : String(v).replace(/[^0-9]/g, "").slice(0, 2));
+  const [showPreds, setShowPreds] = useState(false);
 
   // Local draft: edits accumulate here and only commit to the real match
   // (via onChange) when "حفظ" is pressed. This matters specifically for the
@@ -2535,18 +2536,29 @@ function Scoreboard({ match, onChange, onRemove, tournaments, onAddTournament, c
           };
           return (
             <div style={{ borderTop: `1px solid ${theme.border}` }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 60px 1fr", padding: "6px 12px", borderBottom: `1px solid ${theme.border}`, background: theme.bg }}>
-                <span style={{ fontSize: "9px", fontWeight: 700, color: theme.muted }}>المشارك</span>
-                <span style={{ fontSize: "9px", fontWeight: 700, color: theme.muted, textAlign: "center" }}>التوقع</span>
-                <span style={{ fontSize: "9px", fontWeight: 700, color: theme.muted, textAlign: "left" }}>وقت الإدخال</span>
-              </div>
-              {matchPreds.map((r) => (
-                <div key={r.user_id} style={{ display: "grid", gridTemplateColumns: "1fr 60px 1fr", alignItems: "center", padding: "7px 12px", borderBottom: `1px solid ${theme.border}` }}>
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: theme.text }}>{r.profiles?.name || "—"}</span>
-                  <span style={{ fontSize: "11px", fontWeight: 800, color: theme.violet, textAlign: "center" }}>{r.pred_away}-{r.pred_home}</span>
-                  <span dir="ltr" style={{ fontSize: "9px", color: theme.muted, textAlign: "left", display: "block" }}>{fmt(r.updated_at)}</span>
-                </div>
-              ))}
+              <button
+                onClick={() => setShowPreds((s) => !s)}
+                style={{ width: "100%", background: "transparent", border: "none", padding: "10px 12px", fontFamily: "Cairo, sans-serif", fontWeight: 800, fontSize: "12px", color: theme.primary, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
+              >
+                {showPreds ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                {showPreds ? "إخفاء التوقعات" : `عرض التوقعات (${matchPreds.length})`}
+              </button>
+              {showPreds && (
+                <>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 60px 1fr", padding: "6px 12px", borderTop: `1px solid ${theme.border}`, borderBottom: `1px solid ${theme.border}`, background: theme.bg }}>
+                    <span style={{ fontSize: "9px", fontWeight: 700, color: theme.muted }}>المشارك</span>
+                    <span style={{ fontSize: "9px", fontWeight: 700, color: theme.muted, textAlign: "center" }}>التوقع</span>
+                    <span style={{ fontSize: "9px", fontWeight: 700, color: theme.muted, textAlign: "left" }}>وقت الإدخال</span>
+                  </div>
+                  {matchPreds.map((r) => (
+                    <div key={r.user_id} style={{ display: "grid", gridTemplateColumns: "1fr 60px 1fr", alignItems: "center", padding: "7px 12px", borderBottom: `1px solid ${theme.border}` }}>
+                      <span style={{ fontSize: "11px", fontWeight: 700, color: theme.text }}>{r.profiles?.name || "—"}</span>
+                      <span style={{ fontSize: "11px", fontWeight: 800, color: theme.violet, textAlign: "center" }}>{r.pred_away}-{r.pred_home}</span>
+                      <span dir="ltr" style={{ fontSize: "9px", color: theme.muted, textAlign: "left", display: "block" }}>{fmt(r.updated_at)}</span>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
           );
         })()}
