@@ -8153,8 +8153,7 @@ export default function App() {
               })()}
             </div>
 
-            <div style={{ padding: "12px 16px 16px" }}>
-              <div style={{ border: `1px solid #000000`, borderRadius: "12px", overflow: "hidden", background: "#ffffff" }}>
+            <div style={{ border: `1.5px solid ${theme.violet}`, borderRadius: "10px", overflow: "hidden", background: "#ffffff", marginBottom: "16px" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "Cairo, sans-serif", textAlign: "center" }}>
                   <thead>
                     <tr>
@@ -8173,7 +8172,6 @@ export default function App() {
                     </tr>
                   </tbody>
                 </table>
-              </div>
             </div>
 
             {/* Matches */}
