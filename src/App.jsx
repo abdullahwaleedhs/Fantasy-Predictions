@@ -8153,7 +8153,7 @@ export default function App() {
               })()}
             </div>
 
-            <div style={{ border: `1.5px solid ${theme.violet}`, borderRadius: "10px", overflow: "hidden", background: "#ffffff", marginBottom: "16px" }}>
+            <div style={{ border: `1.5px solid #000000`, borderRadius: "10px", overflow: "hidden", background: "#ffffff", marginBottom: "16px" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "Cairo, sans-serif", textAlign: "center" }}>
                   <thead>
                     <tr>
