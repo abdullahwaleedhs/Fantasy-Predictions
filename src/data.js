@@ -28,6 +28,13 @@ export async function refundBoostDB(userId) {
   if (error) throw error;
 }
 
+// Number of registered users, for the registration cap.
+export async function fetchUserCount() {
+  const { count, error } = await supabase.from("profiles").select("id", { count: "exact", head: true });
+  if (error) throw error;
+  return count ?? 0;
+}
+
 export async function fetchAllProfiles() {
   const { data, error } = await supabase
     .from("profiles")

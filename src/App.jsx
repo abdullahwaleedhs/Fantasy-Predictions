@@ -25,6 +25,7 @@ import {
   createLeagueDB,
   joinLeagueDB,
   fetchAllProfiles,
+  fetchUserCount,
   fetchAllPredictionsWithProfiles,
   fetchServerTimeOffset,
   bustTournamentsCache,
@@ -7531,8 +7532,15 @@ export default function App() {
     }).catch(() => {});
   }, [currentUser?.id]);
 
+  const MAX_USERS = 30;
+
   const handleRegister = async ({ name, username, email, password }) => {
     try {
+      // Registration is capped — block new signups once the limit is reached.
+      const userCount = await fetchUserCount().catch(() => 0);
+      if (userCount >= MAX_USERS) {
+        return { error: "وصل عدد المستخدمين للحد الأقصى، التسجيل مقفل حالياً." };
+      }
       if (await isUsernameTaken(username)) {
         return { usernameError: "اسم المستخدم هذا مستخدم من قبل، جرّب واحد ثاني" };
       }
@@ -7542,6 +7550,10 @@ export default function App() {
       setActivePage("home");
       return {};
     } catch (err) {
+      // Hard cap enforced by the DB trigger
+      if (err.message && err.message.includes("USER_CAP_REACHED")) {
+        return { error: "وصل عدد المستخدمين للحد الأقصى، التسجيل مقفل حالياً." };
+      }
       // Postgres unique-constraint violation on the username column
       if (err.message && (err.message.includes("profiles_username_key") || err.message.includes("duplicate key") || err.message.includes("unique"))) {
         return { usernameError: "اسم المستخدم هذا مستخدم من قبل، جرّب واحد ثاني" };
