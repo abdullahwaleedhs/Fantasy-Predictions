@@ -8157,6 +8157,7 @@ export default function App() {
               })()}
             </div>
 
+            {predictionsTabView === "available" && (
             <div style={{ border: `1.5px solid #000000`, borderRadius: "10px", overflow: "hidden", background: "#ffffff", marginBottom: "16px", padding: "8px" }}>
               {/* header */}
               <div style={{ display: "flex", marginBottom: "8px" }}>
@@ -8177,6 +8178,7 @@ export default function App() {
                 </div>
               ))}
             </div>
+            )}
 
             {/* Matches */}
             {(() => {
