@@ -8158,7 +8158,7 @@ export default function App() {
                 <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "Cairo, sans-serif", textAlign: "center" }}>
                   <thead>
                     <tr>
-                      <th style={{ padding: "9px 12px", fontSize: "12px", fontWeight: 600, color: "#000000", textAlign: "center", width: "30%", whiteSpace: "nowrap", borderInlineEnd: `1px solid #000000` }}>الميزة</th>
+                      <th style={{ padding: "9px 10px", fontSize: "12px", fontWeight: 600, color: "#000000", textAlign: "center", width: "1%", whiteSpace: "nowrap", borderInlineEnd: `1px solid #000000` }}>الميزة</th>
                       <th style={{ padding: "9px 12px", fontSize: "12px", fontWeight: 600, color: "#000000", textAlign: "center" }}>إيضاح</th>
                     </tr>
                   </thead>
