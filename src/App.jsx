@@ -8153,22 +8153,22 @@ export default function App() {
               })()}
             </div>
 
-            <div style={{ padding: "12px 12px 16px" }}>
-              <div style={{ border: `2px solid #000000`, borderRadius: "12px", overflow: "hidden", background: "#ffffff", maxWidth: "480px", margin: "0 auto" }}>
+            <div style={{ padding: "12px 16px 16px" }}>
+              <div style={{ border: `1px solid #000000`, borderRadius: "12px", overflow: "hidden", background: "#ffffff" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "Cairo, sans-serif", textAlign: "center" }}>
                   <thead>
                     <tr>
-                      <th style={{ padding: "9px 12px", fontSize: "12px", fontWeight: 800, color: "#000000", textAlign: "center", width: "30%", whiteSpace: "nowrap", borderInlineEnd: `1.5px solid #000000` }}>الميزة</th>
-                      <th style={{ padding: "9px 12px", fontSize: "12px", fontWeight: 800, color: "#000000", textAlign: "center" }}>إيضاح</th>
+                      <th style={{ padding: "9px 12px", fontSize: "12px", fontWeight: 600, color: "#000000", textAlign: "center", width: "30%", whiteSpace: "nowrap", borderInlineEnd: `1px solid #000000` }}>الميزة</th>
+                      <th style={{ padding: "9px 12px", fontSize: "12px", fontWeight: 600, color: "#000000", textAlign: "center" }}>إيضاح</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr style={{ borderTop: `1.5px solid #000000` }}>
-                      <td style={{ padding: "9px 12px", fontSize: "12px", fontWeight: 800, color: "#000000", verticalAlign: "middle", whiteSpace: "nowrap", borderInlineEnd: `1.5px solid #000000` }}>الدبل</td>
+                    <tr style={{ borderTop: `1px solid #000000` }}>
+                      <td style={{ padding: "9px 12px", fontSize: "12px", fontWeight: 600, color: "#000000", verticalAlign: "middle", whiteSpace: "nowrap", borderInlineEnd: `1px solid #000000` }}>الدبل</td>
                       <td style={{ padding: "9px 12px", fontSize: "12px", color: "#333333", lineHeight: 1.7, textAlign: "center" }}>يتم تفعيله من قبل المنظم مباراة واحدة لكل أسبوع وتكون المباراة بالإطار الذهبي</td>
                     </tr>
-                    <tr style={{ borderTop: `1.5px solid #000000` }}>
-                      <td style={{ padding: "9px 12px", fontSize: "12px", fontWeight: 800, color: "#000000", verticalAlign: "middle", whiteSpace: "nowrap", borderInlineEnd: `1.5px solid #000000` }}>التربل</td>
+                    <tr style={{ borderTop: `1px solid #000000` }}>
+                      <td style={{ padding: "9px 12px", fontSize: "12px", fontWeight: 600, color: "#000000", verticalAlign: "middle", whiteSpace: "nowrap", borderInlineEnd: `1px solid #000000` }}>التربل</td>
                       <td style={{ padding: "9px 12px", fontSize: "12px", color: "#333333", lineHeight: 1.7, textAlign: "center" }}>يتم تفعيله من قبل اللاعبين ومتوفر ٣ مرات طوال الموسم ولا يمكن تفعيله على مباراة الدبل</td>
                     </tr>
                   </tbody>
