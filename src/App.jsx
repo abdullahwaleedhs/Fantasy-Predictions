@@ -2074,7 +2074,6 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, doublePredsRem
             ) : (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", paddingTop: "62px", width: "76px" }}>
                 {(() => {
-                  const TOTAL = 3;
                   const chip = (color, active, disabled, column) => ({
                     display: "inline-flex", flexDirection: column ? "column" : "row", alignItems: "center", justifyContent: "center", gap: column ? "1px" : "0",
                     width: "76px", boxSizing: "border-box", borderRadius: "7px", padding: "4px 3px",
@@ -2085,13 +2084,13 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, doublePredsRem
                     cursor: disabled ? "not-allowed" : "pointer",
                     opacity: disabled ? 0.45 : 1, whiteSpace: "nowrap", marginBottom: "2px",
                   });
-                  const option = (label, color, active, remaining, onClick) => {
-                    const used = Math.max(0, TOTAL - remaining);
+                  const option = (label, color, active, remaining, total, onClick) => {
+                    const used = Math.max(0, total - remaining);
                     const disabled = remaining <= 0 && !active;
                     return (
                       <button onClick={onClick} disabled={disabled} style={chip(color, active, disabled, true)}>
                         <span>{label}</span>
-                        <span style={{ fontSize: "7.5px", fontWeight: 700 }}>{used} من {TOTAL} مستخدم</span>
+                        <span style={{ fontSize: "7.5px", fontWeight: 700 }}>{used} من {total} مستخدم</span>
                       </button>
                     );
                   };
@@ -2105,8 +2104,8 @@ function UserMatchCard({ match, onChange, theme, boostsRemaining, doublePredsRem
                   }
                   return (
                     <>
-                      {option("تربل", "#10B981", draftBoost, boostsRemaining, selectTriple)}
-                      {option("توقعين", "#3B82F6", draftDouble, doublePredsRemaining, selectDouble)}
+                      {option("تربل", "#10B981", draftBoost, boostsRemaining, 3, selectTriple)}
+                      {option("توقعين", "#3B82F6", draftDouble, doublePredsRemaining, 2, selectDouble)}
                       <button onClick={clearPerk} style={chip(theme.muted, false, false, false)}>بدون</button>
                     </>
                   );
@@ -7725,7 +7724,7 @@ export default function App() {
   };
 
   const boostsRemaining = currentUser?.boosts_remaining ?? 3;
-  const doublePredsRemaining = currentUser?.double_preds_remaining ?? 3;
+  const doublePredsRemaining = currentUser?.double_preds_remaining ?? 2;
 
   // Leagues are loaded from Supabase (leagues + league_members), and
   // re-shaped into the {id, code, name, players:[{id, name, isYou}]} form
@@ -8273,7 +8272,7 @@ export default function App() {
               {[
                 { name: "دبل", color: "#D4AF37", desc: "النقاط مضروبة بـ (2) لمباريات عشوائية من اختيار المنظم وتكون بإطار باللون الذهبي", count: "∞" },
                 { name: "تربل", color: "#10B981", desc: "النقاط مضروبة بـ 3 ولا يمكن استخدامها مع ميزة أخرى", count: "٣" },
-                { name: "توقعين", color: "#3B82F6", desc: "ادخال توقعين لمباراة واحدة والتوقع الأكثر نقاط يحسب لك ولا يمكن استخدامه مع ميزة أخرى", count: "٣" },
+                { name: "توقعين", color: "#3B82F6", desc: "ادخال توقعين لمباراة واحدة والتوقع الأكثر نقاط يحسب لك ولا يمكن استخدامه مع ميزة أخرى", count: "٢" },
               ].map((p) => (
                 <div key={p.name} style={{ display: "flex", alignItems: "stretch", border: `2px solid ${p.color}`, borderRadius: "8px", overflow: "hidden", marginBottom: "8px" }}>
                   <div style={{ width: "54px", flexShrink: 0, padding: "9px 4px", fontSize: "12px", fontWeight: 700, color: "#000000", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", borderInlineEnd: `2px solid ${p.color}` }}>{p.name}</div>
