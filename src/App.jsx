@@ -4264,7 +4264,7 @@ function AdminPerksPage({ matches, allPredictionRows, theme }) {
 // Admin: send a push notification to a specific user or everyone.
 function AdminNotifyPage({ theme }) {
   const [profiles, setProfiles] = useState([]);
-  const [recipient, setRecipient] = useState("all");
+  const [selectedIds, setSelectedIds] = useState([]); // empty = everyone
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
@@ -4273,6 +4273,9 @@ function AdminNotifyPage({ theme }) {
   useEffect(() => {
     fetchAllProfiles().then(setProfiles).catch(() => {});
   }, []);
+
+  const toggleUser = (id) =>
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   const inputStyle = {
     width: "100%", border: `1.5px solid ${theme.inputBorder}`, borderRadius: "10px",
@@ -4286,7 +4289,7 @@ function AdminNotifyPage({ theme }) {
     setStatus(null);
     try {
       const res = await sendAnnouncement({
-        userId: recipient === "all" ? null : recipient,
+        userIds: selectedIds,
         title: title.trim(),
         body: body.trim(),
         url: "/",
@@ -4307,13 +4310,32 @@ function AdminNotifyPage({ theme }) {
           أرسل إشعاراً لمستخدم محدّد أو لجميع من فعّل الإشعارات
         </p>
 
-        <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>المُستقبِل</label>
-        <select value={recipient} onChange={(e) => setRecipient(e.target.value)} style={{ ...inputStyle, marginBottom: "12px" }}>
-          <option value="all">🔔 الجميع</option>
-          {profiles.map((p) => (
-            <option key={p.id} value={p.id}>{p.name}{p.username ? ` (@${p.username})` : ""}</option>
-          ))}
-        </select>
+        <div style={{ display: "flex", alignItems: "center", marginBottom: "6px" }}>
+          <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted }}>
+            المُستقبِلون {selectedIds.length === 0 ? "(الجميع)" : `(${selectedIds.length} محدّد)`}
+          </label>
+          {selectedIds.length > 0 && (
+            <button onClick={() => setSelectedIds([])} style={{ marginInlineStart: "auto", background: "transparent", border: "none", color: theme.primary, fontSize: "11px", fontWeight: 700, cursor: "pointer" }}>
+              مسح التحديد (الجميع)
+            </button>
+          )}
+        </div>
+        <div style={{ border: `1.5px solid ${theme.inputBorder}`, borderRadius: "10px", maxHeight: "220px", overflowY: "auto", marginBottom: "12px", background: theme.surface }}>
+          {profiles.length === 0 ? (
+            <div style={{ padding: "12px", fontSize: "12px", color: theme.muted, textAlign: "center" }}>لا يوجد مستخدمون</div>
+          ) : (
+            profiles.map((p) => (
+              <label key={p.id} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "9px 12px", borderBottom: `1px solid ${theme.border}`, cursor: "pointer", fontSize: "13px", color: theme.text }}>
+                <input type="checkbox" checked={selectedIds.includes(p.id)} onChange={() => toggleUser(p.id)} />
+                <span style={{ fontWeight: 700 }}>{p.name}</span>
+                {p.username && <span style={{ color: theme.muted, fontSize: "11px" }}>@{p.username}</span>}
+              </label>
+            ))
+          )}
+        </div>
+        <p style={{ fontSize: "10.5px", color: theme.muted, marginTop: "-6px", marginBottom: "12px" }}>
+          اترك الكل بدون تحديد = يُرسل للجميع. أو علّم على من تبي.
+        </p>
 
         <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>العنوان</label>
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="مثال: تنبيه" style={{ ...inputStyle, marginBottom: "12px" }} />

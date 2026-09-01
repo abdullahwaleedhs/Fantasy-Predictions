@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
     return new Response("bad VAPID_KEYS", { status: 500, headers: cors });
   }
 
-  let input: { title?: string; body?: string; url?: string; user_id?: string } = {};
+  let input: { title?: string; body?: string; url?: string; user_id?: string; user_ids?: string[] } = {};
   try { input = await req.json(); } catch { /* defaults */ }
 
   const payload = JSON.stringify({
@@ -52,10 +52,12 @@ Deno.serve(async (req) => {
     url: input.url || "/",
   });
 
+  // Recipients: a list of user_ids, a single user_id, or everyone.
+  const ids = input.user_ids && input.user_ids.length ? input.user_ids : input.user_id ? [input.user_id] : null;
   let query = supabase.from("push_subscriptions").select("user_id, subscription");
-  if (input.user_id) query = query.eq("user_id", input.user_id);
+  if (ids) query = query.in("user_id", ids);
   const { data: subs } = await query;
-  console.log("targets:", subs?.length ?? 0, input.user_id ? `(user ${input.user_id})` : "(all)");
+  console.log("targets:", subs?.length ?? 0, ids ? `(${ids.length} users)` : "(all)");
   if (!subs?.length) return new Response(JSON.stringify({ subscribers: 0, sent: 0 }), { status: 200, headers: cors });
 
   let sent = 0;

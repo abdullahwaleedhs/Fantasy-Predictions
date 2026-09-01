@@ -30,9 +30,9 @@ export async function refundBoostDB(userId) {
 
 // Sends a push notification via the `announce` edge function — to a specific
 // user (userId) or to everyone (userId omitted). Admin-only (enforced server side).
-export async function sendAnnouncement({ userId, title, body, url }) {
+export async function sendAnnouncement({ userIds, title, body, url }) {
   const { data, error } = await supabase.functions.invoke("announce", {
-    body: { user_id: userId || undefined, title, body, url: url || "/" },
+    body: { user_ids: userIds && userIds.length ? userIds : undefined, title, body, url: url || "/" },
   });
   if (error) throw error;
   return data;
