@@ -28,6 +28,16 @@ export async function refundBoostDB(userId) {
   if (error) throw error;
 }
 
+// Sends a push notification via the `announce` edge function — to a specific
+// user (userId) or to everyone (userId omitted). Admin-only (enforced server side).
+export async function sendAnnouncement({ userId, title, body, url }) {
+  const { data, error } = await supabase.functions.invoke("announce", {
+    body: { user_id: userId || undefined, title, body, url: url || "/" },
+  });
+  if (error) throw error;
+  return data;
+}
+
 // Number of registered users, for the registration cap.
 export async function fetchUserCount() {
   const { count, error } = await supabase.from("profiles").select("id", { count: "exact", head: true });

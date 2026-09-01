@@ -3,12 +3,35 @@ import * as webpush from "jsr:@negrel/webpush@0.3";
 
 const VAPID_SUBJECT = "mailto:abdullahwaleedhs@gmail.com";
 
-// One-off broadcast: sends a push notification to every stored subscription.
-// Invoke from the Supabase dashboard (Functions → announce → Send request)
-// with a JSON body: { "title": "...", "body": "...", "url": "/#championships" }
+const cors = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+// Broadcast (or targeted) push notification. Body:
+//   { title, body, url?, user_id? }
+// If user_id is given, sends only to that user; otherwise to everyone.
+// Only an admin (profiles.is_admin) may call this.
 Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+
   const rawVapid = Deno.env.get("VAPID_KEYS");
-  if (!rawVapid) return new Response("missing VAPID_KEYS", { status: 500 });
+  if (!rawVapid) return new Response("missing VAPID_KEYS", { status: 500, headers: cors });
+
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  );
+
+  // Verify the caller is a logged-in admin.
+  const jwt = req.headers.get("Authorization")?.replace("Bearer ", "");
+  if (!jwt) return new Response("unauthorized", { status: 401, headers: cors });
+  const { data: userData } = await supabase.auth.getUser(jwt);
+  const callerId = userData?.user?.id;
+  if (!callerId) return new Response("unauthorized", { status: 401, headers: cors });
+  const { data: caller } = await supabase.from("profiles").select("is_admin").eq("id", callerId).single();
+  if (!caller?.is_admin) return new Response("forbidden", { status: 403, headers: cors });
 
   let appServer;
   try {
@@ -16,43 +39,37 @@ Deno.serve(async (req) => {
     appServer = await webpush.ApplicationServer.new({ contactInformation: VAPID_SUBJECT, vapidKeys });
   } catch (e) {
     console.error("bad VAPID_KEYS", e);
-    return new Response("bad VAPID_KEYS", { status: 500 });
+    return new Response("bad VAPID_KEYS", { status: 500, headers: cors });
   }
 
-  let payloadIn: { title?: string; body?: string; url?: string } = {};
-  try { payloadIn = await req.json(); } catch { /* use defaults */ }
+  let input: { title?: string; body?: string; url?: string; user_id?: string } = {};
+  try { input = await req.json(); } catch { /* defaults */ }
 
   const payload = JSON.stringify({
-    title: payloadIn.title || "🏆 قسم جديد: البطولات",
-    body: payloadIn.body || "توقّع ترتيب الدوريات وأبطال الكؤوس — اختياري ومنفصل عن نقاط المباريات",
-    tag: "announce-championships",
-    url: payloadIn.url || "/#championships",
+    title: input.title || "توقع المباريات",
+    body: input.body || "",
+    tag: `announce-${Date.now()}`,
+    url: input.url || "/",
   });
 
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-  );
-
-  const { data: subs } = await supabase.from("push_subscriptions").select("user_id, subscription");
-  console.log("subscribers:", subs?.length ?? 0);
-  if (!subs?.length) return new Response("no subscribers", { status: 200 });
+  let query = supabase.from("push_subscriptions").select("user_id, subscription");
+  if (input.user_id) query = query.eq("user_id", input.user_id);
+  const { data: subs } = await query;
+  console.log("targets:", subs?.length ?? 0, input.user_id ? `(user ${input.user_id})` : "(all)");
+  if (!subs?.length) return new Response(JSON.stringify({ subscribers: 0, sent: 0 }), { status: 200, headers: cors });
 
   let sent = 0;
   for (const sub of subs) {
     try {
-      const subscription = sub.subscription as PushSubscriptionJSON;
-      await appServer.subscribe(subscription).pushTextMessage(payload, {});
+      await appServer.subscribe(sub.subscription as PushSubscriptionJSON).pushTextMessage(payload, {});
       sent++;
     } catch (e) {
       const msg = String(e);
       if (msg.includes("410") || msg.includes("404")) {
         await supabase.from("push_subscriptions").delete().eq("user_id", sub.user_id);
       }
-      console.error("push error for", sub.user_id, msg);
+      console.error("push error", sub.user_id, msg);
     }
   }
-
-  console.log("sent:", sent);
-  return new Response(JSON.stringify({ subscribers: subs.length, sent }), { status: 200 });
+  return new Response(JSON.stringify({ subscribers: subs.length, sent }), { status: 200, headers: cors });
 });

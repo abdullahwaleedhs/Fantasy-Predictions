@@ -28,6 +28,7 @@ import {
   joinLeagueDB,
   fetchAllProfiles,
   fetchUserCount,
+  sendAnnouncement,
   fetchAllPredictionsWithProfiles,
   fetchServerTimeOffset,
   bustTournamentsCache,
@@ -4260,6 +4261,84 @@ function AdminPerksPage({ matches, allPredictionRows, theme }) {
   );
 }
 
+// Admin: send a push notification to a specific user or everyone.
+function AdminNotifyPage({ theme }) {
+  const [profiles, setProfiles] = useState([]);
+  const [recipient, setRecipient] = useState("all");
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [sending, setSending] = useState(false);
+  const [status, setStatus] = useState(null);
+
+  useEffect(() => {
+    fetchAllProfiles().then(setProfiles).catch(() => {});
+  }, []);
+
+  const inputStyle = {
+    width: "100%", border: `1.5px solid ${theme.inputBorder}`, borderRadius: "10px",
+    padding: "11px 12px", fontFamily: "Cairo, sans-serif", fontSize: "14px",
+    color: theme.text, background: theme.surface, outline: "none", boxSizing: "border-box",
+  };
+
+  const send = async () => {
+    if (!title.trim() && !body.trim()) { setStatus({ ok: false, msg: "اكتب عنوان أو نص للإشعار" }); return; }
+    setSending(true);
+    setStatus(null);
+    try {
+      const res = await sendAnnouncement({
+        userId: recipient === "all" ? null : recipient,
+        title: title.trim(),
+        body: body.trim(),
+        url: "/",
+      });
+      setStatus({ ok: true, msg: `تم الإرسال إلى ${res?.sent ?? 0} جهاز` });
+    } catch (e) {
+      setStatus({ ok: false, msg: "تعذّر الإرسال: " + (e?.message || "خطأ") });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div style={{ padding: "24px 18px 60px" }}>
+      <div style={{ maxWidth: "480px", margin: "0 auto" }}>
+        <h2 style={{ fontSize: "16px", fontWeight: 800, color: theme.primary, marginBottom: "6px", textAlign: "center" }}>إرسال إشعار</h2>
+        <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", marginBottom: "18px" }}>
+          أرسل إشعاراً لمستخدم محدّد أو لجميع من فعّل الإشعارات
+        </p>
+
+        <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>المُستقبِل</label>
+        <select value={recipient} onChange={(e) => setRecipient(e.target.value)} style={{ ...inputStyle, marginBottom: "12px" }}>
+          <option value="all">🔔 الجميع</option>
+          {profiles.map((p) => (
+            <option key={p.id} value={p.id}>{p.name}{p.username ? ` (@${p.username})` : ""}</option>
+          ))}
+        </select>
+
+        <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>العنوان</label>
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="مثال: تنبيه" style={{ ...inputStyle, marginBottom: "12px" }} />
+
+        <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted, display: "block", marginBottom: "6px" }}>النص</label>
+        <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={3} placeholder="نص الإشعار" style={{ ...inputStyle, marginBottom: "16px", resize: "vertical" }} />
+
+        <button
+          onClick={send}
+          disabled={sending}
+          style={{ width: "100%", padding: "13px 0", borderRadius: "10px", border: "none", background: theme.primary, color: theme.surface, fontFamily: "Cairo, sans-serif", fontWeight: 800, fontSize: "14px", cursor: sending ? "not-allowed" : "pointer", opacity: sending ? 0.6 : 1 }}
+        >
+          {sending ? "جارِ الإرسال..." : "إرسال"}
+        </button>
+
+        {status && (
+          <div style={{ marginTop: "12px", textAlign: "center", fontSize: "13px", fontWeight: 700, color: status.ok ? "#10B981" : theme.danger }}>
+            {status.msg}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // Admin: every private league on the site — founder, members, created date.
 function AdminLeaguesPage({ theme }) {
   const [leagues, setLeagues] = useState([]);
@@ -6267,6 +6346,7 @@ const ADMIN_NAV_ITEMS = [
   { id: "clubs", label: "إدارة الأندية", icon: Shield, color: (t) => t.muted },
   { id: "adminLeagues", label: "كل الدوريات", icon: Users, color: (t) => t.muted },
   { id: "adminPerks", label: "المزايا", icon: Zap, color: (t) => t.muted },
+  { id: "adminNotify", label: "إرسال إشعار", icon: Mail, color: (t) => t.muted },
   { id: "users", label: "المستخدمون", icon: Users, color: (t) => t.muted },
 ];
 
@@ -8531,6 +8611,8 @@ export default function App() {
       {activePage === "adminLeagues" && <AdminLeaguesPage theme={theme} />}
 
       {activePage === "adminPerks" && <AdminPerksPage matches={matches} allPredictionRows={allPredictionRows} theme={theme} />}
+
+      {activePage === "adminNotify" && <AdminNotifyPage theme={theme} />}
 
       {activePage === "leagues" && !authLoading && !currentUser && (
         <LoginGate onNavigateToAuth={() => setActivePage("auth")} theme={theme} />
