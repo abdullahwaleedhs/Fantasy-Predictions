@@ -5761,7 +5761,7 @@ function HomePage({ theme, onNavigate, onGoToPredictions, onOpenLeague, currentU
           {unpredictedMatches.length === 0 ? (
             <p style={{ fontSize: "12px", color: theme.muted, textAlign: "center", padding: "16px 0" }}>أحسنت! توقعت كل المباريات المتاحة</p>
           ) : (
-            unpredictedMatches.slice(0, 5).map((m) => {
+            unpredictedMatches.map((m) => {
               const kickoffISO = `${m.date}T${m.time}:00+03:00`;
               return (
                 <div
