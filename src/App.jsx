@@ -2678,6 +2678,59 @@ function computeGlobalRanking(matches, allPredictionRows, currentUser) {
   });
 }
 
+// Ranks the members of one private league by their real points within that
+// league — same scoring and tiebreakers as the league detail page, and
+// honouring the "count from creation" option. Used by the home summary so the
+// rank shown matches each league's actual standings (not global points).
+function computeLeagueRanking(league, matches, allPredictionRows) {
+  const creationCutoff = league.countFromCreation && league.createdAt ? new Date(league.createdAt).getTime() : null;
+  const matchById = Object.fromEntries(matches.map((m) => [m.id, m]));
+  const finishedSorted = matches
+    .filter(isMatchFinished)
+    .sort((a, b) => new Date(`${b.date}T${b.time}:00+03:00`) - new Date(`${a.date}T${a.time}:00+03:00`));
+  const lastFinished = finishedSorted[0] || null;
+
+  const byUser = {};
+  for (const row of allPredictionRows) {
+    const match = matchById[row.match_id];
+    if (!match || !isMatchFinished(match)) continue;
+    if (creationCutoff != null && match.date && match.time) {
+      const ko = new Date(`${match.date}T${match.time}:00+03:00`).getTime();
+      if (ko < creationCutoff) continue;
+    }
+    if (!byUser[row.user_id]) byUser[row.user_id] = { points: 0, tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 }, lastMatchPredAt: null };
+    const entry = byUser[row.user_id];
+    if (lastFinished && row.match_id === lastFinished.id && row.updated_at) entry.lastMatchPredAt = row.updated_at;
+    const hasPrediction = row.pred_home != null && row.pred_away != null;
+    if (!hasPrediction) { entry.tierCounts.none += 1; continue; }
+    const result = matchPointsForRow(row, match);
+    if (result) {
+      entry.tierCounts[result.basePoints] = (entry.tierCounts[result.basePoints] || 0) + 1;
+      entry.points += result.points;
+    }
+  }
+
+  return [...league.players]
+    .map((p) => {
+      const s = byUser[p.userId];
+      return {
+        ...p,
+        points: s ? s.points : 0,
+        tierCounts: s ? s.tierCounts : { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 },
+        lastMatchPredAt: s ? s.lastMatchPredAt : null,
+      };
+    })
+    .sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      const t = compareTierCounts(a.tierCounts, b.tierCounts);
+      if (t !== 0) return t;
+      if (a.lastMatchPredAt && b.lastMatchPredAt) return new Date(a.lastMatchPredAt) - new Date(b.lastMatchPredAt);
+      if (a.lastMatchPredAt) return -1;
+      if (b.lastMatchPredAt) return 1;
+      return 0;
+    });
+}
+
 // Logos/avatars are stored as base64 directly in the database (no file
 // storage bucket), so an unresized phone photo can be several MB - and since
 // every match/club/tournament row embeds its logo, that gets re-downloaded
@@ -5658,17 +5711,12 @@ function HomePage({ theme, onNavigate, onGoToPredictions, onOpenLeague, currentU
       leagues
         .filter((l) => l.players.some((p) => p.isYou))
         .map((l) => {
-          const globalRankById = Object.fromEntries(globalRanked.map((p, i) => [p.id, i]));
-          const ranked = [...l.players].sort((a, b) => {
-            const pa = pointsByUserId[a.userId] || 0;
-            const pb = pointsByUserId[b.userId] || 0;
-            if (pb !== pa) return pb - pa;
-            return (globalRankById[a.userId] ?? 9999) - (globalRankById[b.userId] ?? 9999);
-          });
+          // Rank by each league's real standings (not global points).
+          const ranked = computeLeagueRanking(l, matches, allPredictionRows);
           const myRank = ranked.findIndex((p) => p.isYou) + 1;
           return { ...l, myRank, memberCount: l.players.length };
         }),
-    [leagues, pointsByUserId, globalRanked]
+    [leagues, matches, allPredictionRows]
   );
 
   const tierCounts = me?.tierCounts || { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 };
