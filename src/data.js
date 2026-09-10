@@ -304,7 +304,7 @@ export async function setLeagueCountModeDB(leagueId, countFromCreation) {
 export async function fetchAllLeaguesAdmin() {
   const { data, error } = await supabase
     .from("leagues")
-    .select("id, code, name, created_at, created_by, league_members(user_id, display_name, profiles(name, username))")
+    .select("id, code, name, created_at, created_by, count_from_creation, league_members(user_id, display_name, profiles(name, username))")
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data;

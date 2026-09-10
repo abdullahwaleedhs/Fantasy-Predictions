@@ -4414,8 +4414,8 @@ function AdminNotifyPage({ theme }) {
   );
 }
 
-// Admin: every private league on the site — founder, members, created date.
-function AdminLeaguesPage({ theme }) {
+// Admin: every private league on the site — founder, members, created date, and standings.
+function AdminLeaguesPage({ theme, matches, allPredictionRows }) {
   const [leagues, setLeagues] = useState([]);
   const [profilesById, setProfilesById] = useState({});
   const [loading, setLoading] = useState(true);
@@ -4458,17 +4458,31 @@ function AdminLeaguesPage({ theme }) {
                   <div style={{ fontSize: "12px", color: theme.muted, lineHeight: 1.9 }}>
                     <div>👑 المؤسس: <b style={{ color: theme.text }}>{founder?.name || "—"}</b>{founder?.username ? ` @${founder.username}` : ""}</div>
                     <div>📅 أُنشئ: <b style={{ color: theme.text }}>{lg.created_at ? new Date(lg.created_at).toLocaleString("ar", { dateStyle: "medium", timeStyle: "short" }) : "—"}</b></div>
-                    <div>👥 الأعضاء: <b style={{ color: theme.text }}>{members.length}</b></div>
+                    <div>👥 الأعضاء: <b style={{ color: theme.text }}>{members.length}</b>{lg.count_from_creation ? " · النقاط من إنشاء الدوري" : ""}</div>
                   </div>
-                  {members.length > 0 && (
-                    <div style={{ marginTop: "8px", borderTop: `1px dashed ${theme.border}`, paddingTop: "8px", display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                      {members.map((m, i) => (
-                        <span key={i} style={{ fontSize: "11px", background: theme.bg, borderRadius: "8px", padding: "3px 8px", color: theme.text }}>
-                          {m.display_name || m.profiles?.name || "عضو"}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  {members.length > 0 && (() => {
+                    const ranked = computeLeagueRanking(
+                      {
+                        players: members.map((m) => ({ userId: m.user_id, name: m.profiles?.name || m.display_name || "عضو" })),
+                        createdAt: lg.created_at,
+                        countFromCreation: lg.count_from_creation,
+                      },
+                      matches,
+                      allPredictionRows
+                    );
+                    return (
+                      <div style={{ marginTop: "8px", borderTop: `1px dashed ${theme.border}`, paddingTop: "8px", display: "flex", flexDirection: "column", gap: "4px" }}>
+                        <div style={{ fontSize: "11px", fontWeight: 800, color: theme.primary, marginBottom: "2px" }}>الترتيب</div>
+                        {ranked.map((p, i) => (
+                          <div key={p.userId} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px" }}>
+                            <span style={{ width: "18px", fontWeight: 900, color: i < 3 ? "#D4AF37" : theme.muted }}>{i + 1}</span>
+                            <span style={{ flex: 1, color: theme.text, fontWeight: 700 }}>{p.name}</span>
+                            <span style={{ fontWeight: 900, color: theme.text }}>{p.points}</span>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             })}
@@ -8698,7 +8712,7 @@ export default function App() {
 
       {activePage === "users" && <UsersAdminPage theme={theme} />}
 
-      {activePage === "adminLeagues" && <AdminLeaguesPage theme={theme} />}
+      {activePage === "adminLeagues" && <AdminLeaguesPage theme={theme} matches={matches} allPredictionRows={allPredictionRows} />}
 
       {activePage === "adminPerks" && <AdminPerksPage matches={matches} allPredictionRows={allPredictionRows} theme={theme} />}
 
