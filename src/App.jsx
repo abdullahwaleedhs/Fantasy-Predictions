@@ -2668,11 +2668,13 @@ function computeGlobalRanking(matches, allPredictionRows, currentUser) {
 
   return [...players].sort((a, b) => {
     if (b.points !== a.points) return b.points - a.points;
-    // Tie: whoever entered their prediction first ranks higher.
+    // Tie: better prediction quality first (more 10s, then 5s, 4s, 3s, 1s), then earliest predictor.
+    const tierDiff = compareTierCounts(a.tierCounts, b.tierCounts);
+    if (tierDiff !== 0) return tierDiff;
     if (a.firstPredAt && b.firstPredAt) return new Date(a.firstPredAt) - new Date(b.firstPredAt);
     if (a.firstPredAt) return -1;
     if (b.firstPredAt) return 1;
-    return compareTierCounts(a.tierCounts, b.tierCounts);
+    return 0;
   });
 }
 
@@ -2719,11 +2721,13 @@ function computeLeagueRanking(league, matches, allPredictionRows) {
     })
     .sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;
-      // Tie: whoever entered their prediction first ranks higher.
+      // Tie: better prediction quality first (more 10s, then 5s, 4s, 3s, 1s), then earliest predictor.
+      const tierDiff = compareTierCounts(a.tierCounts, b.tierCounts);
+      if (tierDiff !== 0) return tierDiff;
       if (a.firstPredAt && b.firstPredAt) return new Date(a.firstPredAt) - new Date(b.firstPredAt);
       if (a.firstPredAt) return -1;
       if (b.firstPredAt) return 1;
-      return compareTierCounts(a.tierCounts, b.tierCounts);
+      return 0;
     });
 }
 
@@ -5043,11 +5047,13 @@ function PrivateLeagueDetail({ league, matches, allPredictionRows, onJoin, onSet
     })
     .sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;
-      // Tie: whoever entered their prediction first ranks higher.
+      // Tie: better prediction quality first (more 10s, then 5s, 4s, 3s, 1s), then earliest predictor.
+      const tierDiff = compareTierCounts(a.tierCounts, b.tierCounts);
+      if (tierDiff !== 0) return tierDiff;
       if (a.firstPredAt && b.firstPredAt) return new Date(a.firstPredAt) - new Date(b.firstPredAt);
       if (a.firstPredAt) return -1;
       if (b.firstPredAt) return 1;
-      return compareTierCounts(a.tierCounts, b.tierCounts);
+      return 0;
     });
 
   // التوقعات tab: every finished match, most recently finished first.
