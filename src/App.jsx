@@ -6193,6 +6193,24 @@ function PointsSystemPage({ theme }) {
             );
           })}
         </div>
+
+        {/* Tiebreaker explanation */}
+        <h3 style={{ fontSize: "14px", fontWeight: 800, color: theme.primary, marginTop: "24px", marginBottom: "8px" }}>
+          كسر التعادل
+        </h3>
+        <div style={{ background: theme.surface, border: `1px solid ${theme.border}`, borderRadius: "14px", padding: "14px 18px", boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
+          <p style={{ fontSize: "12px", color: theme.muted, lineHeight: 1.8, marginBottom: "10px" }}>
+            إذا تساوى لاعبان (أو أكثر) في إجمالي النقاط، يُحدَّد الترتيب بالتالي بالترتيب:
+          </p>
+          <ol style={{ margin: 0, paddingInlineStart: "20px", color: theme.text, fontSize: "12.5px", lineHeight: 2 }}>
+            <li>الأكثر نتائج <b>كاملة صحيحة (١٠ نقاط)</b></li>
+            <li>ثم الأكثر نتائج <b>فائز مع هدف صحيح (٥)</b></li>
+            <li>ثم الأكثر <b>فائز صحيح (٤)</b></li>
+            <li>ثم الأكثر <b>تعادل غير دقيق (٣)</b></li>
+            <li>ثم الأكثر <b>عدد أهداف صحيح (١)</b></li>
+            <li>وأخيراً: <b>الأسبق في إدخال توقّعه</b> يكون الأعلى</li>
+          </ol>
+        </div>
       </div>
     </div>
   );
