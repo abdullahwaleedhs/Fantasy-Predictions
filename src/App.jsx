@@ -2622,15 +2622,15 @@ function computeGlobalRanking(matches, allPredictionRows, currentUser) {
         username: row.profiles?.username || null,
         points: 0,
         tierCounts: { 10: 0, 5: 0, 4: 0, 3: 0, 1: 0, 0: 0, none: 0 },
-        lastMatchPredAt: null,
+        firstPredAt: null,
       };
       predictedMatchIdsByUser[row.user_id] = new Set();
     }
     const entry = byUser[row.user_id];
 
-    // Track when this user submitted their prediction for the last finished match
-    if (lastFinishedMatch && row.match_id === lastFinishedMatch.id && row.updated_at) {
-      entry.lastMatchPredAt = row.updated_at;
+    // Earliest prediction the user entered — ties are broken by who predicted first.
+    if (row.updated_at && (entry.firstPredAt == null || new Date(row.updated_at) < new Date(entry.firstPredAt))) {
+      entry.firstPredAt = row.updated_at;
     }
 
     const hasPrediction = row.pred_home !== null && row.pred_home !== undefined && row.pred_away !== null && row.pred_away !== undefined;
@@ -2668,13 +2668,11 @@ function computeGlobalRanking(matches, allPredictionRows, currentUser) {
 
   return [...players].sort((a, b) => {
     if (b.points !== a.points) return b.points - a.points;
-    const tierDiff = compareTierCounts(a.tierCounts, b.tierCounts);
-    if (tierDiff !== 0) return tierDiff;
-    // Tiebreaker: earliest prediction on last finished match wins
-    if (a.lastMatchPredAt && b.lastMatchPredAt) return new Date(a.lastMatchPredAt) - new Date(b.lastMatchPredAt);
-    if (a.lastMatchPredAt) return -1;
-    if (b.lastMatchPredAt) return 1;
-    return 0;
+    // Tie: whoever entered their prediction first ranks higher.
+    if (a.firstPredAt && b.firstPredAt) return new Date(a.firstPredAt) - new Date(b.firstPredAt);
+    if (a.firstPredAt) return -1;
+    if (b.firstPredAt) return 1;
+    return compareTierCounts(a.tierCounts, b.tierCounts);
   });
 }
 
