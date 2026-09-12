@@ -4367,11 +4367,16 @@ function AdminNotifyPage({ theme }) {
           <label style={{ fontSize: "11px", fontWeight: 700, color: theme.muted }}>
             المُستقبِلون {selectedIds.length === 0 ? "(الجميع)" : `(${selectedIds.length} محدّد)`}
           </label>
-          {selectedIds.length > 0 && (
-            <button onClick={() => setSelectedIds([])} style={{ marginInlineStart: "auto", background: "transparent", border: "none", color: theme.primary, fontSize: "11px", fontWeight: 700, cursor: "pointer" }}>
-              مسح التحديد (الجميع)
+          <div style={{ marginInlineStart: "auto", display: "flex", gap: "12px" }}>
+            <button onClick={() => setSelectedIds(profiles.map((p) => p.id))} style={{ background: "transparent", border: "none", color: theme.primary, fontSize: "11px", fontWeight: 700, cursor: "pointer" }}>
+              تحديد الكل
             </button>
-          )}
+            {selectedIds.length > 0 && (
+              <button onClick={() => setSelectedIds([])} style={{ background: "transparent", border: "none", color: theme.primary, fontSize: "11px", fontWeight: 700, cursor: "pointer" }}>
+                مسح التحديد
+              </button>
+            )}
+          </div>
         </div>
         <div style={{ border: `1.5px solid ${theme.inputBorder}`, borderRadius: "10px", maxHeight: "220px", overflowY: "auto", marginBottom: "12px", background: theme.surface }}>
           {profiles.length === 0 ? (
