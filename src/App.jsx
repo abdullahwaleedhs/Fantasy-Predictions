@@ -6265,10 +6265,22 @@ function StatBox({ label, value, theme }) {
 function StatsPage({ matches, tournaments, tournamentLogos, theme }) {
   const [tournamentFilter, setTournamentFilter] = usePersistedState("stats.tournamentFilter", "الكل");
   const [tierView, setTierView] = usePersistedState("stats.tierView", "count"); // "count" | "percent"
+  const [expandedTier, setExpandedTier] = useState(null); // which tier's match list is open
   const statsTiers = getStatsTiers(theme);
 
   const filteredMatches = tournamentFilter === "الكل" ? matches : matches.filter((m) => (m.tournament || "بدون بطولة") === tournamentFilter);
   const stats = computeStats(filteredMatches);
+
+  // Group the finished matches by which point-tier the user scored on each,
+  // so tapping a tier reveals exactly those matches.
+  const matchesByTier = {};
+  for (const m of filteredMatches.filter(isMatchFinished)) {
+    const hasPred = m.predHome !== "" && m.predHome != null && m.predAway !== "" && m.predAway != null;
+    let key;
+    if (!hasPred) key = "none";
+    else { const r = matchPointsForRow(m, m); key = r ? r.basePoints : "none"; }
+    (matchesByTier[key] = matchesByTier[key] || []).push(m);
+  }
 
   return (
     <div style={{ padding: "20px 16px 60px" }}>
@@ -6378,15 +6390,18 @@ function StatsPage({ matches, tournaments, tournamentLogos, theme }) {
             const count = stats.tierCounts[t.points] || 0;
             const pct = stats.totalFinished > 0 ? Math.round((count / stats.totalFinished) * 100) : 0;
             const isLast = i === statsTiers.length - 1;
+            const isOpen = expandedTier === t.points;
+            const tierMatches = matchesByTier[t.points] || [];
             return (
+              <div key={`tier-${t.points}`} style={{ borderBottom: isLast && !isOpen ? "none" : `1px solid ${theme.border}` }}>
               <div
-                key={`tier-${t.points}`}
+                onClick={() => count > 0 && setExpandedTier(isOpen ? null : t.points)}
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: "12px",
                   padding: "14px 0",
-                  borderBottom: isLast ? "none" : `1px solid ${theme.border}`,
+                  cursor: count > 0 ? "pointer" : "default",
                 }}
               >
                 <div
@@ -6428,6 +6443,28 @@ function StatsPage({ matches, tournaments, tournamentLogos, theme }) {
                 >
                   {tierView === "count" ? count : `${pct}%`}
                 </div>
+                {count > 0 && (
+                  <ChevronDown size={16} color={theme.muted} style={{ transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s", flexShrink: 0 }} />
+                )}
+              </div>
+
+              {isOpen && tierMatches.length > 0 && (
+                <div style={{ paddingBottom: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {tierMatches.map((m) => {
+                    const hasPred = m.predHome !== "" && m.predHome != null;
+                    return (
+                      <div key={m.id} style={{ background: theme.bg, borderRadius: "10px", padding: "9px 11px", border: `1px solid ${theme.border}` }}>
+                        {m.tournament && <div style={{ fontSize: "9px", color: theme.muted, fontWeight: 700, marginBottom: "3px" }}>{m.tournament}</div>}
+                        <div style={{ fontSize: "12px", fontWeight: 700, color: theme.text }}>{m.home} × {m.away}</div>
+                        <div style={{ display: "flex", gap: "14px", marginTop: "4px", fontSize: "11px", color: theme.muted, flexWrap: "wrap" }}>
+                          <span>توقعك: <b style={{ color: theme.text }}>{hasPred ? `${m.predHome}-${m.predAway}` : "—"}</b></span>
+                          <span>النتيجة: <b style={{ color: theme.text }}>{m.actualHome}-{m.actualAway}</b></span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
               </div>
             );
           })}
