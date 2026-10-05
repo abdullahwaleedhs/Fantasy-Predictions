@@ -7567,6 +7567,13 @@ export default function App() {
   const [pullRefreshing, setPullRefreshing] = useState(false);
   const [pullY, setPullY] = useState(0);
 
+  // Stale-while-revalidate cache so re-opening the app paints instantly from
+  // the last known data instead of waiting on a full network round-trip.
+  const DATA_CACHE_KEY = "fp_data_cache_v1";
+  const writeDataCache = (t, c, m, p) => {
+    try { localStorage.setItem(DATA_CACHE_KEY, JSON.stringify({ t, c, m, p })); } catch { /* quota / private mode */ }
+  };
+
   const refreshData = () => {
     return Promise.all([
       fetchTournaments(),
@@ -7578,6 +7585,7 @@ export default function App() {
       setClubRows(c);
       setMatchRows(m);
       setAllPredictionRows(p);
+      writeDataCache(t, c, m, p);
     });
   };
 
@@ -7597,6 +7605,17 @@ export default function App() {
   };
 
   useEffect(() => {
+    // Hydrate from the local cache first for an instant paint, then refresh.
+    try {
+      const cached = JSON.parse(localStorage.getItem(DATA_CACHE_KEY) || "null");
+      if (cached && Array.isArray(cached.m)) {
+        setTournamentRows(cached.t || []);
+        setClubRows(cached.c || []);
+        setMatchRows(cached.m || []);
+        setAllPredictionRows(cached.p || []);
+        setDataLoading(false);
+      }
+    } catch { /* ignore */ }
     refreshData().finally(() => setDataLoading(false));
   }, []);
 
