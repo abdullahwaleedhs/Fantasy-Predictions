@@ -5437,7 +5437,7 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
               key={p.id}
               style={
                 accent
-                  ? { display: "flex", alignItems: "center", border: `2px solid ${accent}`, borderRadius: "8px", margin: "6px" }
+                  ? { display: "flex", alignItems: "center", border: `1px solid ${accent}`, borderRadius: "6px", margin: "2px 4px" }
                   : { display: "flex", alignItems: "center", borderTop: idx === 0 ? "none" : `1px solid ${theme.border}` }
               }
             >
@@ -5448,14 +5448,14 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
                 {!pred ? (
                   <span style={{ fontSize: "11px", fontWeight: 700, color: theme.muted }}>لم يتوقع</span>
                 ) : isDouble ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-                    <span style={{ fontSize: "11px", fontWeight: 800, color: c1 }}>{pred.predHome}-{pred.predAway}</span>
-                    <span style={{ fontSize: "11px", fontWeight: 800, color: c2 }}>
-                      {pred.predHome2 != null ? pred.predHome2 : "—"}-{pred.predAway2 != null ? pred.predAway2 : "—"}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
+                    <span style={{ fontSize: "10px", fontWeight: 800, color: c1, lineHeight: 1.3 }}>{pred.predAway}-{pred.predHome}</span>
+                    <span style={{ fontSize: "10px", fontWeight: 800, color: c2, lineHeight: 1.3 }}>
+                      {pred.predAway2 != null ? pred.predAway2 : "—"}-{pred.predHome2 != null ? pred.predHome2 : "—"}
                     </span>
                   </div>
                 ) : (
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: theme.text }}>{pred.predHome} - {pred.predAway}</span>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: theme.text }}>{pred.predAway} - {pred.predHome}</span>
                 )}
               </div>
               <div style={{ flex: 1, textAlign: "center", padding: "5px 4px" }}>
