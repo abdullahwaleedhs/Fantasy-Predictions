@@ -5410,31 +5410,52 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
         {league.players.map((p, idx) => {
           const pred = playerPredictionsById[p.id]?.[match.id];
           const result = pred ? matchPointsForRow(pred, match) : null;
-          const colors = result
-            ? pred?.userBoost
-              ? { bg: theme.yellowSoft, text: theme.yellow, ring: theme.yellow }
-              : tierStyleFor(theme, result.basePoints)
-            : null;
+          const colors = result ? tierStyleFor(theme, result.basePoints) : null;
+
+          // Perk accent for this player's row: green = تربل, blue = توقعين.
+          const isTriple = !!pred?.userBoost;
+          const isDouble = !!pred?.doublePred;
+          const accent = isTriple ? "#10B981" : isDouble ? "#3B82F6" : null;
+
+          // For توقعين: colour the accepted (higher) prediction green and the
+          // other red; if they tie, both stay the normal colour.
+          let c1 = theme.text, c2 = theme.text;
+          if (isDouble && hasActual) {
+            const mult = match.doublePoints ? 2 : 1;
+            const r1 = calcPoints(pred.predHome, pred.predAway, match.actualHome, match.actualAway, mult);
+            const r2 = calcPoints(pred.predHome2, pred.predAway2, match.actualHome, match.actualAway, mult);
+            const pt1 = r1 ? r1.points : -1;
+            const pt2 = r2 ? r2.points : -1;
+            if (pt1 !== pt2) {
+              c1 = pt1 > pt2 ? "#10B981" : "#EF4444";
+              c2 = pt2 > pt1 ? "#10B981" : "#EF4444";
+            }
+          }
+
           return (
             <div
               key={p.id}
-              style={{
-                display: "flex",
-                borderTop: idx === 0 ? "none" : `1px solid ${theme.border}`,
-              }}
+              style={
+                accent
+                  ? { display: "flex", alignItems: "center", border: `2px solid ${accent}`, borderRadius: "8px", margin: "6px" }
+                  : { display: "flex", alignItems: "center", borderTop: idx === 0 ? "none" : `1px solid ${theme.border}` }
+              }
             >
               <div style={{ flex: 1, textAlign: "center", padding: "5px 4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <span style={{ fontSize: "11px", fontWeight: 700, color: theme.text, wordBreak: "break-word" }}>{p.name}</span>
               </div>
               <div style={{ flex: 1, textAlign: "center", padding: "5px 4px" }}>
-                {pred ? (
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: theme.text }}>
-                    {pred.predHome} - {pred.predAway}
-                  </span>
+                {!pred ? (
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: theme.muted }}>لم يتوقع</span>
+                ) : isDouble ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                    <span style={{ fontSize: "11px", fontWeight: 800, color: c1 }}>{pred.predHome}-{pred.predAway}</span>
+                    <span style={{ fontSize: "11px", fontWeight: 800, color: c2 }}>
+                      {pred.predHome2 != null ? pred.predHome2 : "—"}-{pred.predAway2 != null ? pred.predAway2 : "—"}
+                    </span>
+                  </div>
                 ) : (
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: theme.muted }}>
-                    لم يتوقع
-                  </span>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: theme.text }}>{pred.predHome} - {pred.predAway}</span>
                 )}
               </div>
               <div style={{ flex: 1, textAlign: "center", padding: "5px 4px" }}>
@@ -5443,8 +5464,8 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
                     بالإنتظار
                   </ResultPill>
                 ) : result ? (
-                  pred?.userBoost ? (
-                    <ResultPill theme={theme} border={theme.yellow} bg={theme.yellowSoft} color={theme.yellow} compact>
+                  isTriple ? (
+                    <ResultPill theme={theme} border="#10B981" bg="#10B9811a" color="#10B981" compact>
                       {result.points}
                     </ResultPill>
                   ) : (
