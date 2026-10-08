@@ -5449,13 +5449,13 @@ function LeaguePredictionCard({ match, league, playerPredictionsById, tournament
                   <span style={{ fontSize: "11px", fontWeight: 700, color: theme.muted }}>لم يتوقع</span>
                 ) : isDouble ? (
                   <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
-                    <span style={{ fontSize: "10px", fontWeight: 800, color: c1, lineHeight: 1.3 }}>{pred.predAway}-{pred.predHome}</span>
-                    <span style={{ fontSize: "10px", fontWeight: 800, color: c2, lineHeight: 1.3 }}>
-                      {pred.predAway2 != null ? pred.predAway2 : "—"}-{pred.predHome2 != null ? pred.predHome2 : "—"}
+                    <span dir="ltr" style={{ fontSize: "10px", fontWeight: 800, color: c1, lineHeight: 1.3 }}>{pred.predHome} - {pred.predAway}</span>
+                    <span dir="ltr" style={{ fontSize: "10px", fontWeight: 800, color: c2, lineHeight: 1.3 }}>
+                      {pred.predHome2 != null ? pred.predHome2 : "—"} - {pred.predAway2 != null ? pred.predAway2 : "—"}
                     </span>
                   </div>
                 ) : (
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: theme.text }}>{pred.predAway} - {pred.predHome}</span>
+                  <span dir="ltr" style={{ fontSize: "11px", fontWeight: 700, color: theme.text }}>{pred.predHome} - {pred.predAway}</span>
                 )}
               </div>
               <div style={{ flex: 1, textAlign: "center", padding: "5px 4px" }}>
